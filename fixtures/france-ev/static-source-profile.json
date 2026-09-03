@@ -1,0 +1,100 @@
+{
+  "captured_at": "2026-09-03T22:07:58Z",
+  "primary_national_static": {
+    "dataset_url": "https://www.data.gouv.fr/datasets/beta-bases-nationales-des-points-de-recharge-pour-vehicules-electriques-en-france-irve",
+    "resource_url": "https://www.data.gouv.fr/api/1/datasets/r/4ca78c71-4ea4-475d-bd3a-d4aef88f7bf8",
+    "resource_id": "4ca78c71-4ea4-475d-bd3a-d4aef88f7bf8",
+    "bytes": 119496193,
+    "sha256": "ba0ec7f32868d7ba4fa7af059037ea8e62733b47bf622e03ee34d2a591fd1c99",
+    "field_count": 49,
+    "schema_field_count": 40,
+    "row_count": 166339,
+    "unique_station_ids": 48181,
+    "unique_charge_point_ids": 166337,
+    "duplicate_charge_point_ids": [
+      "FRC2AEDE0120B1GNAC00061K",
+      "FRC2AEDE0240B1GP2C00058M"
+    ],
+    "coordinates_present": 166339,
+    "coordinate_consistency_true": 139871,
+    "coordinate_consistency_false": 26468,
+    "operator_present": 165914,
+    "power_present": 166339,
+    "power_zero": 2765,
+    "power_above_1000_kw": 900,
+    "power_max_kw": 160000,
+    "at_least_one_connector_true": 165062,
+    "no_connector_true": 1277,
+    "free_paid_flag_known": 129362,
+    "free_true": 669,
+    "tarification_text_present": 35280,
+    "date_maj_present": 166339,
+    "date_maj_min": "2012-09-10",
+    "date_maj_max": "2026-12-30",
+    "date_maj_after_capture_date": 56,
+    "date_maj_within_30_days": 69398,
+    "cable_t2_attache_known": 0,
+    "source_dataset_count": 456,
+    "source_resource_count": 584,
+    "deduplication_status": {
+      "unique": 101338,
+      "kept_because_resource_more_recent": 3859,
+      "kept_because_exact_duplicate_in_same_file": 106,
+      "kept_because_date_maj_more_recent": 5808,
+      "kept_because_in_prioritary_dataset": 55228
+    },
+    "connector_true_counts": {
+      "prise_type_ef": 45874,
+      "prise_type_2": 117110,
+      "prise_type_combo_ccs": 43202,
+      "prise_type_chademo": 6879,
+      "prise_type_autre": 3146
+    },
+    "fixed_geographies": {
+      "paris_10km": {
+        "charge_points": 12398,
+        "stations": 1575
+      },
+      "toulouse_10km": {
+        "charge_points": 2351,
+        "stations": 541
+      },
+      "a9_villages_catalans_10km": {
+        "charge_points": 147,
+        "stations": 43
+      },
+      "la_jonquera_anchor_25km": {
+        "charge_points": 266,
+        "stations": 93
+      }
+    }
+  },
+  "qualicharge_static": {
+    "dataset_url": "https://www.data.gouv.fr/datasets/infrastructures-de-recharge-pour-vehicules-electriques-donnees-ouvertes",
+    "resource_url": "https://www.data.gouv.fr/api/1/datasets/r/8bb0a6e2-1016-42ba-aaee-f72f55c82e9f",
+    "resource_id": "8bb0a6e2-1016-42ba-aaee-f72f55c82e9f",
+    "bytes": 41691367,
+    "sha256": "1039d08a951455c898da1b25b02e820d268e9ddc6ac0b344758d6eea13439afa",
+    "field_count": 40,
+    "row_count": 78114,
+    "unique_station_ids": 17334,
+    "unique_charge_point_ids": 78114,
+    "at_least_one_connector_true": 77585,
+    "free_paid_flag_known": 50439,
+    "tarification_text_present": 15787,
+    "cable_t2_attache_known": 35687,
+    "connector_true_counts": {
+      "prise_type_ef": 13242,
+      "prise_type_2": 37119,
+      "prise_type_combo_ccs": 37593,
+      "prise_type_chademo": 4953,
+      "prise_type_autre": 1296
+    }
+  },
+  "comparison": {
+    "same_40_core_fields_in_same_order": true,
+    "qualicharge_unique_ids_present_in_national": 78089,
+    "qualicharge_unique_ids_missing_from_national": 25,
+    "decision": "Use the PAN national static consolidation as the primary static source. Do not union the QualiCharge static file into it."
+  }
+}

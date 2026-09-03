@@ -4,7 +4,7 @@
 > 需求来源：[france_spain_driver_decision_engine_project.md](./france_spain_driver_decision_engine_project.md)  
 > 当前状态：进行中  
 > 当前阶段：Phase 1 — Data Feasibility Spike
-> 下一项任务：`P1-EV-FR-01` 验证法国 IRVE/QualiCharge 静态数据源
+> 下一项任务：`P1-EV-FR-02` 验证法国实时 availability 与价格覆盖率
 > 最后更新：2026-09-04
 
 ## 使用方法
@@ -138,7 +138,7 @@ V1 的核心验收结果是：
 
 ## 1.5 EV 数据验证
 
-- [ ] `P1-EV-FR-01` 验证法国 IRVE/QualiCharge 静态数据源
+- [x] `P1-EV-FR-01` 验证法国 IRVE/QualiCharge 静态数据源，选择 PAN Beta consolidation 为唯一静态主清单并记录质量隔离规则（2026-09-04；[验证报告](./docs/data/france-ev-static-source.md)；[固定 profile/sample](./fixtures/france-ev/)）
 - [ ] `P1-EV-FR-02` 验证法国实时 availability 与价格覆盖率
 - [ ] `P1-EV-ES-01` 验证西班牙公共充电静态数据源
 - [ ] `P1-EV-ES-02` 验证西班牙实时 availability 与价格覆盖率
@@ -542,3 +542,4 @@ V1 的核心验收结果是：
 | 2026-09-04 | 量化两国 Wash 来源覆盖 | 法国全国 4,052/9,804（41.33%）明确声明 Wash；西班牙 MITECO 无该字段，0 known-positive 不能解释为现实中不存在；见 `docs/data/wash-coverage-validation.md` |
 | 2026-09-04 | 评估 Wash 类型和价格覆盖 | 法国 4,052 个 Wash-positive 记录的详细类型与价格均为 0% known；西班牙无 Wash denominator；见 `docs/data/wash-type-price-coverage-validation.md` |
 | 2026-09-04 | 决定使用 OSM 补充 Air/Wash | 四个目标城市均有明确 Air/Wash 候选；仅采纳显式 presence，生产不依赖公共 Overpass，公开 Beta 前审查 ODbL 合并数据库义务；见 `docs/decisions/0011-osm-air-wash-supplement.md` |
+| 2026-09-04 | 验证法国 EV 静态数据源 | PAN Beta 49 字段含 166,339 个 PDC/48,181 个站；QualiCharge 99.97% 已包含，禁止重复叠加；记录重复 ID、坐标、功率和时间异常；见 `docs/data/france-ev-static-source.md` |
