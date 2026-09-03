@@ -4,7 +4,7 @@
 > 需求来源：[france_spain_driver_decision_engine_project.md](./france_spain_driver_decision_engine_project.md)  
 > 当前状态：进行中  
 > 当前阶段：Phase 1 — Data Feasibility Spike
-> 下一项任务：`P1-FUEL-08` 明确价格未知、过期、缺货和站点关闭的显示规则
+> 下一项任务：`P1-FUEL-09` 验证 Perpignan/Girona 一带的跨境查询
 > 最后更新：2026-09-03
 
 ## 使用方法
@@ -119,7 +119,7 @@ V1 的核心验收结果是：
 - [x] `P1-FUEL-05` 支持跨时区 Open now 筛选、关闭/未知分区、跨午夜及 Fuel 24/7 自助语义（2026-09-03；[验证报告](./docs/data/unified-fuel-open-now-validation.md)；64 tests）
 - [x] `P1-FUEL-06` 每个结果返回可追溯 source、source URL 和来源命名空间（2026-09-03；[验证报告](./docs/data/unified-fuel-source-attribution-validation.md)；66 tests）
 - [x] `P1-FUEL-07` 每个结果返回有依据的 source updated_at、依据类型及独立系统 fetched_at（2026-09-03；[验证报告](./docs/data/unified-fuel-source-timestamps-validation.md)；69 tests）
-- [ ] `P1-FUEL-08` 明确价格未知、过期、缺货和站点关闭的显示规则
+- [x] `P1-FUEL-08` 明确并实现价格未知/Stale/过期、缺货、关闭及 Unknown 的显示和决策规则（2026-09-03；[验证报告](./docs/data/unified-fuel-decision-state-validation.md)；78 tests）
 - [ ] `P1-FUEL-09` 验证 Perpignan/Girona 一带的跨境查询
 - [ ] `P1-FUEL-10` 人工对照抽查真实站点与价格
 
@@ -529,3 +529,4 @@ V1 的核心验收结果是：
 | 2026-09-03 | 实现统一 Fuel Open now 筛选 | 按站点时区计算营业状态并区分 Open/Closed/Unknown，支持分段、跨午夜及法国 24/7 自助 Fuel；64 项测试通过；见 `docs/data/unified-fuel-open-now-validation.md` |
 | 2026-09-03 | 验证统一 Fuel 来源署名 | Toulouse 70 条与 Madrid 219 条结果全部返回来源 ID、名称和 HTTPS URL，全局 ID 可反查来源；66 项测试通过；见 `docs/data/unified-fuel-source-attribution-validation.md` |
 | 2026-09-03 | 验证统一 Fuel 来源时间 | Toulouse 70 条使用 source observed，Madrid 219 条使用 snapshot published，并始终与系统 fetched_at 分离；69 项测试通过；见 `docs/data/unified-fuel-source-timestamps-validation.md` |
+| 2026-09-03 | 定义统一 Fuel 显示和决策状态 | 价格 Current/Stale/Expired/Unknown、库存、关闭与本地化 warning code 形成可执行契约；78 项测试通过；见 `docs/data/unified-fuel-decision-state-validation.md` |

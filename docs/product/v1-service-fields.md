@@ -145,6 +145,26 @@ The requested fuel's price may be unknown. If price is unknown or past its decis
 | `payment_methods` | Optional | string array | Only normalized values with evidence |
 | `discount_programs` | Optional | structured array | Must state membership conditions |
 
+### Fuel decision and display states
+
+The response derives one decision state for the requested fuel. Clients render these codes consistently rather than interpreting nullable fields independently.
+
+| Concern | State | Display/decision rule |
+|---|---|---|
+| Price | `current` | Show amount; may receive Cheapest benefit |
+| Price | `stale` | Show amount with warning; no low-price advantage |
+| Price | `expired` | Hide from primary price; optional explicitly last-known detail; no price advantage |
+| Price | `unknown` | Show Unknown, never zero/free; no price advantage |
+| Availability | `available` | Explicit source evidence |
+| Availability | `out_of_stock` | Warn and exclude from Cheapest/Open now |
+| Availability | `unknown` | Keep with warning; do not infer stock |
+| Availability | `not_offered` | Exclude for the requested fuel |
+| Station | `temporarily_closed` | Overrides schedule; exclude from immediate decisions |
+| Station | `closed` | Show closed; exclude from immediate decisions |
+| Station | `unknown` | Keep in Nearest with warning; never claim Open now |
+
+Every warning is a localizable code (`price_unknown`, `price_stale`, `price_expired`, `stock_unknown`, `out_of_stock`, `opening_unknown`, `station_closed`, `temporary_closure`, or `fuel_not_offered`), not hard-coded UI copy.
+
 ### Initial normalized fuel codes
 
 - `sp95`

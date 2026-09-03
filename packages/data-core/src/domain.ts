@@ -125,7 +125,7 @@ export interface NormalizedServicePoint {
   timezone: "Europe/Paris" | "Europe/Madrid";
   openingHours: NormalizedOpeningHours | null;
   openingStatus: OpeningStatus;
-  temporaryClosure: null;
+  temporaryClosure: boolean | null;
   unattendedFuelPayment24Seven: boolean | null;
   fuels: NormalizedFuel[];
   air: AirCapability | null;

@@ -28,6 +28,16 @@ export type {
   EvaluatedFuelOpeningCandidate,
   FuelOpenNowFilterResult,
 } from "./fuel/filterFuelCandidatesOpenNow.js";
+export { deriveFuelDecisionState } from "./fuel/deriveFuelDecisionState.js";
+export type {
+  FuelAvailabilityPresentationState,
+  FuelDecisionPrice,
+  FuelDecisionState,
+  FuelDecisionStateOptions,
+  FuelDecisionWarning,
+  FuelPricePresentationState,
+  FuelStationPresentationState,
+} from "./fuel/deriveFuelDecisionState.js";
 export {
   DEFAULT_FUEL_SEARCH_RADIUS_M,
   MAX_FUEL_SEARCH_RADIUS_M,
