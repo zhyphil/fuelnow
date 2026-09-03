@@ -818,6 +818,7 @@ export class FranceFuelAdapter {
         primarySourceId: SOURCE_ID,
         sourceName: SOURCE_NAME,
         sourceUrl: SOURCE_URL,
+        sourcePublishedAt: null,
         sourceObservedAt,
         fetchedAt: fetchedAtIso,
         freshness: sourceFreshness,

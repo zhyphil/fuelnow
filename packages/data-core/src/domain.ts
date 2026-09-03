@@ -98,28 +98,29 @@ export interface WashCapability {
 }
 
 export interface SourceSummary {
-  primarySourceId: "fr-fuel-realtime-v2";
-  sourceName: "DGCCRF — Prix des carburants en France, Flux instantané v2";
+  primarySourceId: string;
+  sourceName: string;
   sourceUrl: string;
+  sourcePublishedAt: string | null;
   sourceObservedAt: string | null;
   fetchedAt: string;
   freshness: Freshness;
   confidence: Confidence;
-  licenceName: "Licence Ouverte 2.0 (Etalab)";
+  licenceName: string;
   licenceUrl: string;
 }
 
 export interface NormalizedServicePoint {
   id: string;
   sourceId: string;
-  country: "FR";
+  country: CountryCode;
   serviceTypes: ServiceType[];
-  name: null;
-  brand: null;
+  name: string | null;
+  brand: string | null;
   latitude: number;
   longitude: number;
   address: StructuredAddress;
-  timezone: "Europe/Paris";
+  timezone: "Europe/Paris" | "Europe/Madrid";
   openingHours: NormalizedOpeningHours | null;
   openingStatus: OpeningStatus;
   temporaryClosure: null;

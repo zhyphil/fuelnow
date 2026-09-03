@@ -18,3 +18,13 @@ export {
   haversineDistanceMeters,
 } from "./geo/haversine.js";
 export type { GeoPoint } from "./geo/haversine.js";
+export {
+  parseSpainFuelLocalDateTime,
+  SpainFuelAdapter,
+  SpainFuelSupplementIndex,
+} from "./spain-fuel/SpainFuelAdapter.js";
+export type {
+  SpainFuelAdapterContext,
+  SpainFuelSupplement,
+  SpainFuelSupplementMatchResult,
+} from "./spain-fuel/SpainFuelAdapter.js";

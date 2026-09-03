@@ -237,6 +237,7 @@ source_summary
   primary_source_id
   source_name
   source_url
+  source_published_at
   source_observed_at
   fetched_at
   freshness
@@ -245,7 +246,7 @@ source_summary
   licence_url
 ```
 
-`source_name`, `source_url`, `fetched_at`, `freshness`, and `confidence` are required for every eligible result. `source_observed_at` remains nullable because not every publisher provides field-level observation time.
+`source_name`, `source_url`, `fetched_at`, `freshness`, and `confidence` are required for every eligible result. `source_published_at` and `source_observed_at` remain nullable because not every publisher provides both distribution-level and field-level times. A snapshot generation time belongs in `source_published_at`; it must not impersonate a station or field observation.
 
 ## Missing and conflicting values
 

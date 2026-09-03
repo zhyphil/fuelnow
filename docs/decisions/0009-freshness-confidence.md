@@ -36,6 +36,9 @@ Confidence is exposed separately as `high`, `medium`, or `low` with an internal 
 source_observed_at
   When the publisher/operator says the fact was observed or changed.
 
+source_published_at
+  When the source snapshot/distribution containing the fact was generated.
+
 verified_at
   When an eligible human or merchant explicitly confirmed the fact.
 
@@ -53,6 +56,7 @@ Rules:
 
 - Never substitute `fetched_at` for a missing `source_observed_at`.
 - A source file's publication time is not automatically every field's observation time.
+- Store a known snapshot generation time in `source_published_at`, not `source_observed_at`, when the source also exposes a more specific station or field observation.
 - Store timestamps in UTC and preserve the source timezone/offset when parsing evidence requires it.
 - Reject or quarantine timestamps implausibly far in the future.
 - Recompute labels at response time or through an equivalent time-aware mechanism; do not store a permanent `Live` boolean.
@@ -198,4 +202,3 @@ Freshness also depends on source-pipeline health:
 - Stale prices cannot win Cheapest/Best solely because of an old low value.
 - Record cards and details cannot hide a stale critical field behind a fresh non-critical field.
 - Phase 1 reports compare these thresholds with actual feed behavior before release.
-
