@@ -4,7 +4,7 @@
 > 需求来源：[france_spain_driver_decision_engine_project.md](./france_spain_driver_decision_engine_project.md)  
 > 当前状态：进行中  
 > 当前阶段：Phase 0 — 开工决策  
-> 下一项任务：`P0-11` 确定全国上线还是先做区域 Beta
+> 下一项任务：`P0-12` 记录所有决策及理由到“决策记录”章节
 > 最后更新：2026-09-03
 
 ## 使用方法
@@ -71,7 +71,7 @@ V1 的核心验收结果是：
 - [x] `P0-08` 明确数据来源署名方式：API provenance、结果卡、详情页和全局来源/许可证注册表四层展示（2026-09-03；[ADR 0008](./docs/decisions/0008-source-attribution.md)、[来源注册表](./docs/data/source-registry.md)）
 - [x] `P0-09` 定义 Live、Verified、Recent、Stale、Unknown 的时间标准，并将 freshness 与 confidence 分离（2026-09-03；[ADR 0009](./docs/decisions/0009-freshness-confidence.md)）
 - [x] `P0-10` 定义 Fuel、Charge、Air、Wash 的搜索准入字段、必需可空字段、可选字段和缺失值语义（2026-09-03；[V1 字段契约](./docs/product/v1-service-fields.md)）
-- [ ] `P0-11` 确定全国上线还是先做区域 Beta
+- [x] `P0-11` 确定发布范围：全国数据能力 + Toulouse–Barcelona 走廊区域 Beta，Paris/Madrid 作为强制异地回归市场（2026-09-03；[ADR 0010](./docs/decisions/0010-beta-launch-scope.md)）
 - [ ] `P0-12` 记录所有决策及理由到“决策记录”章节
 
 ## Phase 0 验收门槛
@@ -465,7 +465,7 @@ V1 的核心验收结果是：
 | 2026-09-03 | 数据来源署名 | API、结果卡、详情页、全局来源/许可证注册表四层展示；保留字段级 provenance | 兼顾用户可信度判断、多来源合并和不同许可证的署名要求 | P0-08 |
 | 2026-09-03 | 新鲜度与可信度 | 按字段计算 Live/Verified/Recent/Stale/Unknown；confidence 独立为 high/medium/low | 不让新抓取的旧值伪装成实时数据，并对不同服务使用不同有效期 | P0-09 |
 | 2026-09-03 | V1 服务字段 | 按搜索准入、必需可空、可选和查询派生字段定义 Fuel/Charge/Air/Wash | 让未知值保持透明，避免用 0、false、closed 或 free 代替缺失数据 | P0-10 |
-| 待定 | 首发区域 | 待定 | 待确认 | P0-05、P0-11 |
+| 2026-09-03 | 首发区域 | 全国数据导入与实验性搜索；首轮公开 Beta 质量承诺聚焦 Toulouse–Barcelona 走廊；Paris/Madrid 强制回归 | 先验证跨境核心价值，并将人工验证与运营支持控制在可管理范围 | P0-05、P0-11 |
 
 # 风险与阻塞记录
 
@@ -495,3 +495,4 @@ V1 的核心验收结果是：
 | 2026-09-03 | 定义数据来源与许可证署名体系 | 四层 provenance 展示并建立来源注册表；见 `docs/decisions/0008-source-attribution.md` |
 | 2026-09-03 | 定义按字段的新鲜度与可信度语义 | 五级 freshness + 独立 confidence；见 `docs/decisions/0009-freshness-confidence.md` |
 | 2026-09-03 | 定义 V1 四类服务字段契约 | 明确搜索准入、未知值、价格、状态、来源和查询派生字段；见 `docs/product/v1-service-fields.md` |
+| 2026-09-03 | 确定 V1 发布测试与区域 Beta 范围 | 全国数据能力 + Toulouse–Barcelona 走廊质量承诺；见 `docs/decisions/0010-beta-launch-scope.md` |
