@@ -56,6 +56,26 @@ address
 
 All members may be null independently. `formatted` must be generated without literal `null`/`undefined` fragments.
 
+## Source summary
+
+```text
+source_summary
+  primary_source_id
+  source_name
+  source_url
+  source_observed_at
+  source_published_at
+  source_updated_at
+  source_updated_at_basis: observed | published | unknown
+  fetched_at
+  freshness
+  confidence
+  licence_name
+  licence_url
+```
+
+`source_updated_at` is the presentation-ready publisher time: prefer a specific source observation, otherwise use a known snapshot publication time. Its basis must be returned with it. `fetched_at` is always Fuel Now's retrieval time and must never be used to fill missing source evidence.
+
 ## Search-result fields
 
 These fields belong to the response for an active origin and may not be stored on the canonical service point.

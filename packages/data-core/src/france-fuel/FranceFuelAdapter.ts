@@ -14,6 +14,7 @@ import type {
   ServiceType,
   SourceAdapter,
 } from "../domain.js";
+import { resolveSourceUpdatedAt } from "../source/resolveSourceUpdatedAt.js";
 
 const SOURCE_ID = "fr-fuel-realtime-v2" as const;
 const SOURCE_NAME =
@@ -760,6 +761,7 @@ export class FranceFuelAdapter implements SourceAdapter<AdapterContext> {
       fetchedAt,
       context.sourceSyncHealthy !== false,
     );
+    const sourceUpdate = resolveSourceUpdatedAt(sourceObservedAt, null);
     const createdAt =
       context.existingCreatedAt === undefined
         ? fetchedAtIso
@@ -821,6 +823,7 @@ export class FranceFuelAdapter implements SourceAdapter<AdapterContext> {
         sourceUrl: SOURCE_URL,
         sourcePublishedAt: null,
         sourceObservedAt,
+        ...sourceUpdate,
         fetchedAt: fetchedAtIso,
         freshness: sourceFreshness,
         confidence: sourceObservedAt === null ? "low" : "high",

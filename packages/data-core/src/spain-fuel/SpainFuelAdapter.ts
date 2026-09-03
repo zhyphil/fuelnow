@@ -14,6 +14,7 @@ import type {
   OpeningInterval,
   SourceAdapter,
 } from "../domain.js";
+import { resolveSourceUpdatedAt } from "../source/resolveSourceUpdatedAt.js";
 
 const SOURCE_ID = "es-miteco-fuel-prices";
 const SOURCE_NAME =
@@ -853,6 +854,10 @@ export class SpainFuelAdapter implements SourceAdapter<SpainFuelAdapterContext> 
       fetchedAt,
       sourceSyncHealthy,
     );
+    const sourceUpdate = resolveSourceUpdatedAt(
+      sourceObservedAt,
+      sourcePublishedAt,
+    );
     const createdAt =
       context.existingCreatedAt === undefined
         ? fetchedAtIso
@@ -903,6 +908,7 @@ export class SpainFuelAdapter implements SourceAdapter<SpainFuelAdapterContext> 
         sourceUrl: SOURCE_URL,
         sourcePublishedAt,
         sourceObservedAt,
+        ...sourceUpdate,
         fetchedAt: fetchedAtIso,
         freshness,
         confidence: confidenceFor(freshness, sourceSyncHealthy),

@@ -103,6 +103,8 @@ export interface SourceSummary {
   sourceUrl: string;
   sourcePublishedAt: string | null;
   sourceObservedAt: string | null;
+  sourceUpdatedAt: string | null;
+  sourceUpdatedAtBasis: "observed" | "published" | "unknown";
   fetchedAt: string;
   freshness: Freshness;
   confidence: Confidence;

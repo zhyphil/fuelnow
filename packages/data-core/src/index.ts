@@ -45,6 +45,8 @@ export {
   haversineDistanceMeters,
 } from "./geo/haversine.js";
 export type { GeoPoint } from "./geo/haversine.js";
+export { resolveSourceUpdatedAt } from "./source/resolveSourceUpdatedAt.js";
+export type { ResolvedSourceUpdate } from "./source/resolveSourceUpdatedAt.js";
 export {
   parseSpainFuelLocalDateTime,
   SpainFuelAdapter,
