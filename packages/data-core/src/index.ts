@@ -21,6 +21,14 @@ export type {
   SpainFuelSourceRecord,
 } from "./fuel/normalizeFuelSourceRecord.js";
 export {
+  evaluateOpeningStatusAt,
+  filterFuelCandidatesOpenNow,
+} from "./fuel/filterFuelCandidatesOpenNow.js";
+export type {
+  EvaluatedFuelOpeningCandidate,
+  FuelOpenNowFilterResult,
+} from "./fuel/filterFuelCandidatesOpenNow.js";
+export {
   DEFAULT_FUEL_SEARCH_RADIUS_M,
   MAX_FUEL_SEARCH_RADIUS_M,
   selectNearbyFuelCandidates,
