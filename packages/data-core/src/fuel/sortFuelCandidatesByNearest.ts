@@ -1,6 +1,6 @@
 import type { FuelDistanceCandidate } from "./selectNearbyFuelCandidates.js";
 
-function compareIds(left: string, right: string): number {
+export function compareFuelCandidateIds(left: string, right: string): number {
   if (left < right) {
     return -1;
   }
@@ -27,6 +27,6 @@ export function sortFuelCandidatesByNearest<
   return [...candidates].sort(
     (left, right) =>
       left.straightLineDistanceM - right.straightLineDistanceM ||
-      compareIds(left.servicePoint.id, right.servicePoint.id),
+      compareFuelCandidateIds(left.servicePoint.id, right.servicePoint.id),
   );
 }

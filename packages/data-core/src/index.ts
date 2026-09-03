@@ -30,6 +30,7 @@ export type {
   FuelDistanceSelection,
   FuelDistanceSelectionOptions,
 } from "./fuel/selectNearbyFuelCandidates.js";
+export { sortFuelCandidatesByCheapest } from "./fuel/sortFuelCandidatesByCheapest.js";
 export { sortFuelCandidatesByNearest } from "./fuel/sortFuelCandidatesByNearest.js";
 export {
   assertValidGeoPoint,
