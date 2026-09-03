@@ -4,7 +4,7 @@
 > 需求来源：[france_spain_driver_decision_engine_project.md](./france_spain_driver_decision_engine_project.md)  
 > 当前状态：进行中  
 > 当前阶段：Phase 1 — Data Feasibility Spike
-> 下一项任务：`P1-FUEL-06` 每个结果返回 source 和 source URL
+> 下一项任务：`P1-FUEL-07` 每个结果返回 source updated_at 和系统 fetched_at
 > 最后更新：2026-09-03
 
 ## 使用方法
@@ -117,7 +117,7 @@ V1 的核心验收结果是：
 - [x] `P1-FUEL-03` 支持统一 Nearest 排序、全局 ID 决胜和无副作用排序（2026-09-03；[验证报告](./docs/data/unified-fuel-nearest-validation.md)；49 tests）
 - [x] `P1-FUEL-04` 支持按指定燃料 Cheapest 排序、Stale/Unknown/不可用价格降级及单位安全（2026-09-03；[验证报告](./docs/data/unified-fuel-cheapest-validation.md)；55 tests）
 - [x] `P1-FUEL-05` 支持跨时区 Open now 筛选、关闭/未知分区、跨午夜及 Fuel 24/7 自助语义（2026-09-03；[验证报告](./docs/data/unified-fuel-open-now-validation.md)；64 tests）
-- [ ] `P1-FUEL-06` 每个结果返回 source 和 source URL
+- [x] `P1-FUEL-06` 每个结果返回可追溯 source、source URL 和来源命名空间（2026-09-03；[验证报告](./docs/data/unified-fuel-source-attribution-validation.md)；66 tests）
 - [ ] `P1-FUEL-07` 每个结果返回 source updated_at 和系统 fetched_at
 - [ ] `P1-FUEL-08` 明确价格未知、过期、缺货和站点关闭的显示规则
 - [ ] `P1-FUEL-09` 验证 Perpignan/Girona 一带的跨境查询
@@ -527,3 +527,4 @@ V1 的核心验收结果是：
 | 2026-09-03 | 实现统一 Fuel Nearest 排序 | 两国查询共用距离升序与全局 ID 决胜规则，排序不改变调用方数组；49 项测试通过；见 `docs/data/unified-fuel-nearest-validation.md` |
 | 2026-09-03 | 实现统一 Fuel Cheapest 排序 | 仅比较指定燃料与兼容单位，Stale/Unknown/不可用价格不获得旧低价优势，并以距离和全局 ID 决胜；55 项测试通过；见 `docs/data/unified-fuel-cheapest-validation.md` |
 | 2026-09-03 | 实现统一 Fuel Open now 筛选 | 按站点时区计算营业状态并区分 Open/Closed/Unknown，支持分段、跨午夜及法国 24/7 自助 Fuel；64 项测试通过；见 `docs/data/unified-fuel-open-now-validation.md` |
+| 2026-09-03 | 验证统一 Fuel 来源署名 | Toulouse 70 条与 Madrid 219 条结果全部返回来源 ID、名称和 HTTPS URL，全局 ID 可反查来源；66 项测试通过；见 `docs/data/unified-fuel-source-attribution-validation.md` |
