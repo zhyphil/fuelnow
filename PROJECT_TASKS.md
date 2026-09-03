@@ -4,7 +4,7 @@
 > 需求来源：[france_spain_driver_decision_engine_project.md](./france_spain_driver_decision_engine_project.md)  
 > 当前状态：进行中  
 > 当前阶段：Phase 1 — Data Feasibility Spike
-> 下一项任务：`P1-FR-07` 编写 `FranceFuelAdapter`
+> 下一项任务：`P1-FR-08` 输入 GPS，返回 10 km 内真实加油站
 > 最后更新：2026-09-03
 
 ## 使用方法
@@ -94,7 +94,7 @@ V1 的核心验收结果是：
 - [x] `P1-FR-04` 验证 9,804 条记录的站点 ID、地址、坐标、品牌/名称缺失与营业时间结构（2026-09-03；[验证报告](./docs/data/france-fuel-basic-fields-validation.md)）
 - [x] `P1-FR-05` 验证六种燃料、32,574 个价格项、France-local 时间语义及缺货一致性（2026-09-03；[验证报告](./docs/data/france-fuel-price-validation.md)）
 - [x] `P1-FR-06` 验证整站关闭不可得、24/24 自动付款语义及 Air/Wash 服务字段覆盖（2026-09-03；[验证报告](./docs/data/france-fuel-status-services-validation.md)）
-- [ ] `P1-FR-07` 编写 `FranceFuelAdapter`
+- [x] `P1-FR-07` 编写并测试 `FranceFuelAdapter`，覆盖字段归一化、时区、缺货、营业时间及 Air/Wash 语义（2026-09-03；7 tests）
 - [ ] `P1-FR-08` 输入 GPS，返回 10 km 内真实加油站
 - [ ] `P1-FR-09` 验证 Paris、Toulouse、郊区和高速附近样本
 
@@ -475,6 +475,8 @@ V1 的核心验收结果是：
 | 2026-09-03 | 西班牙 EV 实时 availability/price 覆盖可能不完整 | 高 | 不承诺全国实时；先验证后决定 V1 展示范围 | 待验证 |
 | 2026-09-03 | Best 权重尚未定义 | 中 | 先采用可解释规则，再根据导航行为校准 | 待处理 |
 | 2026-09-03 | 路线 API 会带来成本和限流 | 中 | Top N 分批计算，增加缓存、用量指标、预算告警和无 ETA 降级；Beta 前复核价格 | 应对方案已定义，待实现 |
+| 2026-09-03 | 法国 Fuel 门户的 typed datetime 偏移与原始 France-local 墙钟语义不一致 | 高 | 从原始 `@maj/@debut` 按 `Europe/Paris` 解析，保留原值，隔离未来时间，并用夏/冬令时测试保护 | 已在 `FranceFuelAdapter` 缓解，待持续监控 |
+| 2026-09-03 | 当前开发机 Node.js 22 低于项目锁定的 Node.js 24 LTS | 中 | `.nvmrc` 和 `engines` 固定 Node 24；当前兼容性测试通过，CI/发布环境必须使用 Node 24 | 发布环境待落实 |
 
 # 完成记录
 
@@ -503,3 +505,4 @@ V1 的核心验收结果是：
 | 2026-09-03 | 验证法国 Fuel 站点基础字段 | 坐标和地址可用；名称/品牌无显式字段；营业时间覆盖 86.32% 且存在多种时段结构；见 `docs/data/france-fuel-basic-fields-validation.md` |
 | 2026-09-03 | 验证法国 Fuel 价格与缺货字段 | 价格与原始项一致；确认 France-local 时间解析要求及缺货汇总字段异常；见 `docs/data/france-fuel-price-validation.md` |
 | 2026-09-03 | 验证法国 Fuel 关闭、24/7 与设施字段 | 整站临时关闭不可得；区分自动付款与站点 24/7；验证 Air/Wash 标签；见 `docs/data/france-fuel-status-services-validation.md` |
+| 2026-09-03 | 实现法国 Fuel 数据适配器 | 建立最小 TypeScript 数据包；真实 fixture、时区、缺货、营业时间及设施映射共 7 项测试通过；见 `packages/data-core/` |

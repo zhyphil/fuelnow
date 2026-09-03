@@ -1,0 +1,19 @@
+{
+  "name": "@fuel-now/data-core",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "luxon": "3.7.1"
+  },
+  "devDependencies": {
+    "@types/luxon": "3.7.1"
+  }
+}
