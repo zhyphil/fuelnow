@@ -4,7 +4,7 @@
 > 需求来源：[france_spain_driver_decision_engine_project.md](./france_spain_driver_decision_engine_project.md)  
 > 当前状态：进行中  
 > 当前阶段：Phase 1 — Data Feasibility Spike
-> 下一项任务：`P1-AIR-03` 统计两国 Air 字段的实际覆盖率
+> 下一项任务：`P1-AIR-04` 评估 Air 免费/收费价格字段覆盖率
 > 最后更新：2026-09-03
 
 ## 使用方法
@@ -127,7 +127,7 @@ V1 的核心验收结果是：
 
 - [x] `P1-AIR-01` 验证法国 `Station de gonflage` 字段、单值/数组结构及仅 presence 语义（2026-09-03；[验证报告](./docs/data/france-air-field-validation.md)；84 tests）
 - [x] `P1-AIR-02` 验证西班牙 REST/XLS 无 Aire y agua、充气或设备字段，且服务方式不得误映射（2026-09-03；[验证报告](./docs/data/spain-air-field-validation.md)；86 tests）
-- [ ] `P1-AIR-03` 统计两国 Air 字段的实际覆盖率
+- [x] `P1-AIR-03` 统计两国 Air 来源确认覆盖率：法国 55.59%，西班牙当前来源能力不可用（2026-09-03；[覆盖率报告](./docs/data/air-coverage-validation.md)）
 - [ ] `P1-AIR-04` 评估 Air 免费/收费价格字段覆盖率
 - [ ] `P1-AIR-05` 评估设备是否可用或损坏的数据覆盖率
 - [ ] `P1-WASH-01` 验证法国自动/手动洗车服务字段
@@ -534,3 +534,4 @@ V1 的核心验收结果是：
 | 2026-09-03 | 人工抽查真实 Fuel 站点与价格 | 对照两国 10 个城市/机场/高速/边境样本，确认价格、单位、24/7 和临时/永久缺货语义；82 项测试通过；见 `docs/data/manual-fuel-sample-audit.md` |
 | 2026-09-03 | 验证法国 Fuel 的 Air 字段 | 全国 5,450/9,804 条含 `Station de gonflage`；244 条固定样本严格匹配 presence，价格/设备状态保持 Unknown；84 项测试通过；见 `docs/data/france-air-field-validation.md` |
 | 2026-09-03 | 验证西班牙 Fuel 的 Air 字段边界 | REST 41 字段、XLS 40 列均无 Air/水/设备字段；684 条固定样本保持 Unknown，服务方式不误映射；86 项测试通过；见 `docs/data/spain-air-field-validation.md` |
+| 2026-09-03 | 量化两国 Air 来源覆盖 | 法国全国 5,450/9,804（55.59%）明确声明 Air；西班牙 MITECO 无该字段，0 known-positive 不能解释为现实中不存在；见 `docs/data/air-coverage-validation.md` |
