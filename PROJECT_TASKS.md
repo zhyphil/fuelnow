@@ -4,7 +4,7 @@
 > 需求来源：[france_spain_driver_decision_engine_project.md](./france_spain_driver_decision_engine_project.md)  
 > 当前状态：进行中  
 > 当前阶段：Phase 0 — 开工决策  
-> 下一项任务：`P0-08` 明确官方数据来源的署名展示方式
+> 下一项任务：`P0-09` 定义 Live、Verified、Recent、Stale、Unknown 的时间标准
 > 最后更新：2026-09-03
 
 ## 使用方法
@@ -68,7 +68,7 @@ V1 的核心验收结果是：
 - [x] `P0-05` 确定首批验证城市和跨境测试区域：Paris、Toulouse、Carcassonne、Perpignan、La Jonquera、Girona、Barcelona、Madrid（2026-09-03；[ADR 0005](./docs/decisions/0005-validation-geographies.md)）
 - [x] `P0-06` 确定 V1 账号策略：核心搜索和导航完全免登录，偏好保存在设备本地（2026-09-03；[ADR 0006](./docs/decisions/0006-account-policy.md)）
 - [x] `P0-07` 明确位置权限、隐私、数据保存和 GDPR 工程边界：仅前台按需定位、支持手动位置、默认不持久化精确出发点（2026-09-03；[ADR 0007](./docs/decisions/0007-location-privacy.md)）
-- [ ] `P0-08` 明确官方数据来源的署名展示方式
+- [x] `P0-08` 明确数据来源署名方式：API provenance、结果卡、详情页和全局来源/许可证注册表四层展示（2026-09-03；[ADR 0008](./docs/decisions/0008-source-attribution.md)、[来源注册表](./docs/data/source-registry.md)）
 - [ ] `P0-09` 定义 Live、Verified、Recent、Stale、Unknown 的时间标准
 - [ ] `P0-10` 定义四类服务各自的必需字段与可选字段
 - [ ] `P0-11` 确定全国上线还是先做区域 Beta
@@ -462,6 +462,7 @@ V1 的核心验收结果是：
 | 2026-09-03 | 数据与搜索验证区域 | Paris、Toulouse、Carcassonne、Perpignan、La Jonquera、Girona、Barcelona、Madrid | 同时覆盖两国大城市、区域城市、跨境走廊和不同站点密度 | P0-05 |
 | 2026-09-03 | V1 账号策略 | 核心搜索与导航免登录；偏好保存在设备本地 | 降低紧急场景使用阻力，避免在数据验证前引入账号、恢复与身份数据范围 | P0-06 |
 | 2026-09-03 | 位置与隐私边界 | 仅前台按需定位；支持手动输入；精确出发点默认不落库、不进日志和分析 | 遵循目的限制、数据最小化和保存期限原则；避免形成位置历史 | P0-07 |
+| 2026-09-03 | 数据来源署名 | API、结果卡、详情页、全局来源/许可证注册表四层展示；保留字段级 provenance | 兼顾用户可信度判断、多来源合并和不同许可证的署名要求 | P0-08 |
 | 待定 | 首发区域 | 待定 | 待确认 | P0-05、P0-11 |
 
 # 风险与阻塞记录
@@ -489,3 +490,4 @@ V1 的核心验收结果是：
 | 2026-09-03 | 固定法国、西班牙及跨境验证区域 | 8 个核心锚点和 Toulouse–Barcelona 走廊；见 `docs/decisions/0005-validation-geographies.md` |
 | 2026-09-03 | 确定 V1 免登录账号策略 | 核心搜索和导航无需账户；见 `docs/decisions/0006-account-policy.md` |
 | 2026-09-03 | 定义位置权限、保存与 GDPR 工程边界 | 前台按需定位且精确出发点默认不持久化；见 `docs/decisions/0007-location-privacy.md` |
+| 2026-09-03 | 定义数据来源与许可证署名体系 | 四层 provenance 展示并建立来源注册表；见 `docs/decisions/0008-source-attribution.md` |
