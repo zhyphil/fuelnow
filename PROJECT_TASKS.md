@@ -4,7 +4,7 @@
 > 需求来源：[france_spain_driver_decision_engine_project.md](./france_spain_driver_decision_engine_project.md)  
 > 当前状态：进行中  
 > 当前阶段：Phase 1 — Data Feasibility Spike
-> 下一项任务：`P1-FR-04` 验证站名、地址、坐标、品牌和营业时间字段
+> 下一项任务：`P1-FR-05` 验证燃料类型、价格、更新时间和缺货字段
 > 最后更新：2026-09-03
 
 ## 使用方法
@@ -91,7 +91,7 @@ V1 的核心验收结果是：
 - [x] `P1-FR-01` 找到并验证法国官方 Fuel 实时 v2 数据集、Records API 与 CSV/JSON/GeoJSON 导出（2026-09-03；[调查记录](./docs/data/france-fuel-source.md)）
 - [x] `P1-FR-02` 核实 Licence Ouverte 2.0 的商业使用、缓存、再分发和署名要求（2026-09-03；[核验记录](./docs/data/france-fuel-licence.md)）
 - [x] `P1-FR-03` 保存 Toulouse 原始 API 样本并记录 47 个官方字段定义（2026-09-03；[样本与字段字典](./docs/data/france-fuel-fields.md)）
-- [ ] `P1-FR-04` 验证站名、地址、坐标、品牌和营业时间字段
+- [x] `P1-FR-04` 验证 9,804 条记录的站点 ID、地址、坐标、品牌/名称缺失与营业时间结构（2026-09-03；[验证报告](./docs/data/france-fuel-basic-fields-validation.md)）
 - [ ] `P1-FR-05` 验证燃料类型、价格、更新时间和缺货字段
 - [ ] `P1-FR-06` 验证临时关闭、24/7 和服务设施字段
 - [ ] `P1-FR-07` 编写 `FranceFuelAdapter`
@@ -500,3 +500,4 @@ V1 的核心验收结果是：
 | 2026-09-03 | 找到并探测法国官方 Fuel 实时数据源 | v2 dataset、Records API、CSV/JSON/GeoJSON exports 均可访问；见 `docs/data/france-fuel-source.md` |
 | 2026-09-03 | 核实法国 Fuel 数据许可与使用约束 | 允许商业复用、缓存、转换和再分发；必须标注来源与最新更新时间；见 `docs/data/france-fuel-licence.md` |
 | 2026-09-03 | 保存法国 Fuel 原始样本与字段字典 | 固定 station `31000001` 的完整 Records API 响应，并记录 47 个字段；见 `fixtures/france-fuel/` 与 `docs/data/france-fuel-fields.md` |
+| 2026-09-03 | 验证法国 Fuel 站点基础字段 | 坐标和地址可用；名称/品牌无显式字段；营业时间覆盖 86.32% 且存在多种时段结构；见 `docs/data/france-fuel-basic-fields-validation.md` |
