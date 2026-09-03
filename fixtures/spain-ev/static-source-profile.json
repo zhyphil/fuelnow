@@ -56,6 +56,7 @@
     "power_min_kw": 0.06,
     "power_max_kw": 1000,
     "power_non_positive": 0,
+    "power_positive_below_1_kw": 6,
     "power_above_1000_kw": 0,
     "payment_methods_present": 43610,
     "payment_method_distinct_values": 1058,
@@ -133,4 +134,3 @@
     "payment_methods_are_price_evidence": false
   }
 }
-

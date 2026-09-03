@@ -197,16 +197,20 @@ If the user selects a connector type, unknown connector records do not satisfy t
 |---|---|---|---|
 | `charging.operator` | Required nullable | string/null | Operator is distinct from mobility provider |
 | `charging.network` | Optional | string/null | Normalized network/brand where available |
-| `charging.evse_count` | Required nullable | integer/null | Physical semantics documented per adapter |
-| `charging.connectors` | Required | array | May contain an unknown connector only when source lacks detail |
+| `charging.evses` | Required | non-empty array | One item per physical EVSE/PDC; one EVSE can serve at most one vehicle at a time |
+| `evses[].id` | Required nullable | string/null | Stable roaming/source EVSE ID when available |
+| `evses[].status` | Required nullable | `available`, `occupied`, `out_of_service`, `reserved`, `unknown` | EVSE-level dynamic status; requires observation/change timestamp and dynamic provenance |
+| `evses[].operational` | Required nullable | true/false/null | Operational does not imply available |
+| `evses[].source_observed_at` | Required nullable | UTC timestamp/null | Required for Live/Recent availability |
+| `evses[].connectors` | Required | non-empty array | Connector capabilities of the EVSE; do not count these as simultaneous charging capacity |
 | `connectors[].id` | Required nullable | string/null | Stable source/canonical connector ID when available |
 | `connectors[].connector_type` | Required nullable | enum/null | Unknown must be explicit |
 | `connectors[].power_kw` | Required nullable | positive number/null | Rated maximum, not promised delivered power |
-| `connectors[].status` | Required nullable | `available`, `occupied`, `out_of_service`, `reserved`, `unknown` | Dynamic semantics require timestamp |
-| `connectors[].source_observed_at` | Required nullable | UTC timestamp/null | Required for Live/Recent availability |
-| `available_connectors` | Required nullable | integer/null | Station summary derived from eligible connectors |
-| `total_connectors` | Required nullable | integer/null | Must use same counting semantics as available count |
-| `charging.price` | Required nullable | price/tariff/null | Preserve kWh/time/session components when applicable |
+| `connectors[].operational` | Required nullable | true/false/null | Use only when the source reports connector-specific condition |
+| `connectors[].tariffs` | Required nullable | tariff array/null | Preserve energy/time/session/parking components, restrictions, tax and source IDs |
+| `available_evses` | Required nullable | integer/null | Site summary derived from eligible EVSEs, never from connector count |
+| `total_evses` | Required | positive integer | Same EVSE counting semantics as `available_evses` |
+| `charging.price` | Required nullable | price/tariff/null | Request-specific comparable summary; preserve full connector tariffs separately |
 | `authentication_methods` | Optional | string array | App, card, RFID, plug-and-charge, etc. |
 
 ### Initial connector codes
@@ -220,6 +224,8 @@ If the user selects a connector type, unknown connector records do not satisfy t
 - `unknown`
 
 Do not map a connector to a code based only on power.
+
+The EVSE-first hierarchy and count semantics were refined by `P1-EV-01` after validating the France and Spain source structures. France exposes connector capabilities as flags on each PDC; Spain exposes connector rows below each PDC. Neither shape permits connector count to be used as simultaneous vehicle capacity.
 
 ## Air fields
 

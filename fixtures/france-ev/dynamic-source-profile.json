@@ -85,6 +85,32 @@
       "reserve": 9,
       "inconnu": 9853
     },
+    "connector_state_rows": {
+      "type_2": {
+        "blank_not_present": 82952,
+        "fonctionnel": 23379,
+        "inconnu": 9041,
+        "hors_service": 838
+      },
+      "ccs_combo_2": {
+        "blank_not_present": 84464,
+        "fonctionnel": 21059,
+        "inconnu": 9397,
+        "hors_service": 1290
+      },
+      "chademo": {
+        "blank_not_present": 97385,
+        "fonctionnel": 8205,
+        "inconnu": 10384,
+        "hors_service": 236
+      },
+      "domestic_socket": {
+        "blank_not_present": 96580,
+        "fonctionnel": 10642,
+        "inconnu": 8809,
+        "hors_service": 179
+      }
+    },
     "timestamp_min": "2020-12-29T14:39:41Z",
     "timestamp_max": "2026-09-03T22:11:40Z",
     "fixed_geographies": {

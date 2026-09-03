@@ -1,0 +1,133 @@
+{
+  "task": "P1-EV-01",
+  "validated_at": "2026-09-04",
+  "canonical_hierarchy": {
+    "levels": [
+      "service_point",
+      "evse",
+      "connector"
+    ],
+    "capacity_unit": "evse",
+    "rule": "One EVSE can serve at most one vehicle at a time; connectors are compatible interfaces and are not independent capacity."
+  },
+  "source_hierarchy": {
+    "fr_pan_static": {
+      "service_point_id": "id_station_itinerance",
+      "evse_id": "id_pdc_itinerance",
+      "connector_representation": "boolean capability flags on the EVSE row",
+      "physical_connector_ids_available": false
+    },
+    "es_miteco_ripree": {
+      "service_point_id": "COD.INSTALACION",
+      "evse_id": "ID. PUNTO DE RECARGA",
+      "connector_id": "ID. CONECTOR",
+      "connector_identity": "(ID. PUNTO DE RECARGA, ID. CONECTOR)",
+      "connector_representation": "one row per connector"
+    }
+  },
+  "connector_mapping": {
+    "fr_pan_static": {
+      "prise_type_combo_ccs=true": "ccs_combo_2",
+      "prise_type_2=true": "type_2",
+      "cable_t2_attache=true": "type_2_attached",
+      "prise_type_chademo=true": "chademo",
+      "prise_type_ef=true": "domestic_socket",
+      "prise_type_autre=true": "unknown"
+    },
+    "es_miteco_ripree": {
+      "IEC_62196_T2_COMBO": "ccs_combo_2",
+      "IEC_62196_T2 + Cable": "type_2_attached",
+      "IEC_62196_T2 + Socket": "type_2",
+      "CHADEMO": "chademo",
+      "DOMESTIC_A/E/F/L": "domestic_socket",
+      "TeslaConnectorEurope": "tesla_eu",
+      "IEC_62196_T1/T1_COMBO/T3A/T3C": "unknown",
+      "IEC_60309 variants": "unknown"
+    },
+    "rules": [
+      "Do not infer connector type from power.",
+      "Preserve the raw connector value whenever normalized value is unknown.",
+      "France connector flags create logical capabilities with nullable connector IDs, not additional EVSEs.",
+      "PAN cable_t2_attache had zero known values at capture; do not infer attached Type 2 from other fields."
+    ]
+  },
+  "power": {
+    "canonical_unit": "kW",
+    "fr_pan_static": {
+      "source_field": "puissance_nominale",
+      "scope": "evse",
+      "rows": 166339,
+      "zero": 2765,
+      "positive_below_1_kw": 2,
+      "above_1000_kw": 900,
+      "max_kw": 160000
+    },
+    "es_miteco_ripree": {
+      "source_field": "POTENCIA MAXIMA",
+      "scope": "connector",
+      "rows": 43610,
+      "positive_below_1_kw": 6,
+      "above_1000_kw": 0,
+      "min_kw": 0.06,
+      "max_kw": 1000
+    },
+    "rules": [
+      "Parse units and localized decimal separators explicitly.",
+      "Quarantine non-positive, below-1-kW and above-1000-kW values pending source review.",
+      "Do not sum connector or EVSE rated power into promised site output.",
+      "Power is rated maximum and never promised delivered power."
+    ]
+  },
+  "operator": {
+    "fr_pan_static": {
+      "operator": "nom_operateur",
+      "network": "nom_enseigne",
+      "owner_or_developer": "nom_amenageur"
+    },
+    "es_miteco_ripree": {
+      "operator": "NOMBRE OPERADOR",
+      "operator_code": "COD.OPERADOR",
+      "network": null
+    },
+    "es_ree_reve": {
+      "operator": "cpo_name or owner.name",
+      "operator_party_id": "party_id"
+    },
+    "rules": [
+      "Do not merge operator, network, owner/developer or EMSP into one field.",
+      "Normalize aliases only through an auditable mapping while retaining source spelling and code.",
+      "A display name is not a durable identity without its source namespace and code."
+    ]
+  },
+  "status_mapping": {
+    "fr_dynamic": {
+      "hors_service": "out_of_service",
+      "en_service + libre + requested connector fonctionnel": "available",
+      "en_service + occupe": "occupied",
+      "en_service + reserve": "reserved",
+      "inconnu or stale or unsafe join": "unknown"
+    },
+    "es_reve_exact_evse_status": {
+      "AVAILABLE": "available",
+      "CHARGING": "occupied",
+      "RESERVED": "reserved",
+      "BLOCKED": "out_of_service",
+      "INOPERATIVE": "out_of_service",
+      "OUTOFORDER": "out_of_service",
+      "PLANNED": "out_of_service",
+      "REMOVED": "out_of_service_then_tombstone",
+      "UNKNOWN": "unknown"
+    },
+    "es_reve_bulk_operational_status": {
+      "false": "out_of_service",
+      "true": "unknown_until_exact_status"
+    },
+    "rules": [
+      "Status is EVSE-level unless the source explicitly supplies connector condition.",
+      "Higher-level out-of-service overrides connector functional state.",
+      "Occupied and reserved apply to the whole EVSE because only one connector can be used at once.",
+      "RIPREE-only records always have unknown live availability.",
+      "Tariff presence does not prove availability."
+    ]
+  }
+}

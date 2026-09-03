@@ -4,7 +4,7 @@
 > 需求来源：[france_spain_driver_decision_engine_project.md](./france_spain_driver_decision_engine_project.md)  
 > 当前状态：进行中  
 > 当前阶段：Phase 1 — Data Feasibility Spike
-> 下一项任务：`P1-EV-01` 验证 connector、power、operator 和状态字段
+> 下一项任务：`P1-EV-02` 记录各 EV 数据源更新频率与许可证要求
 > 最后更新：2026-09-04
 
 ## 使用方法
@@ -142,7 +142,7 @@ V1 的核心验收结果是：
 - [x] `P1-EV-FR-02` 验证法国动态 availability 与价格：PAN 匹配 61.13% 静态 PDC，但仅 5.43% 在 60 分钟内；动态价格 0%（2026-09-04；[验证报告](./docs/data/france-ev-dynamic-coverage.md)；[固定 profile/sample](./fixtures/france-ev/)）
 - [x] `P1-EV-ES-01` 验证西班牙 RIPREE 公共充电静态数据源，确认 43,610 个连接器行、36,465 个 PDC 和 12,214 个安装点，并记录三级身份、解析及异常隔离规则（2026-09-04；[验证报告](./docs/data/spain-ev-static-source.md)；[固定 profile/sample](./fixtures/spain-ev/)）
 - [x] `P1-EV-ES-02` 验证西班牙 Reve/SGV 动态 availability 与价格：平台内 95.90% EVSE 为 OCPI 动态来源，价格筛选覆盖 91.48% 地点；记录 API key、5 次/小时及逐点精确状态限制（2026-09-04；[验证报告](./docs/data/spain-ev-dynamic-coverage.md)；[固定 profile/sample](./fixtures/spain-ev/)）
-- [ ] `P1-EV-01` 验证 connector、power、operator 和状态字段
+- [x] `P1-EV-01` 验证并统一两国 EV 的 service point → EVSE → connector 层级、接口/功率/运营商映射及状态优先级，容量和 availability 均按 EVSE 计数（2026-09-04；[验证报告](./docs/data/unified-ev-fields-validation.md)；[机器映射](./fixtures/ev/unified-field-mapping.json)）
 - [ ] `P1-EV-02` 记录各数据源更新频率与许可证要求
 - [ ] `P1-EV-03` 决定 V1 可承诺的实时性范围
 
@@ -468,6 +468,7 @@ V1 的核心验收结果是：
 | 2026-09-03 | 首发区域 | 全国数据导入与实验性搜索；首轮公开 Beta 质量承诺聚焦 Toulouse–Barcelona 走廊；Paris/Madrid 强制回归 | 先验证跨境核心价值，并将人工验证与运营支持控制在可管理范围 | P0-05、P0-11 |
 | 2026-09-03 | 西班牙 Fuel 价格与单位 | 9 个明确产品映射到 V1；液体按 EUR/升，GNC/GNL 按 EUR/公斤；`Fecha` 是当前价格快照断言而非单站提交时间 | 避免混合单位比较和夸大更新时间；保持跨端展示一致 | P1-ES-05、P1-ES-07、P1-FUEL-04 |
 | 2026-09-03 | 西班牙 REST/XLS 组合 | REST `IDEESS` 保持主身份；只对确定的一对一 XLS 行补充 `Toma de datos` 和 `Tipo servicio`，不按行序关联 | REST 缺少单站时间/服务方式，XLS 缺少稳定 ID；同址重复站会造成歧义 | P1-ES-06、P1-ES-07 |
+| 2026-09-04 | EV 统一层级与容量 | 统一为 service point → EVSE → connector；availability 和容量按 EVSE 计算，connector 只表达兼容接口 | 法国按 EVSE 行给 connector flags，西班牙按 connector 行重复 EVSE；直接数 connector 会夸大可同时充电数量 | P1-EV-01 |
 
 # 风险与阻塞记录
 
@@ -546,3 +547,4 @@ V1 的核心验收结果是：
 | 2026-09-04 | 验证法国 EV 动态 availability/price | PAN 动态匹配 61.13% 静态 PDC，但最新去重后仅 5.43% 静态 PDC 在 60 分钟内；11,283 个重复 ID；动态价格字段为 0；见 `docs/data/france-ev-dynamic-coverage.md` |
 | 2026-09-04 | 验证西班牙 EV 静态数据源 | 选定官方 MITECO RIPREE 全国导出；43,610 个连接器行覆盖 36,465 个 PDC/12,214 个安装点；确认三级身份、非标准 CSV 解析、重复连接器和容量异常边界；见 `docs/data/spain-ev-static-source.md` |
 | 2026-09-04 | 验证西班牙 EV 动态 availability/price | Reve 内 42,800/44,631 个 EVSE 为 OCPI 动态来源，价格筛选匹配 13,323/14,564 个地点；确认正式 API key、5 次/小时、逐点精确状态及全量身份关联限制；见 `docs/data/spain-ev-dynamic-coverage.md` |
+| 2026-09-04 | 统一验证两国 EV 字段 | 建立 service point → EVSE → connector 模型，固定主要接口、功率隔离、运营商身份和 FR/ES 状态优先级；同步细化 V1 Charge 字段契约；见 `docs/data/unified-ev-fields-validation.md` |
