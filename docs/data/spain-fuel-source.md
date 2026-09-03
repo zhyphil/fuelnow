@@ -19,7 +19,7 @@ Instalaciones de suministro de combustibles a vehículos y embarcaciones con ven
 - National current-station response observed: 11,475 records on 2026-09-03
 - Response note: current prices are refreshed every 30 minutes
 
-This is the primary Spain Fuel candidate because it returns a national current snapshot with station identity, address, locality, municipality/province identifiers, coordinates, opening hours, brand/sign (`Rótulo`), sale/service type, discount metadata, and current prices for a broad fuel/product vocabulary.
+This is the primary Spain Fuel candidate because it returns a national current snapshot with station identity, address, locality, municipality/province identifiers, coordinates, opening hours, brand/sign (`Rótulo`), public-sale type, submission channel, and current prices for a broad fuel/product vocabulary. The REST row does not contain the XLS-only customer-service mode, station data-taking time, or discount-plan details.
 
 ## Canonical pages
 
@@ -95,14 +95,14 @@ The response includes current-price columns for conventional and alternative pro
 
 - Gasolina 95 E5/E10/E25/E85 and premium variants
 - Gasolina 98 E5/E10
-- Gasóleo A, Premium, B, and C
+- Gasóleo A, Premium, and B
 - Bioetanol and Biodiésel
 - GLP, GNC, and GNL
 - Hidrógeno and AdBlue
 - renewable diesel/gasoline
 - methanol, ammonia, compressed/liquefied biogas
 
-Numbers are localized strings. The checked record used decimal commas, for example `1,689`, and empty strings for missing prices. Coordinates also use decimal commas. Adapters must parse locale-aware strings without converting empty values to zero.
+Gasóleo C exists in the official product vocabulary and current XLS, but no Gasóleo C column appeared in the checked 41-field REST schema. Numbers are localized strings. The checked record used decimal commas, for example `1,689`, and empty strings for missing prices. Coordinates also use decimal commas. Adapters must parse locale-aware strings without converting empty values to zero.
 
 ## Filter and reference endpoints
 
@@ -164,14 +164,20 @@ The Geoportal exposes a current national XLS snapshot:
 https://geoportalgasolineras.es/resources/files/preciosEESS_es.xls
 ```
 
-Observed on 2026-09-03:
+Observed and structurally validated on 2026-09-03:
 
 - HTTP 200;
 - content type `application/vnd.ms-excel`;
-- size approximately 7.8 MB;
+- 7,833,600 bytes and 11,475 data rows;
 - `Last-Modified` was present and about 45 minutes before the check.
+- the workbook says it is generated hourly and overwrites the previous file;
+- it adds `Toma de datos`, `Tipo servicio`, and Gasóleo C;
+- it does not expose `IDEESS` or the REST geography IDs;
+- it does not expose temporary closure, Air, Wash, or equipment status.
 
-The catalogue also lists KML and WMS outputs. They may help independent geographic comparison, but the current REST JSON and XLS are better initial adapter candidates.
+Same-time REST and XLS rows matched completely on a normalized location/name composite, but three composite keys covered duplicate colocated rows. Shared hours/prices resolved four of the six ambiguous rows; two rows could not be safely distinguished. Never join these distributions by row position or assign an ambiguous supplement arbitrarily.
+
+The catalogue also lists CSV, KML, and WMS outputs. They may help independent geographic comparison, but the current REST JSON is the stable-ID primary input and XLS is a supplemental/fallback input after deterministic association checks.
 
 ## Legacy host compatibility
 
@@ -190,7 +196,7 @@ That legacy-host URL also returned HTTP 200 and a valid current JSON response du
 - Capture a bounded raw sample from the current REST response in `P1-ES-03`.
 - Record the response envelope separately from station rows.
 - Validate localized decimals, `Fecha` timezone, station `Horario`, `Rótulo`, `Tipo Venta`, and product columns.
-- Compare a bounded sample against the XLS before selecting a production fallback.
+- Compare REST and XLS schemas and association keys before selecting supplemental fields or a production fallback.
 
 ### Formal synchronization
 
@@ -200,7 +206,8 @@ That legacy-host URL also returned HTTP 200 and a valid current JSON response du
 - Start at the stated 30-minute cadence; do not poll more frequently without evidence of value.
 - Use province filters for targeted diagnostics, not as a default way to multiply national API requests.
 - Perform GPS radius filtering after national ingestion with PostGIS; the documented REST API has geography-ID/product filters, not an arbitrary GPS-radius endpoint.
-- Keep XLS as a format-diverse fallback after schema-equivalence tests exist.
+- Use XLS `Toma de datos` and `Tipo servicio` only after an exact one-to-one association with a REST `IDEESS`; reject ambiguous enrichment.
+- Keep XLS as a format-diverse fallback after schema-equivalence and identity-reconciliation tests exist.
 
 ## Risks and follow-up
 

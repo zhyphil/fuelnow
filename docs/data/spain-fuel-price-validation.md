@@ -56,7 +56,7 @@ All 42,619 non-empty values:
 - parse as finite localized decimal values after replacing the comma with a point;
 - are greater than zero;
 - contain no currency symbol or unit;
-- have no separate per-price update timestamp.
+- have no separate per-price update timestamp in the REST row.
 
 Empty strings are missing values, not zero or free prices. The adapter must reject malformed, non-finite, zero, and negative prices and report a field-specific issue instead of silently coercing them.
 
@@ -148,19 +148,23 @@ For an empty price column, do not create a fuel offering solely from that column
 
 The response note says the file is updated every half hour with prices in force at that moment. MITECO's FAQ also says the map publishes the prices currently in force based on information supplied under the reporting order. This supports using `Fecha` as the official current-price snapshot observation time.
 
-However, `Fecha` is not the moment an individual station last changed or submitted each price. User-facing wording must therefore say that MITECO's dataset was checked/current as of that time, not that the station personally reported the price at that time.
+However, `Fecha` is not the moment an individual station last changed or submitted each price. The current XLS distribution supplies a station-level `Toma de datos`; all 11,475 checked rows had one, but 134 were more than seven days old. `Toma de datos` is not product-specific, yet it is the more conservative field-level freshness input when the XLS row can be safely associated with a REST `IDEESS`.
+
+User-facing wording must distinguish the source snapshot time from the station data-taking time.
 
 Adapter rules:
 
 - preserve the raw `Fecha`;
 - parse it using `Europe/Madrid`, including daylight-saving transitions;
-- assign the parsed snapshot time to the mapped price `sourceObservedAt` with snapshot-level provenance;
+- preserve the source snapshot time as publication/snapshot evidence;
+- assign a safely associated XLS `Toma de datos` to mapped price `sourceObservedAt`;
+- leave price `sourceObservedAt` null when supplemental association is missing or ambiguous;
 - keep Fuel Now `fetchedAt` separate;
 - reject invalid or implausibly future source times;
 - compute freshness at response time and require healthy synchronization for `live`;
 - use `unknown` freshness when the snapshot timestamp cannot be parsed.
 
-The existing 15-minute Live window remains conservative and valid because `Fecha` is generated for the current response rather than exposing a half-hour batch boundary. The importer must still alert after two missed expected 30-minute source update intervals.
+The existing 15-minute Live window applies to `Toma de datos`, not the REST response-generation time. No row in the checked 23:00 XLS snapshot was within 15 minutes; 8,050 were within 24 hours, 11,341 within seven days, and 134 exceeded the seven-day decision cutoff. The importer must also monitor the REST 30-minute and XLS hourly distribution cadences separately.
 
 ## Acceptance decision
 
@@ -171,7 +175,7 @@ The source is suitable for V1 fuel-price ingestion with these boundaries:
 - carry product-specific litre/kilogram units;
 - mark the published price as tax-inclusive and non-membership public price;
 - do not infer live stock from price presence;
-- use `Fecha` as a source snapshot assertion, not a per-station submission timestamp;
+- use REST `Fecha` as source snapshot evidence and safely joined XLS `Toma de datos` as the price observation time;
 - keep source and fetch timestamps visible and distinct.
 
-`P1-ES-06` will verify temporary closure, explicit 24/7 operation, and service-facility fields before adapter implementation.
+`P1-ES-06` subsequently validated the XLS-only station timestamp and service mode, explicit 24/7 operation, and unavailable closure/Air/Wash capabilities; see `spain-fuel-status-services-validation.md`. `P1-ES-07` implements these boundaries.

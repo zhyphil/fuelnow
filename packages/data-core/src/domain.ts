@@ -50,7 +50,7 @@ export interface NormalizedOpeningHours {
   parseStatus: "parsed" | "partial";
   days: OpeningDay[];
   siteSchedule24Seven: boolean;
-  unattendedFuelPayment24Seven: boolean;
+  unattendedFuelPayment24Seven: boolean | null;
   raw: string;
 }
 
@@ -123,7 +123,7 @@ export interface NormalizedServicePoint {
   openingHours: NormalizedOpeningHours | null;
   openingStatus: OpeningStatus;
   temporaryClosure: null;
-  unattendedFuelPayment24Seven: boolean;
+  unattendedFuelPayment24Seven: boolean | null;
   fuels: NormalizedFuel[];
   air: AirCapability | null;
   wash: WashCapability | null;
