@@ -1,0 +1,73 @@
+{
+  "task": "P1-EV-03",
+  "accepted_at": "2026-09-04",
+  "nationwide_realtime_availability_claim": false,
+  "nationwide_realtime_price_claim": false,
+  "freshness_seconds": {
+    "live_max": 300,
+    "recent_max": 900,
+    "stale_max": 3600,
+    "unknown_after": 3600,
+    "source_sync_healthy_max": 600
+  },
+  "countries": {
+    "FR": {
+      "static_discovery": "enabled",
+      "static_source": "fr-irve-static-pan",
+      "availability": "conditional_per_evse",
+      "release_dynamic_source": "fr-qualicharge-irve",
+      "shadow_only_dynamic_sources": [
+        "fr-irve-dynamic-pan"
+      ],
+      "price_comparison": "disabled"
+    },
+    "ES": {
+      "static_discovery": "enabled",
+      "static_source": "es-miteco-ripree",
+      "availability": "disabled_unknown",
+      "blocked_dynamic_source": "es-ree-reve",
+      "price_comparison": "disabled"
+    }
+  },
+  "charge_modes": {
+    "nearest": "enabled",
+    "fastest": "rated_compatible_power_only",
+    "available_now": "conditional_france_only",
+    "best": "enabled_without_unknown_dynamic_advantage",
+    "cheapest": "disabled"
+  },
+  "live_availability_requirements": [
+    "unambiguous_static_dynamic_identity",
+    "valid_source_observed_at_within_5_minutes",
+    "last_successful_source_sync_within_10_minutes",
+    "evse_in_service_and_free",
+    "requested_connector_present_and_not_out_of_service",
+    "no_newer_conflict_or_quarantine"
+  ],
+  "count_semantics": {
+    "capacity_unit": "evse",
+    "available_evses": "compatible evses with an eligible Live available state",
+    "known_status_evses": "compatible evses with any eligible Live state",
+    "partial_copy": "{available} available · {unknown} status unknown",
+    "fraction_allowed_only_when_all_known": true,
+    "summary_observed_at": "oldest observation contributing to the displayed count"
+  },
+  "reason_codes": [
+    "availability_unknown",
+    "availability_not_supported_in_country",
+    "availability_source_unhealthy",
+    "availability_too_old",
+    "availability_identity_unresolved",
+    "charge_price_not_comparable",
+    "rated_power_not_delivered_speed"
+  ],
+  "reconsideration": {
+    "measurement_days": 7,
+    "identity_coverage_percent_min": 80,
+    "live_share_of_dynamic_percent_min": 90,
+    "successful_ingestions_percent_min": 99,
+    "commercial_rights_required": true,
+    "sufficient_quota_required": true,
+    "comparable_tariff_coverage_percent_min": 80
+  }
+}

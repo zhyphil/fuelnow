@@ -209,6 +209,8 @@ If the user selects a connector type, unknown connector records do not satisfy t
 | `connectors[].operational` | Required nullable | true/false/null | Use only when the source reports connector-specific condition |
 | `connectors[].tariffs` | Required nullable | tariff array/null | Preserve energy/time/session/parking components, restrictions, tax and source IDs |
 | `available_evses` | Required nullable | integer/null | Site summary derived from eligible EVSEs, never from connector count |
+| `known_status_evses` | Required nullable | integer/null | Compatible EVSEs with an eligible Live state; required to explain partial coverage |
+| `unknown_status_evses` | Required nullable | integer/null | Compatible EVSEs without an eligible Live state; never coerce to unavailable |
 | `total_evses` | Required | positive integer | Same EVSE counting semantics as `available_evses` |
 | `charging.price` | Required nullable | price/tariff/null | Request-specific comparable summary; preserve full connector tariffs separately |
 | `authentication_methods` | Optional | string array | App, card, RFID, plug-and-charge, etc. |
@@ -226,6 +228,8 @@ If the user selects a connector type, unknown connector records do not satisfy t
 Do not map a connector to a code based only on power.
 
 The EVSE-first hierarchy and count semantics were refined by `P1-EV-01` after validating the France and Spain source structures. France exposes connector capabilities as flags on each PDC; Spain exposes connector rows below each PDC. Neither shape permits connector count to be used as simultaneous vehicle capacity.
+
+ADR 0012 defines the V1 real-time boundary. There is no nationwide availability or price promise: France may show per-EVSE Live availability only from a healthy, safely joined QualiCharge record observed within 5 minutes; Spain availability remains Unknown until Reve/SGV commercial/API approval. Charge Cheapest is disabled in both countries. Partial coverage uses explicit copy such as `4 available · 2 status unknown`, not `4/6 available`.
 
 ## Air fields
 

@@ -4,7 +4,7 @@
 > 需求来源：[france_spain_driver_decision_engine_project.md](./france_spain_driver_decision_engine_project.md)  
 > 当前状态：进行中  
 > 当前阶段：Phase 1 — Data Feasibility Spike
-> 下一项任务：`P1-EV-03` 决定 V1 可承诺的实时性范围
+> 下一项任务：`P1-RPT-01` 输出各来源字段映射表
 > 最后更新：2026-09-04
 
 ## 使用方法
@@ -144,7 +144,7 @@ V1 的核心验收结果是：
 - [x] `P1-EV-ES-02` 验证西班牙 Reve/SGV 动态 availability 与价格：平台内 95.90% EVSE 为 OCPI 动态来源，价格筛选覆盖 91.48% 地点；记录 API key、5 次/小时及逐点精确状态限制（2026-09-04；[验证报告](./docs/data/spain-ev-dynamic-coverage.md)；[固定 profile/sample](./fixtures/spain-ev/)）
 - [x] `P1-EV-01` 验证并统一两国 EV 的 service point → EVSE → connector 层级、接口/功率/运营商映射及状态优先级，容量和 availability 均按 EVSE 计数（2026-09-04；[验证报告](./docs/data/unified-ev-fields-validation.md)；[机器映射](./fixtures/ev/unified-field-mapping.json)）
 - [x] `P1-EV-02` 记录各 EV 数据源更新频率、时间戳、商用/缓存/再分发、署名及生产门槛；Reve/SGV 因商用授权和 API 配额保持阻塞（2026-09-04；[政策报告](./docs/data/ev-source-licence-update-policy.md)；[机器策略](./fixtures/ev/source-policy.json)）
-- [ ] `P1-EV-03` 决定 V1 可承诺的实时性范围
+- [x] `P1-EV-03` 决定 V1 不承诺两国全国 EV 实时 availability/price；法国仅对满足 5 分钟与健康/关联门槛的单 EVSE 显示 Live，西班牙保持 Unknown，两国 Charge Cheapest 暂停（2026-09-04；[ADR 0012](./docs/decisions/0012-v1-ev-realtime-scope.md)；[机器规则](./fixtures/ev/v1-realtime-scope.json)）
 
 ## 1.6 数据可行性报告
 
@@ -470,6 +470,7 @@ V1 的核心验收结果是：
 | 2026-09-03 | 西班牙 REST/XLS 组合 | REST `IDEESS` 保持主身份；只对确定的一对一 XLS 行补充 `Toma de datos` 和 `Tipo servicio`，不按行序关联 | REST 缺少单站时间/服务方式，XLS 缺少稳定 ID；同址重复站会造成歧义 | P1-ES-06、P1-ES-07 |
 | 2026-09-04 | EV 统一层级与容量 | 统一为 service point → EVSE → connector；availability 和容量按 EVSE 计算，connector 只表达兼容接口 | 法国按 EVSE 行给 connector flags，西班牙按 connector 行重复 EVSE；直接数 connector 会夸大可同时充电数量 | P1-EV-01 |
 | 2026-09-04 | EV 来源许可与更新政策 | 法国 PAN/QualiCharge 与西班牙 RIPREE 可用于受控开发；Reve/SGV 在书面商用授权、可用配额和再分发条款确认前禁用 | 公开数据许可允许前三类来源缓存、转换和展示；Reve 通用条款不构成 Fuel Now 商用授权 | P1-EV-02 |
+| 2026-09-04 | V1 EV 实时能力边界 | 不承诺两国全国实时 availability/price；法国仅逐 EVSE 条件显示 Live，西班牙动态与两国 Charge Cheapest 默认禁用 | 实测法国 5 分钟内状态占全国静态 PDC 不足 1%，西班牙 Reve 未获商用/API 条件；避免把部分或旧数据包装成全国实时 | P1-EV-03 |
 
 # 风险与阻塞记录
 
@@ -550,3 +551,4 @@ V1 的核心验收结果是：
 | 2026-09-04 | 验证西班牙 EV 动态 availability/price | Reve 内 42,800/44,631 个 EVSE 为 OCPI 动态来源，价格筛选匹配 13,323/14,564 个地点；确认正式 API key、5 次/小时、逐点精确状态及全量身份关联限制；见 `docs/data/spain-ev-dynamic-coverage.md` |
 | 2026-09-04 | 统一验证两国 EV 字段 | 建立 service point → EVSE → connector 模型，固定主要接口、功率隔离、运营商身份和 FR/ES 状态优先级；同步细化 V1 Charge 字段契约；见 `docs/data/unified-ev-fields-validation.md` |
 | 2026-09-04 | 固化 EV 来源更新与许可政策 | 法国 PAN/QualiCharge 和西班牙 RIPREE 可用于受控开发；Reve/SGV 因商用授权、API 配额和再分发条件未闭环而保持生产禁用；见 `docs/data/ev-source-licence-update-policy.md` |
+| 2026-09-04 | 确定 V1 EV 实时承诺范围 | 两国保留全国静态发现；法国仅满足逐 EVSE Live 门槛时显示可用性，西班牙动态与两国 Charge Cheapest 暂停；见 `docs/decisions/0012-v1-ev-realtime-scope.md` |

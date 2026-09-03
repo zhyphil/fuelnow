@@ -1,6 +1,6 @@
 # ADR 0009 — Freshness and confidence semantics
 
-- Status: Accepted; thresholds must be recalibrated with Phase 1 source measurements
+- Status: Accepted; EV availability behavior refined by ADR 0012 after Phase 1 measurement
 - Date: 2026-09-03
 - Task: `P0-09`
 - Scope: Full stack
@@ -108,7 +108,7 @@ These are conservative starting thresholds. Phase 1 reports must measure actual 
 |---|---:|---:|---:|---:|---:|
 | Fuel price | ≤ 15 min from documented dynamic source | ≤ 6 h | ≤ 24 h | > 24 h to 7 d | > 7 d; exclude from Cheapest/Best price benefit |
 | Fuel stock/closure | ≤ 15 min from documented dynamic source | ≤ 2 h | ≤ 6 h | > 6 h to 24 h | > 24 h for dynamic claim |
-| EV connector availability | ≤ 5 min | ≤ 10 min | ≤ 15 min | > 15 min to 60 min | > 60 min; do not claim available now |
+| EV connector availability | ≤ 5 min | ≤ 10 min for eligible human/merchant confirmation | > 5 min to 15 min for an official feed | > 15 min to 60 min | > 60 min; do not claim available now |
 | EV price | ≤ 15 min from documented dynamic tariff | ≤ 6 h | ≤ 24 h | > 24 h to 7 d | > 7 d for Cheapest/Best price benefit |
 | Opening hours | Not applicable unless operator publishes live open/closed state | ≤ 7 d | ≤ 30 d | > 30 d to 180 d | > 180 d or unparseable |
 | Air working status | Operator live status ≤ 15 min | ≤ 24 h | ≤ 7 d | > 7 d to 30 d | > 30 d |
@@ -174,6 +174,8 @@ Confidence scores support ranking and explanation. They are not probabilities an
 - A station with unknown dynamic availability may still appear in Nearest if its existence/location is valid.
 
 Exact numeric Best weights are defined in Phase 3. These semantics determine eligibility before weighting.
+
+ADR 0012 tightens V1 EV behavior: only a ≤5-minute, healthy, safely joined official state may drive `Available now` or a positive availability score. Older official-feed states may be displayed as Recent/Stale evidence but cannot be phrased as current availability.
 
 ## Synchronization health
 
