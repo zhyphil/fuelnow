@@ -1,0 +1,37 @@
+{
+  "task": "P1-RPT-05",
+  "generated_at": "2026-09-04",
+  "sources": {
+    "fr-fuel-realtime-v2": {"risk": "medium", "direct_data_fee": "none_open_licence", "release_status": "approved_for_development", "degrade_to": "last_known_with_freshness_then_static_nearest"},
+    "es-miteco-fuel-prices": {"risk": "high", "direct_data_fee": "none_cc_by_4_distribution", "release_status": "approved_for_development_legal_gate_open", "degrade_to": "last_known_with_freshness_then_static_nearest"},
+    "fr-irve-static-pan": {"risk": "high", "direct_data_fee": "none_open_licence", "observed_payload_mb": 119.5, "release_status": "approved_for_development_with_quarantine", "degrade_to": "atomic_last_known_good"},
+    "fr-qualicharge-irve": {"risk": "high", "direct_data_fee": "none_open_licence", "observed_payload_mb": 6.1, "estimated_full_poll_transfer_gb_per_day_at_5m": 1.7, "release_status": "conditional_per_evse", "degrade_to": "availability_unknown_static_discovery"},
+    "fr-irve-dynamic-pan": {"risk": "high", "direct_data_fee": "none_open_licence", "observed_payload_mb": 8.6, "release_status": "shadow_only", "degrade_to": "no_user_visible_change"},
+    "es-miteco-ripree": {"risk": "high", "direct_data_fee": "none_open_data_notice", "observed_payload_mb": 45.1, "release_status": "approved_for_development_with_quarantine", "degrade_to": "atomic_last_known_good"},
+    "es-ree-reve": {"risk": "critical", "direct_data_fee": "unknown", "release_status": "disabled_pending_commercial_terms_key_quota_reconciliation", "degrade_to": "availability_and_price_unknown"},
+    "openstreetmap": {"risk": "high", "direct_data_fee": "none_odbl", "operational_cost": "extract_or_self_host_or_managed_provider", "release_status": "development_only_pending_acquisition_and_licence_review", "degrade_to": "last_known_presence_then_capability_unavailable"},
+    "mapbox-routing": {"risk": "high", "direct_data_fee": "metered_by_matrix_elements_current_price_review_required", "release_status": "candidate", "degrade_to": "straight_line_distance_eta_unknown"}
+  },
+  "routing_controls": {
+    "destinations_per_search_max": 10,
+    "directed_matrix_elements_per_full_search": 10,
+    "require_explicit_sources_destinations": true,
+    "monthly_budget_required": true,
+    "hard_cap_required": true,
+    "server_token_required": true
+  },
+  "storage_policy": {
+    "raw_default_retention_days": 30,
+    "content_hash_deduplication": true,
+    "retain_every_dynamic_full_body": false,
+    "retain_current_state_and_deltas": true,
+    "atomic_last_known_good": true
+  },
+  "release_blockers": [
+    "reve written commercial and API approval plus usable quota",
+    "OSM production acquisition and ODbL database review",
+    "MITECO Fuel current legal wording reconciliation",
+    "Mapbox current pricing forecast billing cap token and privacy review",
+    "Node.js 24 CI and release runtime"
+  ]
+}

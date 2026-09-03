@@ -4,7 +4,7 @@
 > 需求来源：[france_spain_driver_decision_engine_project.md](./france_spain_driver_decision_engine_project.md)  
 > 当前状态：进行中  
 > 当前阶段：Phase 1 — Data Feasibility Spike
-> 下一项任务：`P1-RPT-05` 输出数据源风险、成本和降级方案
+> 下一项任务：`P1-RPT-06` 根据报告最终确认或缩减 V1 范围
 > 最后更新：2026-09-04
 
 ## 使用方法
@@ -152,7 +152,7 @@ V1 的核心验收结果是：
 - [x] `P1-RPT-02` 汇总 Fuel 全国来源规模/目标区域密度、Air/Wash 来源确认率与 OSM 候选、EV 静态密度及动态关联/新鲜覆盖，并严格区分不可比较分母（2026-09-04；[覆盖率报告](./docs/data/service-coverage-report.md)；[机器汇总](./fixtures/reports/service-coverage.json)）
 - [x] `P1-RPT-03` 输出两国四类服务的价格、排班营业状态和当前 availability 已知/缺失率，区分原始字段、决策级可用性与不可测分母（2026-09-04；[缺失率报告](./docs/data/decision-field-missingness-report.md)；[机器汇总](./fixtures/reports/decision-field-missingness.json)）
 - [x] `P1-RPT-04` 输出 Fuel 价格、EV 动态状态、静态修改时间及 OSM 编辑时间分布，并建立时区、过期值、坐标、重复 ID、功率、未来时间、关联与标签冲突异常目录（2026-09-04；[新鲜度/异常报告](./docs/data/freshness-anomaly-report.md)；[机器汇总](./fixtures/reports/freshness-anomaly-summary.json)）
-- [ ] `P1-RPT-05` 输出数据源风险、成本和降级方案
+- [x] `P1-RPT-05` 输出每个数据/路线依赖的风险、直接与运营成本、容量预算、监控、故障降级矩阵及不可自动关闭的发布门槛（2026-09-04；[风险/成本/降级报告](./docs/data/source-risk-cost-degradation-report.md)；[机器策略](./fixtures/reports/source-risk-cost-degradation.json)）
 - [ ] `P1-RPT-06` 根据报告最终确认或缩减 V1 范围
 
 ## Phase 1 验收门槛
@@ -476,7 +476,9 @@ V1 的核心验收结果是：
 
 | 日期 | 风险或阻塞 | 严重度 | 应对方式 | 状态 |
 |---|---|---|---|---|
-| 2026-09-03 | Air/Wash 价格与设备状态可能覆盖不足 | 高 | Phase 1 量化覆盖率；V1 对未知状态透明展示 | 待验证 |
+| 2026-09-03 | Air/Wash 价格与设备状态覆盖不足 | 高 | V1 限为 presence discovery；价格、设备状态、服务专属营业时间保持 Unknown，不启用 Cheapest/Available now | 已验证，能力已缩减 |
+| 2026-09-04 | OSM Air/Wash 补充的生产获取方式与 ODbL 合并数据库义务未关闭 | 高 | Phase 2 使用区域 extract/自建/合规托管服务；保持来源分离；公开 Beta 前完成数据库分类、署名和提供义务审查 | 开发可继续，发布受阻 |
+| 2026-09-04 | 法国 PAN Charge 为 Beta 且存在重复 ID、坐标、功率和未来时间异常 | 高 | staging 全量校验、异常隔离、原子发布与 last-known-good；PAN dynamic 保持 shadow-only | 开发可继续，需实现监控 |
 | 2026-09-03 | 西班牙 EV 实时 availability/price 虽在 Reve 内覆盖高，但通用条款未授予商用复用，外部 API 还需审批密钥、限 5 次/小时且精确状态逐点读取 | 高 | 不依赖匿名 UI API；取得书面商用缓存/转换/展示授权、正式访问与生产配额，并完成 RIPREE 全量身份关联，在此之前不接入生产或承诺全国实时 | 已验证，生产接入受阻 |
 | 2026-09-03 | Best 权重尚未定义 | 中 | 先采用可解释规则，再根据导航行为校准 | 待处理 |
 | 2026-09-03 | 路线 API 会带来成本和限流 | 中 | Top N 分批计算，增加缓存、用量指标、预算告警和无 ETA 降级；Beta 前复核价格 | 应对方案已定义，待实现 |
@@ -556,3 +558,4 @@ V1 的核心验收结果是：
 | 2026-09-04 | 汇总四类服务覆盖率 | 统一 Fuel 区域密度、Air/Wash 来源确认率与 OSM 候选、Charge 静态规模及动态/新鲜覆盖，禁止混用不同分母；见 `docs/data/service-coverage-report.md` |
 | 2026-09-04 | 汇总决策字段缺失率 | 分别量化 Fuel/Charge 价格、排班营业与实时状态，以及 Air/Wash 价格/设备状态的 Unknown 边界；见 `docs/data/decision-field-missingness-report.md` |
 | 2026-09-04 | 汇总新鲜度与异常样本 | 量化 Fuel/Charge/静态/OSM 时间分布并登记时区、过期、坐标、身份、功率、未来时间和标签冲突样本；见 `docs/data/freshness-anomaly-report.md` |
+| 2026-09-04 | 完成来源风险、成本与降级方案 | 为开放数据、OSM、Reve 与 Mapbox 建立成本驱动、预算控制、故障降级和发布门槛；见 `docs/data/source-risk-cost-degradation-report.md` |
