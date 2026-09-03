@@ -4,7 +4,7 @@
 > 需求来源：[france_spain_driver_decision_engine_project.md](./france_spain_driver_decision_engine_project.md)  
 > 当前状态：进行中  
 > 当前阶段：Phase 1 — Data Feasibility Spike
-> 下一项任务：`P1-AIR-05` 评估设备是否可用或损坏的数据覆盖率
+> 下一项任务：`P1-WASH-01` 验证法国自动/手动洗车服务字段
 > 最后更新：2026-09-03
 
 ## 使用方法
@@ -129,7 +129,7 @@ V1 的核心验收结果是：
 - [x] `P1-AIR-02` 验证西班牙 REST/XLS 无 Aire y agua、充气或设备字段，且服务方式不得误映射（2026-09-03；[验证报告](./docs/data/spain-air-field-validation.md)；86 tests）
 - [x] `P1-AIR-03` 统计两国 Air 来源确认覆盖率：法国 55.59%，西班牙当前来源能力不可用（2026-09-03；[覆盖率报告](./docs/data/air-coverage-validation.md)）
 - [x] `P1-AIR-04` 评估 Air 免费/收费/金额覆盖：法国 5,450 个 Air 记录价格 100% Unknown，西班牙不可测（2026-09-03；[评估报告](./docs/data/air-price-coverage-validation.md)）
-- [ ] `P1-AIR-05` 评估设备是否可用或损坏的数据覆盖率
+- [x] `P1-AIR-05` 评估 Air 设备可用/损坏状态：法国 5,450 条 100% Unknown，西班牙不可测（2026-09-03；[评估报告](./docs/data/air-equipment-status-coverage-validation.md)）
 - [ ] `P1-WASH-01` 验证法国自动/手动洗车服务字段
 - [ ] `P1-WASH-02` 验证西班牙 Lavado 等服务字段
 - [ ] `P1-WASH-03` 统计两国 Wash 字段的实际覆盖率
@@ -536,3 +536,4 @@ V1 的核心验收结果是：
 | 2026-09-03 | 验证西班牙 Fuel 的 Air 字段边界 | REST 41 字段、XLS 40 列均无 Air/水/设备字段；684 条固定样本保持 Unknown，服务方式不误映射；86 项测试通过；见 `docs/data/spain-air-field-validation.md` |
 | 2026-09-03 | 量化两国 Air 来源覆盖 | 法国全国 5,450/9,804（55.59%）明确声明 Air；西班牙 MITECO 无该字段，0 known-positive 不能解释为现实中不存在；见 `docs/data/air-coverage-validation.md` |
 | 2026-09-03 | 评估 Air 价格覆盖 | 法国 5,450 个 Air-positive 记录均无 free/paid/amount，价格 100% Unknown；西班牙无 Air denominator；见 `docs/data/air-price-coverage-validation.md` |
+| 2026-09-03 | 评估 Air 设备状态覆盖 | 法国 5,450 个 Air-positive 记录均无 working/broken/verified 时间，状态 100% Unknown；西班牙不可测；见 `docs/data/air-equipment-status-coverage-validation.md` |
