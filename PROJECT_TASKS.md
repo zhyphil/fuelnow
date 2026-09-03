@@ -4,7 +4,7 @@
 > 需求来源：[france_spain_driver_decision_engine_project.md](./france_spain_driver_decision_engine_project.md)  
 > 当前状态：进行中  
 > 当前阶段：Phase 1 — Data Feasibility Spike
-> 下一项任务：`P1-RPT-01` 输出各来源字段映射表
+> 下一项任务：`P1-RPT-02` 输出 Fuel、Air、Wash、EV 覆盖率
 > 最后更新：2026-09-04
 
 ## 使用方法
@@ -148,7 +148,7 @@ V1 的核心验收结果是：
 
 ## 1.6 数据可行性报告
 
-- [ ] `P1-RPT-01` 输出各来源字段映射表
+- [x] `P1-RPT-01` 输出 France/Spain Fuel、Charge、Air、Wash 全部选定来源到统一模型的字段映射、派生规则、不可用边界及机器可读清单（2026-09-04；[字段映射报告](./docs/data/source-field-mapping-report.md)；[机器映射](./fixtures/reports/source-field-mapping.json)）
 - [ ] `P1-RPT-02` 输出 Fuel、Air、Wash、EV 覆盖率
 - [ ] `P1-RPT-03` 输出价格、营业状态和 availability 缺失率
 - [ ] `P1-RPT-04` 输出新鲜度分布和异常数据样本
@@ -552,3 +552,4 @@ V1 的核心验收结果是：
 | 2026-09-04 | 统一验证两国 EV 字段 | 建立 service point → EVSE → connector 模型，固定主要接口、功率隔离、运营商身份和 FR/ES 状态优先级；同步细化 V1 Charge 字段契约；见 `docs/data/unified-ev-fields-validation.md` |
 | 2026-09-04 | 固化 EV 来源更新与许可政策 | 法国 PAN/QualiCharge 和西班牙 RIPREE 可用于受控开发；Reve/SGV 因商用授权、API 配额和再分发条件未闭环而保持生产禁用；见 `docs/data/ev-source-licence-update-policy.md` |
 | 2026-09-04 | 确定 V1 EV 实时承诺范围 | 两国保留全国静态发现；法国仅满足逐 EVSE Live 门槛时显示可用性，西班牙动态与两国 Charge Cheapest 暂停；见 `docs/decisions/0012-v1-ev-realtime-scope.md` |
+| 2026-09-04 | 汇总全部来源字段映射 | 建立 Fuel、Charge、Air、Wash 的跨来源 canonical 字段、派生/补充/不可用边界，并统一西班牙 Fuel source ID；见 `docs/data/source-field-mapping-report.md` |

@@ -120,7 +120,7 @@ The official product reference endpoint returned 30 product IDs, while the land-
 - Parse prices, coordinates, and percentages with Spanish decimal comma rules.
 - Treat `""`, whitespace, and null as missing; never turn them into numeric zero.
 - Require finite coordinates in WGS84 ranges before a station enters proximity search.
-- Preserve `IDEESS` as a string and namespace canonical identity as `es-miteco-fuel:{IDEESS}`.
+- Preserve `IDEESS` as a string and namespace canonical identity as `es-miteco-fuel-prices:{IDEESS}`.
 - Preserve the source `Rótulo`; normalize brand separately and never infer it solely from address text.
 - Keep `Localidad` and `Municipio` separately because the source exposes both.
 - Preserve unrecognized product columns and source codes for observability rather than silently discarding schema changes.

@@ -136,4 +136,4 @@ No personal data required by Fuel Now was observed in the checked station fields
 
 ## Decision
 
-Approve `es-miteco-fuel` for adapter development and controlled test ingestion under CC BY 4.0, the attribution template, integrity controls, and polling policy in this document. Keep the release legal/attribution gate open because of the legacy non-alteration wording and recheck all active resource metadata immediately before public Beta.
+Approve `es-miteco-fuel-prices` for adapter development and controlled test ingestion under CC BY 4.0, the attribution template, integrity controls, and polling policy in this document. Keep the release legal/attribution gate open because of the legacy non-alteration wording and recheck all active resource metadata immediately before public Beta.

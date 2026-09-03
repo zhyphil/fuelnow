@@ -1,0 +1,92 @@
+{
+  "task": "P1-RPT-01",
+  "generated_at": "2026-09-04",
+  "mapping_statuses": [
+    "direct",
+    "derived",
+    "supplemental",
+    "descriptive_only",
+    "unavailable"
+  ],
+  "sources": {
+    "fr-fuel-realtime-v2": {
+      "services": ["fuel", "air", "wash"],
+      "identity": {"canonical": "id", "source": ["id"], "status": "direct"},
+      "location": {"canonical": "latitude,longitude", "source": ["geom.lat", "geom.lon"], "status": "direct"},
+      "name": {"canonical": "name", "source": [], "status": "unavailable"},
+      "opening_hours": {"canonical": "opening_hours", "source": ["horaires"], "status": "derived"},
+      "fuel_price": {"canonical": "fuels[].price", "source": ["*_prix", "prix"], "status": "derived"},
+      "fuel_observed_at": {"canonical": "fuels[].source_observed_at", "source": ["*_maj", "prix.@maj"], "status": "derived"},
+      "fuel_shortage": {"canonical": "fuels[].out_of_stock", "source": ["*_rupture_debut", "*_rupture_type", "rupture"], "status": "derived"},
+      "air_presence": {"canonical": "air.present", "source": ["Station de gonflage"], "status": "direct"},
+      "wash_presence": {"canonical": "wash.present", "source": ["Lavage automatique", "Lavage manuel"], "status": "direct"}
+    },
+    "es-miteco-fuel-prices": {
+      "services": ["fuel"],
+      "identity": {"canonical": "id", "source": ["IDEESS"], "status": "direct"},
+      "location": {"canonical": "latitude,longitude", "source": ["Latitud", "Longitud (WGS84)"], "status": "derived"},
+      "name": {"canonical": "name", "source": ["Rótulo"], "status": "direct"},
+      "brand": {"canonical": "brand", "source": ["Rótulo"], "status": "derived"},
+      "opening_hours": {"canonical": "opening_hours", "source": ["Horario"], "status": "derived"},
+      "fuel_price": {"canonical": "fuels[].price", "source": ["Precio *"], "status": "derived"},
+      "source_published_at": {"canonical": "source_published_at", "source": ["Fecha"], "status": "direct"},
+      "source_observed_at": {"canonical": "source_observed_at", "source": ["XLS Toma de datos"], "status": "supplemental"},
+      "air_wash": {"canonical": "air,wash", "source": [], "status": "unavailable"}
+    },
+    "fr-irve-static-pan": {
+      "services": ["charging"],
+      "service_point_identity": {"canonical": "id", "source": ["id_station_itinerance"], "status": "direct"},
+      "evse_identity": {"canonical": "charging.evses[].id", "source": ["id_pdc_itinerance"], "status": "direct"},
+      "connector_identity": {"canonical": "connectors[].id", "source": [], "status": "unavailable"},
+      "location": {"canonical": "latitude,longitude", "source": ["consolidated_latitude", "consolidated_longitude"], "status": "direct"},
+      "operator": {"canonical": "charging.operator", "source": ["nom_operateur"], "status": "direct"},
+      "network": {"canonical": "charging.network", "source": ["nom_enseigne"], "status": "direct"},
+      "connector_type": {"canonical": "connectors[].connector_type", "source": ["prise_type_ef", "prise_type_2", "cable_t2_attache", "prise_type_combo_ccs", "prise_type_chademo", "prise_type_autre"], "status": "derived"},
+      "power_kw": {"canonical": "connectors[].power_kw", "source": ["puissance_nominale"], "status": "direct"},
+      "tariff": {"canonical": "connectors[].tariffs", "source": ["gratuit", "tarification"], "status": "descriptive_only"},
+      "availability": {"canonical": "evses[].status", "source": [], "status": "unavailable"}
+    },
+    "fr-qualicharge-irve": {
+      "services": ["charging"],
+      "evse_join": {"canonical": "charging.evses[].id", "source": ["id_pdc_itinerance"], "status": "direct"},
+      "status": {"canonical": "evses[].status", "source": ["etat_pdc", "occupation_pdc", "etat_prise_type_*"], "status": "derived"},
+      "source_observed_at": {"canonical": "evses[].source_observed_at", "source": ["horodatage"], "status": "direct"},
+      "price": {"canonical": "charging.price", "source": [], "status": "unavailable"}
+    },
+    "fr-irve-dynamic-pan": {
+      "services": ["charging"],
+      "evse_join": {"canonical": "charging.evses[].id", "source": ["id_pdc_itinerance"], "status": "direct"},
+      "status": {"canonical": "evses[].status", "source": ["etat_pdc", "occupation_pdc", "etat_prise_type_*"], "status": "derived"},
+      "source_observed_at": {"canonical": "evses[].source_observed_at", "source": ["horodatage"], "status": "direct"},
+      "release_use": "shadow_only"
+    },
+    "es-miteco-ripree": {
+      "services": ["charging"],
+      "service_point_identity": {"canonical": "id", "source": ["COD.INSTALACION"], "status": "direct"},
+      "evse_identity": {"canonical": "charging.evses[].id", "source": ["ID. PUNTO DE RECARGA"], "status": "direct"},
+      "connector_identity": {"canonical": "connectors[].id", "source": ["ID. PUNTO DE RECARGA", "ID. CONECTOR"], "status": "derived"},
+      "location": {"canonical": "latitude,longitude", "source": ["LATITUD", "LONGITUD"], "status": "derived"},
+      "operator": {"canonical": "charging.operator", "source": ["NOMBRE OPERADOR", "COD.OPERADOR"], "status": "direct"},
+      "connector_type": {"canonical": "connectors[].connector_type", "source": ["TIPO CONECTOR", "FORMATO"], "status": "derived"},
+      "power_kw": {"canonical": "connectors[].power_kw", "source": ["POTENCIA MAXIMA"], "status": "derived"},
+      "availability_and_price": {"canonical": "evses[].status,charging.price", "source": [], "status": "unavailable"}
+    },
+    "es-ree-reve": {
+      "services": ["charging"],
+      "evse_join": {"canonical": "charging.evses[].id", "source": ["evse_id"], "status": "direct"},
+      "status": {"canonical": "evses[].status", "source": ["status", "operational_status"], "status": "derived"},
+      "source_observed_at": {"canonical": "evses[].source_observed_at", "source": ["status_updated_at", "change time"], "status": "direct"},
+      "tariffs": {"canonical": "connectors[].tariffs", "source": ["tariff components"], "status": "derived"},
+      "release_use": "disabled_pending_terms_and_api"
+    },
+    "openstreetmap": {
+      "services": ["air", "wash"],
+      "identity": {"canonical": "id", "source": ["element type", "element id"], "status": "derived"},
+      "air_presence": {"canonical": "air.present", "source": ["amenity=compressed_air", "compressed_air=yes"], "status": "direct"},
+      "wash_presence": {"canonical": "wash.present", "source": ["amenity=car_wash", "car_wash=yes"], "status": "direct"},
+      "air_attributes": {"canonical": "air.price,air.access", "source": ["fee", "compressed_air:fee", "access", "compressed_air:access", "pressure", "valves"], "status": "descriptive_only"},
+      "wash_attributes": {"canonical": "wash.wash_types,wash.price", "source": ["self_service", "automated", "fee"], "status": "descriptive_only"},
+      "equipment_status": {"canonical": "working_status,last_verified_at", "source": [], "status": "unavailable"}
+    }
+  }
+}
