@@ -4,7 +4,7 @@
 > 需求来源：[france_spain_driver_decision_engine_project.md](./france_spain_driver_decision_engine_project.md)  
 > 当前状态：进行中  
 > 当前阶段：Phase 0 — 开工决策  
-> 下一项任务：`P0-06` 确定 V1 是否完全免登录
+> 下一项任务：`P0-07` 明确位置权限、隐私、数据保存和 GDPR 边界
 > 最后更新：2026-09-03
 
 ## 使用方法
@@ -66,7 +66,7 @@ V1 的核心验收结果是：
 - [x] `P0-03` 确定数据库方案：PostgreSQL 18 + PostGIS 3.6，使用 geography(Point, 4326)、GiST 与 SQL-first migrations（2026-09-03；[ADR 0003](./docs/decisions/0003-geospatial-database.md)）
 - [x] `P0-04` 确定地图、路径规划和 ETA 服务：后端 Mapbox Matrix API，客户端 react-native-maps，外部 App 完成导航（2026-09-03；[ADR 0004](./docs/decisions/0004-maps-routing-provider.md)）
 - [x] `P0-05` 确定首批验证城市和跨境测试区域：Paris、Toulouse、Carcassonne、Perpignan、La Jonquera、Girona、Barcelona、Madrid（2026-09-03；[ADR 0005](./docs/decisions/0005-validation-geographies.md)）
-- [ ] `P0-06` 确定 V1 是否完全免登录，默认建议免登录使用核心搜索
+- [x] `P0-06` 确定 V1 账号策略：核心搜索和导航完全免登录，偏好保存在设备本地（2026-09-03；[ADR 0006](./docs/decisions/0006-account-policy.md)）
 - [ ] `P0-07` 明确位置权限、隐私、数据保存和 GDPR 边界
 - [ ] `P0-08` 明确官方数据来源的署名展示方式
 - [ ] `P0-09` 定义 Live、Verified、Recent、Stale、Unknown 的时间标准
@@ -460,6 +460,7 @@ V1 的核心验收结果是：
 | 2026-09-03 | 地理数据库 | PostgreSQL 18 + PostGIS 3.6；geography(Point, 4326) + GiST | 支持米制范围查询、空间索引、关系约束与可追溯数据同步 | P0-03 |
 | 2026-09-03 | 地图、路线与 ETA | 后端 Mapbox Matrix；客户端 react-native-maps；外部导航 App | 列表和排名不绑定地图 SDK；小规模 1×N Matrix 符合 Top N ETA 计算；HERE 为首选备选 | P0-04 |
 | 2026-09-03 | 数据与搜索验证区域 | Paris、Toulouse、Carcassonne、Perpignan、La Jonquera、Girona、Barcelona、Madrid | 同时覆盖两国大城市、区域城市、跨境走廊和不同站点密度 | P0-05 |
+| 2026-09-03 | V1 账号策略 | 核心搜索与导航免登录；偏好保存在设备本地 | 降低紧急场景使用阻力，避免在数据验证前引入账号、恢复与身份数据范围 | P0-06 |
 | 待定 | 首发区域 | 待定 | 待确认 | P0-05、P0-11 |
 
 # 风险与阻塞记录
@@ -485,3 +486,4 @@ V1 的核心验收结果是：
 | 2026-09-03 | 完成地理数据库方案选型 | PostgreSQL 18 + PostGIS 3.6；见 `docs/decisions/0003-geospatial-database.md` |
 | 2026-09-03 | 完成地图、路线与 ETA 方案选型 | Mapbox Matrix + react-native-maps + 外部导航；见 `docs/decisions/0004-maps-routing-provider.md` |
 | 2026-09-03 | 固定法国、西班牙及跨境验证区域 | 8 个核心锚点和 Toulouse–Barcelona 走廊；见 `docs/decisions/0005-validation-geographies.md` |
+| 2026-09-03 | 确定 V1 免登录账号策略 | 核心搜索和导航无需账户；见 `docs/decisions/0006-account-policy.md` |
