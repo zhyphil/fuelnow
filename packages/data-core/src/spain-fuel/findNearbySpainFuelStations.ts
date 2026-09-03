@@ -4,6 +4,7 @@ import {
   haversineDistanceMeters,
   type GeoPoint,
 } from "../geo/haversine.js";
+import { sortFuelCandidatesByNearest } from "../fuel/sortFuelCandidatesByNearest.js";
 import {
   SpainFuelAdapter,
   type SpainFuelAdapterContext,
@@ -115,16 +116,13 @@ export function findNearbySpainFuelStations(
     }
   });
 
-  results.sort(
-    (left, right) =>
-      left.straightLineDistanceM - right.straightLineDistanceM ||
-      left.servicePoint.id.localeCompare(right.servicePoint.id),
-  );
+  const sortedResults = sortFuelCandidatesByNearest(results);
 
   return {
     origin: { ...origin },
     radiusM,
-    results: limit === null ? results : results.slice(0, limit),
+    results:
+      limit === null ? sortedResults : sortedResults.slice(0, limit),
     rejectedRecords,
     issues,
   };
