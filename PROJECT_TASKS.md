@@ -4,7 +4,7 @@
 > 需求来源：[france_spain_driver_decision_engine_project.md](./france_spain_driver_decision_engine_project.md)  
 > 当前状态：进行中  
 > 当前阶段：Phase 1 — Data Feasibility Spike
-> 下一项任务：`P1-ES-01` 找到西班牙 MITECO Fuel API 或官方数据源
+> 下一项任务：`P1-ES-02` 核实许可证、商业使用、缓存和署名要求
 > 最后更新：2026-09-03
 
 ## 使用方法
@@ -100,7 +100,7 @@ V1 的核心验收结果是：
 
 ## 1.2 Spain Fuel
 
-- [ ] `P1-ES-01` 找到西班牙 MITECO Fuel API 或官方数据源
+- [x] `P1-ES-01` 找到并验证 MITECO 全国 REST JSON、区域过滤/参考列表与 XLS 快照（2026-09-03；[调查记录](./docs/data/spain-fuel-source.md)）
 - [ ] `P1-ES-02` 核实许可证、商业使用、缓存和署名要求
 - [ ] `P1-ES-03` 保存一份原始数据样本并记录字段定义
 - [ ] `P1-ES-04` 验证站名、地址、坐标、品牌和营业时间字段
@@ -508,3 +508,4 @@ V1 的核心验收结果是：
 | 2026-09-03 | 实现法国 Fuel 数据适配器 | 建立最小 TypeScript 数据包；真实 fixture、时区、缺货、营业时间及设施映射共 7 项测试通过；见 `packages/data-core/` |
 | 2026-09-03 | 实现法国 Fuel 10 km GPS 查询 | Toulouse 官方 12 km 边界样本中正确返回 70 个 10 km 内结果，距离与源 API 相差均小于 2 m；见 `docs/data/france-fuel-nearby-validation.md` |
 | 2026-09-03 | 完成法国 Fuel 多地理场景验证 | Paris、Toulouse、Blagnac 郊区/机场和 A9 高速场景全部通过；17 项测试通过；见 `docs/data/france-fuel-geography-validation.md` |
+| 2026-09-03 | 找到并探测西班牙官方 Fuel 数据源 | MITECO 全国 REST JSON 返回 11,475 站点，并验证区域过滤、参考列表与 XLS；见 `docs/data/spain-fuel-source.md` |
