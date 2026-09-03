@@ -4,7 +4,7 @@
 > 需求来源：[france_spain_driver_decision_engine_project.md](./france_spain_driver_decision_engine_project.md)  
 > 当前状态：进行中  
 > 当前阶段：Phase 1 — Data Feasibility Spike
-> 下一项任务：`P1-FR-02` 核实许可证、商业使用、缓存和署名要求
+> 下一项任务：`P1-FR-03` 保存一份原始数据样本并记录字段定义
 > 最后更新：2026-09-03
 
 ## 使用方法
@@ -89,7 +89,7 @@ V1 的核心验收结果是：
 ## 1.1 France Fuel
 
 - [x] `P1-FR-01` 找到并验证法国官方 Fuel 实时 v2 数据集、Records API 与 CSV/JSON/GeoJSON 导出（2026-09-03；[调查记录](./docs/data/france-fuel-source.md)）
-- [ ] `P1-FR-02` 核实许可证、商业使用、缓存和署名要求
+- [x] `P1-FR-02` 核实 Licence Ouverte 2.0 的商业使用、缓存、再分发和署名要求（2026-09-03；[核验记录](./docs/data/france-fuel-licence.md)）
 - [ ] `P1-FR-03` 保存一份原始数据样本并记录字段定义
 - [ ] `P1-FR-04` 验证站名、地址、坐标、品牌和营业时间字段
 - [ ] `P1-FR-05` 验证燃料类型、价格、更新时间和缺货字段
@@ -498,3 +498,4 @@ V1 的核心验收结果是：
 | 2026-09-03 | 确定 V1 发布测试与区域 Beta 范围 | 全国数据能力 + Toulouse–Barcelona 走廊质量承诺；见 `docs/decisions/0010-beta-launch-scope.md` |
 | 2026-09-03 | 完成 Phase 0 开工决策 | 所有任务和验收门槛完成；ADR 索引见 `docs/decisions/README.md` |
 | 2026-09-03 | 找到并探测法国官方 Fuel 实时数据源 | v2 dataset、Records API、CSV/JSON/GeoJSON exports 均可访问；见 `docs/data/france-fuel-source.md` |
+| 2026-09-03 | 核实法国 Fuel 数据许可与使用约束 | 允许商业复用、缓存、转换和再分发；必须标注来源与最新更新时间；见 `docs/data/france-fuel-licence.md` |

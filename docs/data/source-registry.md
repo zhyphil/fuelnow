@@ -14,7 +14,7 @@ This registry is the source of truth for datasets and external providers conside
 
 | Source ID | Status | Country/service | Publisher/provider | Dataset/service | Licence/terms | Verification note |
 |---|---|---|---|---|---|---|
-| `fr-fuel-realtime-v2` | validating | FR / Fuel, Air, Wash | DGCCRF / Ministères économiques et financiers | Prix des carburants en France — Flux instantané — v2 | Portal metadata shows Licence Ouverte 2.0; formal verification pending P1-FR-02 | Official metadata, Records API, and CSV/JSON/GeoJSON exports verified reachable on 2026-09-03 |
+| `fr-fuel-realtime-v2` | approved for development | FR / Fuel, Air, Wash | DGCCRF / Ministères économiques et financiers | Prix des carburants en France — Flux instantané — v2 | Licence Ouverte 2.0 permits commercial reuse, caching, transformation, and redistribution with source and latest-update attribution | Endpoints verified 2026-09-03; follow [licence review](./france-fuel-licence.md); final product attribution/legal review remains a Phase 5 gate |
 | `es-miteco-fuel` | candidate | ES / Fuel, Air, Wash | MITECO | Instalaciones de suministro de combustibles | Unverified | Capture official resource/API terms and commercial-reuse evidence in Phase 1 |
 | `fr-irve` | candidate | FR / Charge | French national transport/open-data publishers | National IRVE datasets | Unverified per selected resource | Select static/dynamic resources and verify each licence separately |
 | `es-miteco-ev` | candidate | ES / Charge | MITECO | Puntos de Recarga de Vehículos Eléctricos | Unverified | Validate static and dynamic terms separately where applicable |
