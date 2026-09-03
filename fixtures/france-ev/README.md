@@ -9,6 +9,8 @@ The full national static files are too large and too volatile to commit. This di
 - QualiCharge static resource: `8bb0a6e2-1016-42ba-aaee-f72f55c82e9f`
 - Full-file SHA-256 values and parsed counts: [`static-source-profile.json`](./static-source-profile.json)
 - Selected Toulouse-area evidence: [`toulouse-static-sample.json`](./toulouse-static-sample.json)
+- Dynamic-file profiles: [`dynamic-source-profile.json`](./dynamic-source-profile.json)
+- Selected fresh/stale Toulouse dynamic states: [`toulouse-dynamic-sample.json`](./toulouse-dynamic-sample.json)
 
 The sample intentionally includes an obvious name/location inconsistency with `consolidated_is_lon_lat_correct=false`. It is evidence for quarantine rules, not a verified recommendation candidate.
 

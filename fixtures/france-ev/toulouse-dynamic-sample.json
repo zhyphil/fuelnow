@@ -1,0 +1,90 @@
+{
+  "fixture": {
+    "captured_at": "2026-09-03T22:12:21Z",
+    "dynamic_resource_id": "89185b1f-f958-4c5b-9282-399a66ecee97",
+    "static_resource_id": "4ca78c71-4ea4-475d-bd3a-d4aef88f7bf8",
+    "selection": "Representative latest-per-PDC states within 10 km of 43.6047, 1.4442"
+  },
+  "records": [
+    {
+      "case": "live_available",
+      "age_seconds_at_capture": 79.075,
+      "station_id": "FRTSLP16979",
+      "station_name": "Blagnac, France",
+      "longitude": "1.37002",
+      "latitude": "43.64771",
+      "id_pdc_itinerance": "FRTSLE0004V9",
+      "etat_pdc": "en_service",
+      "occupation_pdc": "libre",
+      "horodatage": "2026-09-03 22:11:01.924698+00:00",
+      "etat_prise_type_2": "inconnu",
+      "etat_prise_type_combo_ccs": "inconnu",
+      "etat_prise_type_chademo": "inconnu",
+      "etat_prise_type_ef": "inconnu"
+    },
+    {
+      "case": "fresh_occupied",
+      "age_seconds_at_capture": 79.075,
+      "station_id": "FRTSLP16979",
+      "station_name": "Blagnac, France",
+      "longitude": "1.37002",
+      "latitude": "43.64771",
+      "id_pdc_itinerance": "FRTSLE0004VL",
+      "etat_pdc": "en_service",
+      "occupation_pdc": "occupe",
+      "horodatage": "2026-09-03 22:11:01.924850+00:00",
+      "etat_prise_type_2": "inconnu",
+      "etat_prise_type_combo_ccs": "inconnu",
+      "etat_prise_type_chademo": "inconnu",
+      "etat_prise_type_ef": "inconnu"
+    },
+    {
+      "case": "fresh_out_of_service",
+      "age_seconds_at_capture": 75.23,
+      "station_id": "FRLDLPLFR4013EVCP",
+      "station_name": "LFR4013EVCP03",
+      "longitude": "1.40301",
+      "latitude": "43.52854",
+      "id_pdc_itinerance": "FRLDLE00005717",
+      "etat_pdc": "hors_service",
+      "occupation_pdc": "inconnu",
+      "horodatage": "2026-09-03 22:11:05.770000+00:00",
+      "etat_prise_type_2": "fonctionnel",
+      "etat_prise_type_combo_ccs": "fonctionnel",
+      "etat_prise_type_chademo": "fonctionnel",
+      "etat_prise_type_ef": "fonctionnel"
+    },
+    {
+      "case": "stale_15_to_60m",
+      "age_seconds_at_capture": 912.454,
+      "station_id": "FRLDLPLFR1522EVCP",
+      "station_name": "LFR1522EVCP03",
+      "longitude": "1.50348",
+      "latitude": "43.55923",
+      "id_pdc_itinerance": "FRLDLE00005727",
+      "etat_pdc": "en_service",
+      "occupation_pdc": "occupe",
+      "horodatage": "2026-09-03 21:57:08.546000+00:00",
+      "etat_prise_type_2": "fonctionnel",
+      "etat_prise_type_combo_ccs": "fonctionnel",
+      "etat_prise_type_chademo": "fonctionnel",
+      "etat_prise_type_ef": "fonctionnel"
+    },
+    {
+      "case": "unknown_over_60m",
+      "age_seconds_at_capture": 3630.263,
+      "station_id": "FRTSLP16979",
+      "station_name": "Blagnac, France",
+      "longitude": "1.37002",
+      "latitude": "43.64771",
+      "id_pdc_itinerance": "FRTSLE0004VJ",
+      "etat_pdc": "en_service",
+      "occupation_pdc": "libre",
+      "horodatage": "2026-09-03 21:11:50.737094+00:00",
+      "etat_prise_type_2": "inconnu",
+      "etat_prise_type_combo_ccs": "inconnu",
+      "etat_prise_type_chademo": "inconnu",
+      "etat_prise_type_ef": "inconnu"
+    }
+  ]
+}

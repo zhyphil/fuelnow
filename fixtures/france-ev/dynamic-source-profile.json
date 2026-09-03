@@ -1,0 +1,130 @@
+{
+  "captured_at": "2026-09-03T22:12:21Z",
+  "freshness_policy": {
+    "live_seconds": 300,
+    "verified_seconds": 600,
+    "recent_seconds": 900,
+    "stale_seconds": 3600,
+    "older_than_stale": "unknown_for_available_now"
+  },
+  "qualicharge_dynamic": {
+    "resource_url": "https://www.data.gouv.fr/api/1/datasets/r/411443b1-6667-473f-8217-1c57c167408f",
+    "resource_id": "411443b1-6667-473f-8217-1c57c167408f",
+    "bytes": 6055897,
+    "sha256": "f6aeec5823ffd4f5b1459c5b4731457d23f099699955cf911e1e4179f0150fb7",
+    "field_count": 8,
+    "row_count": 75107,
+    "unique_pdc_ids": 75107,
+    "duplicate_pdc_ids": 0,
+    "matched_qualicharge_static_ids": 75059,
+    "qualicharge_static_ids": 78114,
+    "qualicharge_static_coverage_percent": 96.09,
+    "matched_national_static_ids": 75092,
+    "national_static_ids": 166337,
+    "national_static_coverage_percent": 45.14,
+    "freshness": {
+      "future": 0,
+      "live_le_5m": 705,
+      "verified_5_to_10m": 790,
+      "recent_10_to_15m": 705,
+      "stale_15_to_60m": 5511,
+      "unknown_gt_60m": 67396
+    },
+    "fresh_available_le_60m": 6350,
+    "pdc_state": {
+      "en_service": 68823,
+      "hors_service": 4621,
+      "inconnu": 1663
+    },
+    "occupation": {
+      "libre": 63351,
+      "occupe": 4606,
+      "reserve": 8,
+      "inconnu": 7142
+    },
+    "timestamp_min": "2024-04-28T07:39:50.594Z",
+    "timestamp_max": "2026-09-03T22:11:29.812Z"
+  },
+  "pan_beta_dynamic": {
+    "resource_url": "https://www.data.gouv.fr/api/1/datasets/r/89185b1f-f958-4c5b-9282-399a66ecee97",
+    "resource_id": "89185b1f-f958-4c5b-9282-399a66ecee97",
+    "bytes": 8615683,
+    "sha256": "34f8fef7176d901abf4d06f914c1b228cb5deb7855fb24b7b41659dc946f5302",
+    "field_count": 8,
+    "row_count": 116210,
+    "unique_pdc_ids": 104908,
+    "duplicate_pdc_ids": 11283,
+    "duplicate_extra_rows": 11302,
+    "max_rows_per_pdc_id": 4,
+    "conflicting_duplicate_pdc_ids": 5769,
+    "matched_national_static_ids": 101688,
+    "national_static_ids": 166337,
+    "national_static_coverage_percent": 61.13,
+    "dynamic_ids_missing_from_national_static": 3220,
+    "freshness_after_latest_per_id": {
+      "future": 0,
+      "live_le_5m": 958,
+      "verified_5_to_10m": 792,
+      "recent_10_to_15m": 721,
+      "stale_15_to_60m": 6556,
+      "unknown_gt_60m": 95881
+    },
+    "fresh_status_le_60m": 9027,
+    "fresh_status_le_60m_percent_of_dynamic": 8.6,
+    "fresh_status_le_60m_percent_of_national_static": 5.43,
+    "fresh_available_le_60m": 7259,
+    "fresh_available_le_60m_percent_of_national_static": 4.36,
+    "pdc_state_after_latest_per_id": {
+      "en_service": 93226,
+      "hors_service": 8658,
+      "inconnu": 3024
+    },
+    "occupation_after_latest_per_id": {
+      "libre": 88126,
+      "occupe": 6920,
+      "reserve": 9,
+      "inconnu": 9853
+    },
+    "timestamp_min": "2020-12-29T14:39:41Z",
+    "timestamp_max": "2026-09-03T22:11:40Z",
+    "fixed_geographies": {
+      "paris_10km": {
+        "static_pdc": 12398,
+        "dynamic_pdc": 4639,
+        "dynamic_coverage_percent": 37.42,
+        "fresh_le_60m": 451,
+        "fresh_percent_of_static": 3.64,
+        "fresh_available": 277
+      },
+      "toulouse_10km": {
+        "static_pdc": 2351,
+        "dynamic_pdc": 1055,
+        "dynamic_coverage_percent": 44.87,
+        "fresh_le_60m": 112,
+        "fresh_percent_of_static": 4.76,
+        "fresh_available": 67
+      },
+      "a9_villages_catalans_10km": {
+        "static_pdc": 147,
+        "dynamic_pdc": 121,
+        "dynamic_coverage_percent": 82.31,
+        "fresh_le_60m": 7,
+        "fresh_percent_of_static": 4.76,
+        "fresh_available": 5
+      },
+      "la_jonquera_anchor_25km": {
+        "static_pdc": 266,
+        "dynamic_pdc": 241,
+        "dynamic_coverage_percent": 90.6,
+        "fresh_le_60m": 15,
+        "fresh_percent_of_static": 5.64,
+        "fresh_available": 10
+      }
+    }
+  },
+  "price": {
+    "dynamic_price_fields": 0,
+    "dynamic_price_coverage_percent": 0,
+    "note": "Both dynamic files implement the eight-field national dynamic schema and expose no price or tariff field."
+  }
+}
