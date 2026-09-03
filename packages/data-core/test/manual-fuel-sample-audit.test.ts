@@ -172,9 +172,7 @@ function auditNormalizedPoint(
     expect(point.fuels.find((fuel) => fuel.fuelType === fuelType)).toBeUndefined();
   }
   if (expected.siteSchedule24Seven !== undefined) {
-    expect(point.openingHours?.siteSchedule24Seven).toBe(
-      expected.siteSchedule24Seven,
-    );
+    expect(point.openingHours?.siteSchedule24Seven).toBe(expected.siteSchedule24Seven);
   }
   if (expected.unattendedFuelPayment24Seven !== undefined) {
     expect(point.unattendedFuelPayment24Seven).toBe(

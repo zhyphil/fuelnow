@@ -12,21 +12,12 @@ const DAY_MS = 24 * 60 * 60 * 1_000;
 const PRICE_RECENT_MAX_MS = DAY_MS;
 const PRICE_DECISION_MAX_MS = 7 * DAY_MS;
 
-export type FuelPricePresentationState =
-  | "current"
-  | "stale"
-  | "expired"
-  | "unknown";
+export type FuelPricePresentationState = "current" | "stale" | "expired" | "unknown";
 
 export type FuelAvailabilityPresentationState =
-  | "available"
-  | "out_of_stock"
-  | "unknown"
-  | "not_offered";
+  "available" | "out_of_stock" | "unknown" | "not_offered";
 
-export type FuelStationPresentationState =
-  | OpeningStatus
-  | "temporarily_closed";
+export type FuelStationPresentationState = OpeningStatus | "temporarily_closed";
 
 export type FuelDecisionWarning =
   | "fuel_not_offered"
@@ -115,7 +106,7 @@ function decisionPrice(
   return {
     state,
     displayAmount:
-      state === "current" || state === "stale" ? price?.amount ?? null : null,
+      state === "current" || state === "stale" ? (price?.amount ?? null) : null,
     lastKnownAmount: price?.amount ?? null,
     currency: price?.currency ?? null,
     unit: price?.unit ?? null,
@@ -141,7 +132,7 @@ export function deriveFuelDecisionState(
   const station: FuelStationPresentationState =
     servicePoint.temporaryClosure === true
       ? "temporarily_closed"
-      : options.openingStatus ?? servicePoint.openingStatus;
+      : (options.openingStatus ?? servicePoint.openingStatus);
   const warnings: FuelDecisionWarning[] = [];
 
   if (fuel === undefined) {

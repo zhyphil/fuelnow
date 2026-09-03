@@ -66,55 +66,45 @@ async function loadRecords(fixtureName: string): Promise<FixtureRecord[]> {
     import.meta.url,
   );
   const parsed = JSON.parse(await readFile(fixtureUrl, "utf8")) as
-    | FixtureRecord[]
-    | EnvelopeFixture;
+    FixtureRecord[] | EnvelopeFixture;
   return Array.isArray(parsed) ? parsed : parsed.results;
 }
 
 describe("France Fuel geographic validation", () => {
-  it.each(CASES)(
-    "matches the official 10 km sample for $name",
-    async (testCase) => {
-      const sourceRecords = await loadRecords(testCase.fixture);
-      const search = findNearbyFranceFuelStations(
-        sourceRecords,
-        testCase.origin,
-        { fetchedAt: "2026-09-03T22:30:00Z" },
-      );
+  it.each(CASES)("matches the official 10 km sample for $name", async (testCase) => {
+    const sourceRecords = await loadRecords(testCase.fixture);
+    const search = findNearbyFranceFuelStations(sourceRecords, testCase.origin, {
+      fetchedAt: "2026-09-03T22:30:00Z",
+    });
 
-      expect(search.results).toHaveLength(testCase.expectedCount);
-      expect(search.results[0]?.servicePoint.sourceId).toBe(
-        testCase.expectedNearestId,
-      );
-      expect(search.results.at(-1)?.servicePoint.sourceId).toBe(
-        testCase.expectedFarthestId,
-      );
-      expect(search.results.every((item) => item.straightLineDistanceM <= 10_000)).toBe(
-        true,
-      );
-      expect(search.issues).toEqual([]);
+    expect(search.results).toHaveLength(testCase.expectedCount);
+    expect(search.results[0]?.servicePoint.sourceId).toBe(testCase.expectedNearestId);
+    expect(search.results.at(-1)?.servicePoint.sourceId).toBe(
+      testCase.expectedFarthestId,
+    );
+    expect(search.results.every((item) => item.straightLineDistanceM <= 10_000)).toBe(
+      true,
+    );
+    expect(search.issues).toEqual([]);
 
-      const sourceDistances = new Map(
-        sourceRecords.map((record) => [String(record.id), record.source_distance_m]),
-      );
-      for (const item of search.results) {
-        const sourceDistance = sourceDistances.get(item.servicePoint.sourceId);
-        expect(sourceDistance).toBeDefined();
-        expect(
-          Math.abs(item.straightLineDistanceM - (sourceDistance as number)),
-        ).toBeLessThan(2);
-      }
-    },
-  );
+    const sourceDistances = new Map(
+      sourceRecords.map((record) => [String(record.id), record.source_distance_m]),
+    );
+    for (const item of search.results) {
+      const sourceDistance = sourceDistances.get(item.servicePoint.sourceId);
+      expect(sourceDistance).toBeDefined();
+      expect(
+        Math.abs(item.straightLineDistanceM - (sourceDistance as number)),
+      ).toBeLessThan(2);
+    }
+  });
 
   it("keeps the A9 motorway service area as the zero-distance first result", async () => {
     const testCase = CASES[3] as GeographyCase;
     const sourceRecords = await loadRecords(testCase.fixture);
-    const search = findNearbyFranceFuelStations(
-      sourceRecords,
-      testCase.origin,
-      { fetchedAt: "2026-09-03T22:30:00Z" },
-    );
+    const search = findNearbyFranceFuelStations(sourceRecords, testCase.origin, {
+      fetchedAt: "2026-09-03T22:30:00Z",
+    });
 
     expect(search.results[0]).toMatchObject({
       straightLineDistanceM: 0,

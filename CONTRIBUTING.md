@@ -57,3 +57,13 @@ Each completed checklist task should produce one cohesive commit. Before committ
 5. Push to `origin/main`.
 
 Never commit `.env` files, API tokens, private keys, precise user-location logs, or production credentials.
+
+## Local quality checks
+
+Run the complete pre-commit gate from the repository root:
+
+```text
+pnpm check
+```
+
+It verifies formatting, lint rules, TypeScript types and all workspace tests in that order. To apply formatting before rerunning the gate, use `pnpm format`.

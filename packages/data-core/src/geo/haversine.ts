@@ -6,11 +6,7 @@ export interface GeoPoint {
 }
 
 export function assertValidGeoPoint(point: GeoPoint, label = "point"): void {
-  if (
-    !Number.isFinite(point.latitude) ||
-    point.latitude < -90 ||
-    point.latitude > 90
-  ) {
+  if (!Number.isFinite(point.latitude) || point.latitude < -90 || point.latitude > 90) {
     throw new RangeError(`${label}.latitude must be between -90 and 90`);
   }
   if (
@@ -45,7 +41,8 @@ export function haversineDistanceMeters(
       Math.cos(destinationLatitude) *
       halfLongitude *
       halfLongitude;
-  const angularDistance = 2 * Math.atan2(Math.sqrt(haversine), Math.sqrt(1 - haversine));
+  const angularDistance =
+    2 * Math.atan2(Math.sqrt(haversine), Math.sqrt(1 - haversine));
 
   return EARTH_MEAN_RADIUS_M * angularDistance;
 }

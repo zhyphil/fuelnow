@@ -33,12 +33,8 @@ async function loadCrossBorderPoints(): Promise<NormalizedServicePoint[]> {
     "../../../fixtures/spain-fuel/la-jonquera-25km-bbox.json",
     import.meta.url,
   );
-  const france = JSON.parse(
-    await readFile(franceUrl, "utf8"),
-  ) as FranceFixture;
-  const spain = JSON.parse(
-    await readFile(spainUrl, "utf8"),
-  ) as SpainFixture;
+  const france = JSON.parse(await readFile(franceUrl, "utf8")) as FranceFixture;
+  const spain = JSON.parse(await readFile(spainUrl, "utf8")) as SpainFixture;
   expect(france.total_count).toBe(23);
   expect(spain.ResultadoConsulta).toBe("OK");
   expect(spain.ListaEESSPrecio).toHaveLength(81);
@@ -131,8 +127,6 @@ describe("cross-border Fuel search", () => {
         servicePoint: { id: "fr-fuel-realtime-v2:66160004", country: "FR" },
       },
     ]);
-    expect(ranked.every((item) => item.straightLineDistanceM <= 10_000)).toBe(
-      true,
-    );
+    expect(ranked.every((item) => item.straightLineDistanceM <= 10_000)).toBe(true);
   });
 });

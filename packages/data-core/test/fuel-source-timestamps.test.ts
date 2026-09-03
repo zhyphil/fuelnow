@@ -24,9 +24,9 @@ function expectTimestampOrder(servicePoints: NormalizedServicePoint[]): void {
     expect(sourceSummary.sourceUpdatedAt).not.toBeNull();
     expect(Date.parse(sourceSummary.fetchedAt)).not.toBeNaN();
     expect(Date.parse(sourceSummary.sourceUpdatedAt as string)).not.toBeNaN();
-    expect(
-      Date.parse(sourceSummary.sourceUpdatedAt as string),
-    ).toBeLessThanOrEqual(Date.parse(sourceSummary.fetchedAt));
+    expect(Date.parse(sourceSummary.sourceUpdatedAt as string)).toBeLessThanOrEqual(
+      Date.parse(sourceSummary.fetchedAt),
+    );
   }
 }
 
@@ -36,9 +36,7 @@ describe("Fuel source timestamps", () => {
       "../../../fixtures/france-fuel/toulouse-12km-sample.json",
       import.meta.url,
     );
-    const fixture = JSON.parse(
-      await readFile(fixtureUrl, "utf8"),
-    ) as FranceFixture;
+    const fixture = JSON.parse(await readFile(fixtureUrl, "utf8")) as FranceFixture;
     const search = findNearbyFranceFuelStations(
       fixture.results,
       { latitude: 43.6047, longitude: 1.4442 },
@@ -64,9 +62,7 @@ describe("Fuel source timestamps", () => {
       "../../../fixtures/spain-fuel/madrid-center-bbox.json",
       import.meta.url,
     );
-    const fixture = JSON.parse(
-      await readFile(fixtureUrl, "utf8"),
-    ) as SpainFixture;
+    const fixture = JSON.parse(await readFile(fixtureUrl, "utf8")) as SpainFixture;
     const search = findNearbySpainFuelStations(
       fixture.ListaEESSPrecio,
       { latitude: 40.4168, longitude: -3.7038 },

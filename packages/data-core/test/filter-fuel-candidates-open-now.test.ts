@@ -73,10 +73,9 @@ describe("filterFuelCandidatesOpenNow", () => {
     );
 
     expect(result.evaluatedAt).toBe("2026-09-07T22:00:00Z");
-    expect(result.openCandidates.map((item) => item.candidate.servicePoint.id)).toEqual([
-      "fr",
-      "es",
-    ]);
+    expect(result.openCandidates.map((item) => item.candidate.servicePoint.id)).toEqual(
+      ["fr", "es"],
+    );
     expect(result.closedCandidates).toEqual([]);
     expect(result.unknownCandidates).toEqual([]);
   });
@@ -139,13 +138,12 @@ describe("filterFuelCandidatesOpenNow", () => {
     );
 
     expect(result.openCandidates).toEqual([]);
-    expect(result.closedCandidates.map((item) => item.candidate.servicePoint.id)).toEqual([
-      "closed",
-    ]);
-    expect(result.unknownCandidates.map((item) => item.candidate.servicePoint.id)).toEqual([
-      "unknown",
-      "missing",
-    ]);
+    expect(
+      result.closedCandidates.map((item) => item.candidate.servicePoint.id),
+    ).toEqual(["closed"]);
+    expect(
+      result.unknownCandidates.map((item) => item.candidate.servicePoint.id),
+    ).toEqual(["unknown", "missing"]);
   });
 
   it("uses a known day from a partial schedule", () => {
@@ -186,9 +184,7 @@ describe("filterFuelCandidatesOpenNow", () => {
     const franceFixture = JSON.parse(
       await readFile(franceUrl, "utf8"),
     ) as FranceFixture;
-    const spainFixture = JSON.parse(
-      await readFile(spainUrl, "utf8"),
-    ) as SpainFixture;
+    const spainFixture = JSON.parse(await readFile(spainUrl, "utf8")) as SpainFixture;
     const france = normalizeFuelSourceRecord({
       country: "FR",
       record: franceFixture.results[0],
@@ -219,15 +215,12 @@ describe("filterFuelCandidatesOpenNow", () => {
     expect(france.openingHours?.siteSchedule24Seven).toBe(false);
     expect(france.unattendedFuelPayment24Seven).toBe(true);
     expect(spain.openingHours?.siteSchedule24Seven).toBe(true);
-    expect(result.openCandidates.map((item) => item.candidate.servicePoint.id)).toEqual([
-      "fr-fuel-realtime-v2:31000001",
-      "es-miteco-fuel-prices:13781",
-    ]);
+    expect(result.openCandidates.map((item) => item.candidate.servicePoint.id)).toEqual(
+      ["fr-fuel-realtime-v2:31000001", "es-miteco-fuel-prices:13781"],
+    );
   });
 
   it("rejects an invalid evaluation timestamp", () => {
-    expect(() => filterFuelCandidatesOpenNow([], "not-a-time")).toThrow(
-      RangeError,
-    );
+    expect(() => filterFuelCandidatesOpenNow([], "not-a-time")).toThrow(RangeError);
   });
 });

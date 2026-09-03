@@ -40,9 +40,7 @@ describe("environment profiles", () => {
   });
 
   it("rejects unknown environments instead of silently using development", () => {
-    expect(() =>
-      resolveEnvironmentProfile({ appEnv: "staging" }),
-    ).toThrowError(
+    expect(() => resolveEnvironmentProfile({ appEnv: "staging" })).toThrowError(
       "Unsupported application environment: staging. Expected development, test, production.",
     );
   });

@@ -2,10 +2,7 @@ import { readFile } from "node:fs/promises";
 
 import { describe, expect, it } from "vitest";
 
-import {
-  findNearbyFranceFuelStations,
-  haversineDistanceMeters,
-} from "../src/index.js";
+import { findNearbyFranceFuelStations, haversineDistanceMeters } from "../src/index.js";
 
 interface ToulouseSourceRecord {
   id: number;
@@ -48,11 +45,9 @@ describe("haversineDistanceMeters", () => {
 describe("findNearbyFranceFuelStations", () => {
   it("returns the 70 real stations within 10 km of central Toulouse", async () => {
     const fixture = await loadToulouseFixture();
-    const search = findNearbyFranceFuelStations(
-      fixture.results,
-      TOULOUSE_CENTER,
-      { fetchedAt: "2026-09-03T20:30:00Z" },
-    );
+    const search = findNearbyFranceFuelStations(fixture.results, TOULOUSE_CENTER, {
+      fetchedAt: "2026-09-03T20:30:00Z",
+    });
 
     expect(fixture.total_count).toBe(79);
     expect(search.radiusM).toBe(10_000);
@@ -62,9 +57,7 @@ describe("findNearbyFranceFuelStations", () => {
     expect(search.results[0]?.servicePoint.sourceId).toBe("31400010");
     expect(search.results.at(-1)?.servicePoint.sourceId).toBe("31700006");
 
-    const distances = search.results.map(
-      (result) => result.straightLineDistanceM,
-    );
+    const distances = search.results.map((result) => result.straightLineDistanceM);
     expect(distances.every((distance) => distance <= 10_000)).toBe(true);
     expect(distances).toEqual([...distances].sort((left, right) => left - right));
 
@@ -101,14 +94,24 @@ describe("findNearbyFranceFuelStations", () => {
 
   it("rejects unsafe radius and limit values", () => {
     expect(() =>
-      findNearbyFranceFuelStations([], TOULOUSE_CENTER, {
-        fetchedAt: "2026-09-03T20:30:00Z",
-      }, { radiusM: 0 }),
+      findNearbyFranceFuelStations(
+        [],
+        TOULOUSE_CENTER,
+        {
+          fetchedAt: "2026-09-03T20:30:00Z",
+        },
+        { radiusM: 0 },
+      ),
     ).toThrow(RangeError);
     expect(() =>
-      findNearbyFranceFuelStations([], TOULOUSE_CENTER, {
-        fetchedAt: "2026-09-03T20:30:00Z",
-      }, { limit: 1_001 }),
+      findNearbyFranceFuelStations(
+        [],
+        TOULOUSE_CENTER,
+        {
+          fetchedAt: "2026-09-03T20:30:00Z",
+        },
+        { limit: 1_001 },
+      ),
     ).toThrow(RangeError);
   });
 });

@@ -10,9 +10,9 @@ export function compareFuelCandidateIds(left: string, right: string): number {
   return 0;
 }
 
-export function sortFuelCandidatesByNearest<
-  TCandidate extends FuelDistanceCandidate,
->(candidates: readonly TCandidate[]): TCandidate[] {
+export function sortFuelCandidatesByNearest<TCandidate extends FuelDistanceCandidate>(
+  candidates: readonly TCandidate[],
+): TCandidate[] {
   for (const candidate of candidates) {
     if (
       !Number.isFinite(candidate.straightLineDistanceM) ||

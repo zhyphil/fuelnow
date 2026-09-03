@@ -1,8 +1,4 @@
-import type {
-  AdapterContext,
-  AdapterResult,
-  SourceAdapter,
-} from "../domain.js";
+import type { AdapterContext, AdapterResult, SourceAdapter } from "../domain.js";
 import { FranceFuelAdapter } from "../france-fuel/FranceFuelAdapter.js";
 import {
   SpainFuelAdapter,
@@ -21,9 +17,7 @@ export interface SpainFuelSourceRecord {
   context: SpainFuelAdapterContext;
 }
 
-export type FuelSourceRecord =
-  | FranceFuelSourceRecord
-  | SpainFuelSourceRecord;
+export type FuelSourceRecord = FranceFuelSourceRecord | SpainFuelSourceRecord;
 
 export interface FuelSourceAdapters {
   france?: SourceAdapter<AdapterContext>;

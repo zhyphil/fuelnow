@@ -39,9 +39,7 @@ function intervalBounds(
 ): { opensAt: number; closesAt: number } | null {
   const opensAt = minutesFromTime(interval.opensAt);
   const closesAt = minutesFromTime(interval.closesAt);
-  return opensAt === null || closesAt === null
-    ? null
-    : { opensAt, closesAt };
+  return opensAt === null || closesAt === null ? null : { opensAt, closesAt };
 }
 
 function previousDay(day: OpeningDay["day"]): OpeningDay["day"] {
@@ -53,9 +51,7 @@ function isCarriedOverFromPreviousDay(
   weekday: OpeningDay["day"],
   minuteOfDay: number,
 ): boolean {
-  const previous = openingHours.days.find(
-    (day) => day.day === previousDay(weekday),
-  );
+  const previous = openingHours.days.find((day) => day.day === previousDay(weekday));
   if (previous?.status !== "open") {
     return false;
   }
@@ -122,9 +118,7 @@ export function evaluateOpeningStatusAt(
   return invalidInterval ? "unknown" : "closed";
 }
 
-export function filterFuelCandidatesOpenNow<
-  TCandidate extends FuelDistanceCandidate,
->(
+export function filterFuelCandidatesOpenNow<TCandidate extends FuelDistanceCandidate>(
   candidates: readonly TCandidate[],
   evaluatedAt: string,
 ): FuelOpenNowFilterResult<TCandidate> {

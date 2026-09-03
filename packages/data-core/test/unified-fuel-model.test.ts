@@ -82,9 +82,7 @@ describe("unified Fuel normalization", () => {
     });
     expect(franceData.id).not.toBe(spainData.id);
 
-    expect(Object.keys(franceData).sort()).toEqual(
-      Object.keys(spainData).sort(),
-    );
+    expect(Object.keys(franceData).sort()).toEqual(Object.keys(spainData).sort());
     expect(Object.keys(franceData.address).sort()).toEqual(
       Object.keys(spainData.address).sort(),
     );

@@ -21,9 +21,7 @@ interface PointOptions {
 function makePoint(options: PointOptions = {}): NormalizedServicePoint {
   const amount = options.amount === undefined ? 1.8 : options.amount;
   const observedAt =
-    options.observedAt === undefined
-      ? "2026-09-07T09:00:00Z"
-      : options.observedAt;
+    options.observedAt === undefined ? "2026-09-07T09:00:00Z" : options.observedAt;
   return {
     id: "test",
     openingStatus: options.openingStatus ?? "open",

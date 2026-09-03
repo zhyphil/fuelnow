@@ -18,11 +18,7 @@ export type Freshness = "live" | "recent" | "stale" | "unknown";
 export type Confidence = "high" | "medium" | "low";
 
 export type OpeningStatus =
-  | "open"
-  | "closed"
-  | "closing_soon"
-  | "opening_soon"
-  | "unknown";
+  "open" | "closed" | "closing_soon" | "opening_soon" | "unknown";
 
 export interface StructuredAddress {
   street: string | null;
@@ -71,11 +67,7 @@ export interface NormalizedFuel {
   sourceLabel: string;
   available: boolean | null;
   outOfStock: boolean | null;
-  unavailableReason:
-    | "temporary_shortage"
-    | "permanent_non_offering"
-    | "unknown"
-    | null;
+  unavailableReason: "temporary_shortage" | "permanent_non_offering" | "unknown" | null;
   price: NormalizedPrice | null;
   sourceObservedAt: string | null;
 }

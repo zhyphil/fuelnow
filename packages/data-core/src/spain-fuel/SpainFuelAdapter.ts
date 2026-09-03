@@ -251,10 +251,7 @@ function classifyFuelFreshness(
   return "unknown";
 }
 
-function confidenceFor(
-  freshness: Freshness,
-  sourceSyncHealthy: boolean,
-): Confidence {
+function confidenceFor(freshness: Freshness, sourceSyncHealthy: boolean): Confidence {
   if (freshness === "unknown") {
     return "low";
   }
@@ -328,9 +325,7 @@ function expandDaySpec(value: string): OpeningDay["day"][] | null {
     return null;
   }
   if (endText === undefined) {
-    return [
-      (DAY_TOKENS.indexOf(startText as DayToken) + 1) as OpeningDay["day"],
-    ];
+    return [(DAY_TOKENS.indexOf(startText as DayToken) + 1) as OpeningDay["day"]];
   }
   if (!DAY_TOKENS.includes(endText as DayToken)) {
     return null;
@@ -410,10 +405,7 @@ function parseOpeningHours(
       continue;
     }
     for (const day of days) {
-      intervalsByDay.set(day, [
-        ...(intervalsByDay.get(day) ?? []),
-        ...intervals,
-      ]);
+      intervalsByDay.set(day, [...(intervalsByDay.get(day) ?? []), ...intervals]);
     }
   }
 
@@ -554,9 +546,7 @@ function compositeKey(source: UnknownRecord, xls: boolean): string | null {
         source["Rótulo"],
       ];
   const normalized = values.map(keyPart);
-  return normalized.some((value) => value === null)
-    ? null
-    : JSON.stringify(normalized);
+  return normalized.some((value) => value === null) ? null : JSON.stringify(normalized);
 }
 
 const SUPPLEMENT_DISCRIMINATORS = [
@@ -570,10 +560,7 @@ const SUPPLEMENT_DISCRIMINATORS = [
   ["Precio Gasolina 95 E10", "Precio gasolina 95 E10"],
   ["Precio Gasolina 98 E5", "Precio gasolina 98 E5"],
   ["Precio Gasolina 95 E85", "Precio gasolina 95 E85"],
-  [
-    "Precio Gases licuados del petróleo",
-    "Precio gases licuados del petróleo",
-  ],
+  ["Precio Gases licuados del petróleo", "Precio gases licuados del petróleo"],
   ["Precio Gas Natural Comprimido", "Precio gas natural comprimido"],
   ["Precio Gas Natural Licuado", "Precio gas natural licuado"],
 ] as const;
@@ -620,10 +607,7 @@ export class SpainFuelSupplementIndex {
         );
         continue;
       }
-      this.#rowsByComposite.set(key, [
-        ...(this.#rowsByComposite.get(key) ?? []),
-        row,
-      ]);
+      this.#rowsByComposite.set(key, [...(this.#rowsByComposite.get(key) ?? []), row]);
     }
   }
 
@@ -738,12 +722,7 @@ export class SpainFuelAdapter implements SourceAdapter<SpainFuelAdapterContext> 
         "Latitud/Longitud (WGS84)",
         "Localized finite WGS84 coordinates are required",
       );
-    } else if (
-      latitude < 27 ||
-      latitude > 44 ||
-      longitude < -19 ||
-      longitude > 5
-    ) {
+    } else if (latitude < 27 || latitude > 44 || longitude < -19 || longitude > 5) {
       addIssue(
         issues,
         "coordinates_outside_spain_service_area",
@@ -757,9 +736,7 @@ export class SpainFuelAdapter implements SourceAdapter<SpainFuelAdapterContext> 
       return { data: null, issues };
     }
 
-    let sourcePublishedAt = parseSpainFuelLocalDateTime(
-      context.sourceSnapshotAt,
-    );
+    let sourcePublishedAt = parseSpainFuelLocalDateTime(context.sourceSnapshotAt);
     if (sourcePublishedAt === null) {
       addIssue(
         issues,
@@ -832,8 +809,7 @@ export class SpainFuelAdapter implements SourceAdapter<SpainFuelAdapterContext> 
 
     const openingHours = parseOpeningHours(input.Horario, issues);
     const rawName = asString(input["Rótulo"]);
-    const brand =
-      rawName !== null && KNOWN_EXACT_BRANDS.has(rawName) ? rawName : null;
+    const brand = rawName !== null && KNOWN_EXACT_BRANDS.has(rawName) ? rawName : null;
     if (rawName === null) {
       addIssue(
         issues,
@@ -854,10 +830,7 @@ export class SpainFuelAdapter implements SourceAdapter<SpainFuelAdapterContext> 
       fetchedAt,
       sourceSyncHealthy,
     );
-    const sourceUpdate = resolveSourceUpdatedAt(
-      sourceObservedAt,
-      sourcePublishedAt,
-    );
+    const sourceUpdate = resolveSourceUpdatedAt(sourceObservedAt, sourcePublishedAt);
     const createdAt =
       context.existingCreatedAt === undefined
         ? fetchedAtIso
@@ -885,13 +858,7 @@ export class SpainFuelAdapter implements SourceAdapter<SpainFuelAdapterContext> 
         locality,
         administrativeArea: province,
         countryCode: "ES",
-        formatted: formatAddress(
-          street,
-          postalCode,
-          locality,
-          municipality,
-          province,
-        ),
+        formatted: formatAddress(street, postalCode, locality, municipality, province),
       },
       timezone: SOURCE_TIMEZONE,
       openingHours,

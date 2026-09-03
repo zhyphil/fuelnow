@@ -8,7 +8,7 @@ import { sortFuelCandidatesByNearest } from "../fuel/sortFuelCandidatesByNearest
 import {
   SpainFuelAdapter,
   type SpainFuelAdapterContext,
-  SpainFuelSupplementIndex,
+  type SpainFuelSupplementIndex,
 } from "./SpainFuelAdapter.js";
 
 export const DEFAULT_SPAIN_FUEL_RADIUS_M = 10_000;
@@ -32,10 +32,7 @@ export interface NearbySpainFuelSearchResult {
   issues: NearbySpainFuelIssue[];
 }
 
-export type NearbySpainFuelSearchContext = Omit<
-  SpainFuelAdapterContext,
-  "supplement"
->;
+export type NearbySpainFuelSearchContext = Omit<SpainFuelAdapterContext, "supplement">;
 
 export interface NearbySpainFuelSearchOptions {
   radiusM?: number;
@@ -64,10 +61,7 @@ function validateOptions(options: NearbySpainFuelSearchOptions): {
   }
 
   const limit = options.limit ?? null;
-  if (
-    limit !== null &&
-    (!Number.isInteger(limit) || limit <= 0 || limit > 1_000)
-  ) {
+  if (limit !== null && (!Number.isInteger(limit) || limit <= 0 || limit > 1_000)) {
     throw new RangeError("limit must be an integer between 1 and 1000");
   }
 
@@ -121,8 +115,7 @@ export function findNearbySpainFuelStations(
   return {
     origin: { ...origin },
     radiusM,
-    results:
-      limit === null ? sortedResults : sortedResults.slice(0, limit),
+    results: limit === null ? sortedResults : sortedResults.slice(0, limit),
     rejectedRecords,
     issues,
   };

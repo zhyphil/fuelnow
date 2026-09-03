@@ -83,10 +83,7 @@ export function findNearbyFranceFuelStations(
       issues.push({ sourceIndex, sourceId, issue });
     }
 
-    if (
-      adapted.data === null ||
-      !adapted.data.serviceTypes.includes("fuel")
-    ) {
+    if (adapted.data === null || !adapted.data.serviceTypes.includes("fuel")) {
       rejectedRecords += 1;
       return;
     }
@@ -105,8 +102,7 @@ export function findNearbyFranceFuelStations(
   return {
     origin: { ...origin },
     radiusM,
-    results:
-      limit === null ? sortedResults : sortedResults.slice(0, limit),
+    results: limit === null ? sortedResults : sortedResults.slice(0, limit),
     rejectedRecords,
     issues,
   };

@@ -30,12 +30,8 @@ async function loadRealServicePoints(): Promise<{
     "../../../fixtures/spain-fuel/pinto-municipality-4384.json",
     import.meta.url,
   );
-  const franceFixture = JSON.parse(
-    await readFile(franceUrl, "utf8"),
-  ) as FranceFixture;
-  const spainFixture = JSON.parse(
-    await readFile(spainUrl, "utf8"),
-  ) as SpainFixture;
+  const franceFixture = JSON.parse(await readFile(franceUrl, "utf8")) as FranceFixture;
+  const spainFixture = JSON.parse(await readFile(spainUrl, "utf8")) as SpainFixture;
   const spainRecord = spainFixture.ListaEESSPrecio.find(
     (station) => station.IDEESS === "13781",
   );
@@ -87,8 +83,7 @@ describe("selectNearbyFuelCandidates", () => {
     });
 
     expect(
-      selectNearbyFuelCandidates([spain], origin, { radiusM: distance })
-        .candidates,
+      selectNearbyFuelCandidates([spain], origin, { radiusM: distance }).candidates,
     ).toHaveLength(1);
     expect(
       selectNearbyFuelCandidates([spain], origin, {
@@ -111,10 +106,10 @@ describe("selectNearbyFuelCandidates", () => {
       id: "air-only",
       serviceTypes: ["air" as const],
     };
-    const selection = selectNearbyFuelCandidates(
-      [near, airOnly, nearer],
-      { latitude: 40.4168, longitude: -3.7038 },
-    );
+    const selection = selectNearbyFuelCandidates([near, airOnly, nearer], {
+      latitude: 40.4168,
+      longitude: -3.7038,
+    });
 
     expect(selection.candidates.map((item) => item.servicePoint.id)).toEqual([
       "near",

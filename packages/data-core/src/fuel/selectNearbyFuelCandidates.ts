@@ -25,11 +25,7 @@ export interface FuelDistanceSelection {
 
 function resolveRadius(options: FuelDistanceSelectionOptions): number {
   const radiusM = options.radiusM ?? DEFAULT_FUEL_SEARCH_RADIUS_M;
-  if (
-    !Number.isFinite(radiusM) ||
-    radiusM <= 0 ||
-    radiusM > MAX_FUEL_SEARCH_RADIUS_M
-  ) {
+  if (!Number.isFinite(radiusM) || radiusM <= 0 || radiusM > MAX_FUEL_SEARCH_RADIUS_M) {
     throw new RangeError(
       `radiusM must be greater than 0 and at most ${MAX_FUEL_SEARCH_RADIUS_M}`,
     );

@@ -23,9 +23,7 @@ async function loadUniqueRecords(): Promise<{
   let sourceSnapshotAt = "";
   for (const path of paths) {
     const url = new URL(`../../../fixtures/spain-fuel/${path}`, import.meta.url);
-    const parsed = JSON.parse(
-      await readFile(url, "utf8"),
-    ) as SpainEnvelope;
+    const parsed = JSON.parse(await readFile(url, "utf8")) as SpainEnvelope;
     sourceSnapshotAt ||= parsed.Fecha;
     for (const record of parsed.ListaEESSPrecio) {
       records.set(String(record.IDEESS), record);
@@ -38,14 +36,11 @@ describe("Spain Air source-field boundary", () => {
   it("keeps Air unknown across every committed real Spain record", async () => {
     const { records, sourceSnapshotAt } = await loadUniqueRecords();
     const fieldNames = [...new Set(records.flatMap((record) => Object.keys(record)))];
-    const equipmentPattern =
-      /aire|agua|air|infl|presi|lav|wash|aspir|vacuum/i;
+    const equipmentPattern = /aire|agua|air|infl|presi|lav|wash|aspir|vacuum/i;
 
     expect(records).toHaveLength(684);
     expect(fieldNames).toHaveLength(41);
-    expect(fieldNames.filter((field) => equipmentPattern.test(field))).toEqual(
-      [],
-    );
+    expect(fieldNames.filter((field) => equipmentPattern.test(field))).toEqual([]);
 
     const adapter = new SpainFuelAdapter();
     for (const record of records) {

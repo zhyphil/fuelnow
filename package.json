@@ -8,12 +8,20 @@
     "node": ">=24 <25"
   },
   "scripts": {
+    "check": "pnpm format:check && pnpm lint && pnpm typecheck && pnpm test",
+    "format": "prettier --write --ignore-unknown apps packages package.json tsconfig.json pnpm-workspace.yaml eslint.config.js .prettierrc.json",
+    "format:check": "prettier --check --ignore-unknown apps packages package.json tsconfig.json pnpm-workspace.yaml eslint.config.js .prettierrc.json",
+    "lint": "eslint .",
     "test": "pnpm --recursive test",
     "typecheck": "pnpm --recursive typecheck"
   },
   "devDependencies": {
+    "@eslint/js": "10.0.1",
     "@types/node": "24.3.0",
+    "eslint": "10.9.1",
+    "prettier": "3.9.6",
     "typescript": "5.9.2",
+    "typescript-eslint": "8.69.0",
     "vitest": "3.2.4"
   }
 }

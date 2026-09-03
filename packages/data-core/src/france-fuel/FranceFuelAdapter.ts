@@ -203,9 +203,7 @@ function parseFetchedAt(value: string): DateTime {
 }
 
 export function parseFranceFuelLocalDateTime(value: string): string | null {
-  const wallClock = value.includes("T")
-    ? value.slice(0, 19).replace("T", " ")
-    : value;
+  const wallClock = value.includes("T") ? value.slice(0, 19).replace("T", " ") : value;
   const parsed = DateTime.fromFormat(wallClock, "yyyy-MM-dd HH:mm:ss", {
     zone: SOURCE_TIMEZONE,
     setZone: true,
@@ -392,9 +390,7 @@ function parseOpeningHours(
     }
 
     const closed = valueForDay["@ferme"] === "1";
-    const intervals = closed
-      ? []
-      : parseOpeningIntervals(valueForDay.horaire, issues);
+    const intervals = closed ? [] : parseOpeningIntervals(valueForDay.horaire, issues);
     days.push({
       day: dayNumber as OpeningDay["day"],
       status: closed ? "closed" : intervals.length > 0 ? "open" : "unknown",
@@ -490,15 +486,12 @@ function normalizeFuel(
   }
 
   const shortageType =
-    asString(source[descriptor.shortageTypeField]) ??
-    asString(rawShortage?.["@type"]);
+    asString(source[descriptor.shortageTypeField]) ?? asString(rawShortage?.["@type"]);
   const shortageStartText =
     asString(source[descriptor.shortageStartField]) ??
     asString(rawShortage?.["@debut"]);
   const shortageObservedAt =
-    shortageStartText === null
-      ? null
-      : parseFranceFuelLocalDateTime(shortageStartText);
+    shortageStartText === null ? null : parseFranceFuelLocalDateTime(shortageStartText);
 
   if (
     shortageType !== null &&
@@ -549,11 +542,7 @@ function normalizeFuel(
       : declaredUnavailable
         ? false
         : null;
-  const outOfStock = isTemporaryShortage
-    ? true
-    : available === true
-      ? false
-      : null;
+  const outOfStock = isTemporaryShortage ? true : available === true ? false : null;
   const unavailableReason = isTemporaryShortage
     ? "temporary_shortage"
     : isPermanentNonOffering
@@ -593,10 +582,7 @@ function normalizeFuel(
   };
 }
 
-function getSourceServices(
-  source: UnknownRecord,
-  issues: AdapterIssue[],
-): string[] {
+function getSourceServices(source: UnknownRecord, issues: AdapterIssue[]): string[] {
   const rawValue = source.services;
   if (rawValue !== null && rawValue !== undefined && rawValue !== "") {
     const decoded = parseEmbeddedRecordList(rawValue, "services", issues);
@@ -697,9 +683,7 @@ export class FranceFuelAdapter implements SourceAdapter<AdapterContext> {
     const rawPrices = parseEmbeddedRecordList(input.prix, "prix", issues);
     const rawShortages = parseEmbeddedRecordList(input.rupture, "rupture", issues);
     const availableFuels = new Set(asStringArray(input.carburants_disponibles));
-    const unavailableFuels = new Set(
-      asStringArray(input.carburants_indisponibles),
-    );
+    const unavailableFuels = new Set(asStringArray(input.carburants_indisponibles));
     const fuels = FUEL_DESCRIPTORS.map((descriptor) =>
       normalizeFuel(
         input,
@@ -720,8 +704,7 @@ export class FranceFuelAdapter implements SourceAdapter<AdapterContext> {
       (service): service is "Lavage automatique" | "Lavage manuel" =>
         service === "Lavage automatique" || service === "Lavage manuel",
     );
-    const unattendedFuelPayment24Seven =
-      input.horaires_automate_24_24 === "Oui";
+    const unattendedFuelPayment24Seven = input.horaires_automate_24_24 === "Oui";
     const openingHours = parseOpeningHours(
       input.horaires,
       unattendedFuelPayment24Seven,

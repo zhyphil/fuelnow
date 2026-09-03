@@ -50,10 +50,7 @@ export type {
 } from "./fuel/selectNearbyFuelCandidates.js";
 export { sortFuelCandidatesByCheapest } from "./fuel/sortFuelCandidatesByCheapest.js";
 export { sortFuelCandidatesByNearest } from "./fuel/sortFuelCandidatesByNearest.js";
-export {
-  assertValidGeoPoint,
-  haversineDistanceMeters,
-} from "./geo/haversine.js";
+export { assertValidGeoPoint, haversineDistanceMeters } from "./geo/haversine.js";
 export type { GeoPoint } from "./geo/haversine.js";
 export { resolveSourceUpdatedAt } from "./source/resolveSourceUpdatedAt.js";
 export type { ResolvedSourceUpdate } from "./source/resolveSourceUpdatedAt.js";

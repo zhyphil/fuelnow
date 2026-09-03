@@ -36,14 +36,10 @@ async function loadMadridFixture(): Promise<MadridFixture> {
 describe("findNearbySpainFuelStations", () => {
   it("returns the 219 real stations within 10 km of central Madrid", async () => {
     const fixture = await loadMadridFixture();
-    const search = findNearbySpainFuelStations(
-      fixture.ListaEESSPrecio,
-      MADRID_CENTER,
-      {
-        fetchedAt: "2026-09-03T20:52:20Z",
-        sourceSnapshotAt: fixture.Fecha,
-      },
-    );
+    const search = findNearbySpainFuelStations(fixture.ListaEESSPrecio, MADRID_CENTER, {
+      fetchedAt: "2026-09-03T20:52:20Z",
+      sourceSnapshotAt: fixture.Fecha,
+    });
 
     expect(fixture.ResultadoConsulta).toBe("OK");
     expect(fixture.fixture.source_total_count).toBe(11_475);
@@ -56,14 +52,9 @@ describe("findNearbySpainFuelStations", () => {
     expect(search.results[0]?.servicePoint.sourceId).toBe("4508");
     expect(search.results.at(-1)?.servicePoint.sourceId).toBe("4611");
     expect(search.results[0]?.straightLineDistanceM).toBeCloseTo(1_282.41, 1);
-    expect(search.results.at(-1)?.straightLineDistanceM).toBeCloseTo(
-      9_995.64,
-      1,
-    );
+    expect(search.results.at(-1)?.straightLineDistanceM).toBeCloseTo(9_995.64, 1);
 
-    const distances = search.results.map(
-      (result) => result.straightLineDistanceM,
-    );
+    const distances = search.results.map((result) => result.straightLineDistanceM);
     expect(distances.every((distance) => distance <= 10_000)).toBe(true);
     expect(distances).toEqual([...distances].sort((left, right) => left - right));
   });
@@ -95,7 +86,12 @@ describe("findNearbySpainFuelStations", () => {
     const search = findNearbySpainFuelStations(
       [
         valid,
-        { ...valid, IDEESS: "zero", Latitud: "0,000000", "Longitud (WGS84)": "0,000000" },
+        {
+          ...valid,
+          IDEESS: "zero",
+          Latitud: "0,000000",
+          "Longitud (WGS84)": "0,000000",
+        },
       ],
       MADRID_CENTER,
       {
@@ -122,11 +118,7 @@ describe("findNearbySpainFuelStations", () => {
       sourceSnapshotAt: "03/09/2026 22:52:12",
     };
     expect(() =>
-      findNearbySpainFuelStations(
-        [],
-        { latitude: 91, longitude: -3.7 },
-        context,
-      ),
+      findNearbySpainFuelStations([], { latitude: 91, longitude: -3.7 }, context),
     ).toThrow(RangeError);
     expect(() =>
       findNearbySpainFuelStations([], MADRID_CENTER, context, { radiusM: 0 }),

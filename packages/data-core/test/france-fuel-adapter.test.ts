@@ -2,10 +2,7 @@ import { readFile } from "node:fs/promises";
 
 import { describe, expect, it } from "vitest";
 
-import {
-  FranceFuelAdapter,
-  parseFranceFuelLocalDateTime,
-} from "../src/index.js";
+import { FranceFuelAdapter, parseFranceFuelLocalDateTime } from "../src/index.js";
 
 interface FixtureEnvelope {
   results: unknown[];
@@ -18,16 +15,16 @@ async function loadFixtureRecord(): Promise<unknown> {
     "../../../fixtures/france-fuel/records-id-31000001.json",
     import.meta.url,
   );
-  const envelope = JSON.parse(
-    await readFile(fixtureUrl, "utf8"),
-  ) as FixtureEnvelope;
+  const envelope = JSON.parse(await readFile(fixtureUrl, "utf8")) as FixtureEnvelope;
   return envelope.results[0];
 }
 
-function makeSevenDaySchedule(interval = {
-  "@ouverture": "00.00",
-  "@fermeture": "00.00",
-}): string {
+function makeSevenDaySchedule(
+  interval = {
+    "@ouverture": "00.00",
+    "@fermeture": "00.00",
+  },
+): string {
   return JSON.stringify({
     "@automate-24-24": "",
     jour: Array.from({ length: 7 }, (_, index) => ({
@@ -215,9 +212,7 @@ describe("FranceFuelAdapter", () => {
       { fetchedAt: "2026-09-03T20:00:00Z" },
     );
 
-    expect(result.data?.fuels[0]?.price?.sourceObservedAt).toBe(
-      "2026-09-03T19:00:00Z",
-    );
+    expect(result.data?.fuels[0]?.price?.sourceObservedAt).toBe("2026-09-03T19:00:00Z");
     expect(result.data?.wash?.present).toBe(true);
     expect(result.issues.map((issue) => issue.field)).toEqual(
       expect.arrayContaining(["prix", "rupture", "services"]),

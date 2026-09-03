@@ -46,10 +46,8 @@ function makeSupplementRow(
     "Precio gasolina 95 E10": source["Precio Gasolina 95 E10"],
     "Precio gasolina 98 E5": source["Precio Gasolina 98 E5"],
     "Precio gasolina 95 E85": source["Precio Gasolina 95 E85"],
-    "Precio gases licuados del petróleo":
-      source["Precio Gases licuados del petróleo"],
-    "Precio gas natural comprimido":
-      source["Precio Gas Natural Comprimido"],
+    "Precio gases licuados del petróleo": source["Precio Gases licuados del petróleo"],
+    "Precio gas natural comprimido": source["Precio Gas Natural Comprimido"],
     "Precio gas natural licuado": source["Precio Gas Natural Licuado"],
     "Toma de datos": "03/09/2026 22:30",
     "Tipo servicio": "L-D: 24H (D)",
@@ -137,9 +135,7 @@ describe("SpainFuelAdapter", () => {
       "cng",
       "lng",
     ]);
-    expect(
-      result.data?.fuels.find((fuel) => fuel.fuelType === "cng"),
-    ).toMatchObject({
+    expect(result.data?.fuels.find((fuel) => fuel.fuelType === "cng")).toMatchObject({
       available: null,
       outOfStock: null,
       price: {
@@ -165,9 +161,7 @@ describe("SpainFuelAdapter", () => {
     expect(result.data?.name).toBe("REPSOL");
     expect(result.data?.brand).toBe("REPSOL");
     expect(result.data?.sourceSummary.sourceObservedAt).toBeNull();
-    expect(result.data?.sourceSummary.sourcePublishedAt).toBe(
-      "2026-09-03T20:49:44Z",
-    );
+    expect(result.data?.sourceSummary.sourcePublishedAt).toBe("2026-09-03T20:49:44Z");
     expect(result.data?.fuels[0]?.price).toMatchObject({
       sourceObservedAt: null,
       freshness: "unknown",
@@ -180,8 +174,7 @@ describe("SpainFuelAdapter", () => {
     const source = {
       ...fixture.ListaEESSPrecio[0],
       IDEESS: "hours-test",
-      Horario:
-        "L-J: 00:00-02:00 y 06:00-23:59; V-S: 00:00-23:59; D: 8:00 -21:00",
+      Horario: "L-J: 00:00-02:00 y 06:00-23:59; V-S: 00:00-23:59; D: 8:00 -21:00",
     };
     const result = adapter.adapt(source, {
       fetchedAt: "2026-09-03T20:52:20Z",
@@ -220,8 +213,9 @@ describe("SpainFuelAdapter", () => {
     );
 
     expect(result.data?.openingHours?.parseStatus).toBe("partial");
-    expect(result.data?.openingHours?.days.every((day) => day.status === "unknown"))
-      .toBe(true);
+    expect(
+      result.data?.openingHours?.days.every((day) => day.status === "unknown"),
+    ).toBe(true);
     expect(result.issues).toContainEqual(
       expect.objectContaining({ code: "partial_opening_hours" }),
     );
@@ -330,9 +324,7 @@ describe("SpainFuelSupplementIndex", () => {
       }),
     ]);
 
-    expect(index.match(source).supplement?.dataTakenAt).toBe(
-      "03/09/2026 22:30",
-    );
+    expect(index.match(source).supplement?.dataTakenAt).toBe("03/09/2026 22:30");
   });
 
   it("refuses an ambiguous supplement association", async () => {

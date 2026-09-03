@@ -2,10 +2,7 @@ import { readFile } from "node:fs/promises";
 
 import { describe, expect, it } from "vitest";
 
-import {
-  findNearbySpainFuelStations,
-  type GeoPoint,
-} from "../src/index.js";
+import { findNearbySpainFuelStations, type GeoPoint } from "../src/index.js";
 
 interface SourceRecord extends Record<string, unknown> {
   IDEESS: string;
@@ -109,10 +106,7 @@ function parseCoordinate(value: string): number {
   return Number(value.replace(",", "."));
 }
 
-function isInsideBoundingBox(
-  record: SourceRecord,
-  bbox: BoundingBox,
-): boolean {
+function isInsideBoundingBox(record: SourceRecord, bbox: BoundingBox): boolean {
   const latitude = parseCoordinate(record.Latitud);
   const longitude = parseCoordinate(record["Longitud (WGS84)"]);
   return (
@@ -131,9 +125,7 @@ async function loadFixture(testCase: GeographyCase): Promise<{
     `../../../fixtures/spain-fuel/${testCase.fixture}`,
     import.meta.url,
   );
-  const envelope = JSON.parse(
-    await readFile(fixtureUrl, "utf8"),
-  ) as SpainFuelFixture;
+  const envelope = JSON.parse(await readFile(fixtureUrl, "utf8")) as SpainFuelFixture;
   const scenario = envelope.fixture.selection.scenarios?.find(
     (candidate) => candidate.id === testCase.scenarioId,
   );
@@ -147,59 +139,46 @@ async function loadFixture(testCase: GeographyCase): Promise<{
 }
 
 describe("Spain Fuel geographic validation", () => {
-  it.each(CASES)(
-    "matches the captured 10 km sample for $name",
-    async (testCase) => {
-      const { envelope, sourceRecords } = await loadFixture(testCase);
-      const search = findNearbySpainFuelStations(
-        sourceRecords,
-        testCase.origin,
-        {
-          fetchedAt: "2026-09-03T20:52:20Z",
-          sourceSnapshotAt: envelope.Fecha,
-        },
-      );
+  it.each(CASES)("matches the captured 10 km sample for $name", async (testCase) => {
+    const { envelope, sourceRecords } = await loadFixture(testCase);
+    const search = findNearbySpainFuelStations(sourceRecords, testCase.origin, {
+      fetchedAt: "2026-09-03T20:52:20Z",
+      sourceSnapshotAt: envelope.Fecha,
+    });
 
-      expect(envelope.ResultadoConsulta).toBe("OK");
-      expect(envelope.fixture.source_total_count).toBe(11_475);
-      expect(sourceRecords).toHaveLength(testCase.expectedSourceRecords);
-      expect(search.results).toHaveLength(testCase.expectedResults);
-      expect(search.rejectedRecords).toBe(testCase.expectedRejectedRecords);
-      expect(search.results[0]?.servicePoint.sourceId).toBe(
-        testCase.expectedNearestId,
-      );
-      expect(search.results[0]?.straightLineDistanceM).toBeCloseTo(
-        testCase.expectedNearestDistanceM,
-        1,
-      );
-      expect(search.results.at(-1)?.servicePoint.sourceId).toBe(
-        testCase.expectedFarthestId,
-      );
-      expect(search.results.at(-1)?.straightLineDistanceM).toBeCloseTo(
-        testCase.expectedFarthestDistanceM,
-        1,
-      );
+    expect(envelope.ResultadoConsulta).toBe("OK");
+    expect(envelope.fixture.source_total_count).toBe(11_475);
+    expect(sourceRecords).toHaveLength(testCase.expectedSourceRecords);
+    expect(search.results).toHaveLength(testCase.expectedResults);
+    expect(search.rejectedRecords).toBe(testCase.expectedRejectedRecords);
+    expect(search.results[0]?.servicePoint.sourceId).toBe(testCase.expectedNearestId);
+    expect(search.results[0]?.straightLineDistanceM).toBeCloseTo(
+      testCase.expectedNearestDistanceM,
+      1,
+    );
+    expect(search.results.at(-1)?.servicePoint.sourceId).toBe(
+      testCase.expectedFarthestId,
+    );
+    expect(search.results.at(-1)?.straightLineDistanceM).toBeCloseTo(
+      testCase.expectedFarthestDistanceM,
+      1,
+    );
 
-      const distances = search.results.map(
-        (result) => result.straightLineDistanceM,
-      );
-      expect(distances.every((distance) => distance <= 10_000)).toBe(true);
-      expect(distances).toEqual(
-        [...distances].sort((left, right) => left - right),
-      );
+    const distances = search.results.map((result) => result.straightLineDistanceM);
+    expect(distances.every((distance) => distance <= 10_000)).toBe(true);
+    expect(distances).toEqual([...distances].sort((left, right) => left - right));
 
-      if (testCase.expectedRejectedRecords === 0) {
-        expect(search.issues).toEqual([]);
-      } else {
-        expect(search.issues).toContainEqual(
-          expect.objectContaining({
-            sourceId: "16239",
-            issue: expect.objectContaining({ code: "no_supported_services" }),
-          }),
-        );
-      }
-    },
-  );
+    if (testCase.expectedRejectedRecords === 0) {
+      expect(search.issues).toEqual([]);
+    } else {
+      expect(search.issues).toContainEqual(
+        expect.objectContaining({
+          sourceId: "16239",
+          issue: expect.objectContaining({ code: "no_supported_services" }),
+        }),
+      );
+    }
+  });
 
   it("anchors the suburb and motorway cases to explicit source addresses", async () => {
     const suburb = CASES[2] as GeographyCase;

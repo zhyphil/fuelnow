@@ -11,13 +11,8 @@ interface PriceRank {
   amount: number | null;
 }
 
-function priceRank(
-  candidate: FuelDistanceCandidate,
-  fuelType: FuelType,
-): PriceRank {
-  const fuel = candidate.servicePoint.fuels.find(
-    (item) => item.fuelType === fuelType,
-  );
+function priceRank(candidate: FuelDistanceCandidate, fuelType: FuelType): PriceRank {
+  const fuel = candidate.servicePoint.fuels.find((item) => item.fuelType === fuelType);
   if (
     fuel === undefined ||
     fuel.price === null ||
@@ -41,9 +36,10 @@ function priceRank(
   return { tier: 2, amount: null };
 }
 
-export function sortFuelCandidatesByCheapest<
-  TCandidate extends FuelDistanceCandidate,
->(candidates: readonly TCandidate[], fuelType: FuelType): TCandidate[] {
+export function sortFuelCandidatesByCheapest<TCandidate extends FuelDistanceCandidate>(
+  candidates: readonly TCandidate[],
+  fuelType: FuelType,
+): TCandidate[] {
   const prices = new Map<TCandidate, PriceRank>();
   for (const candidate of candidates) {
     if (

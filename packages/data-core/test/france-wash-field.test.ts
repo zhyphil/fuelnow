@@ -30,8 +30,7 @@ async function loadUniqueRecords(): Promise<Array<Record<string, unknown>>> {
   for (const path of paths) {
     const url = new URL(`../../../fixtures/france-fuel/${path}`, import.meta.url);
     const parsed = JSON.parse(await readFile(url, "utf8")) as
-      | Array<Record<string, unknown>>
-      | FranceEnvelope;
+      Array<Record<string, unknown>> | FranceEnvelope;
     for (const record of Array.isArray(parsed) ? parsed : parsed.results) {
       records.set(String(record.id), record);
     }
