@@ -1,0 +1,110 @@
+{
+  "task": "P1-EV-02",
+  "reviewed_at": "2026-09-04",
+  "release_legal_review_required": true,
+  "sources": {
+    "fr-irve-static-pan": {
+      "country": "FR",
+      "role": "canonical_static_inventory",
+      "publisher_update": "nightly",
+      "fetch_policy": "at_most_daily_after_publisher_refresh",
+      "licence": "Licence Ouverte 2.0",
+      "commercial_use": true,
+      "cache": true,
+      "transform": true,
+      "redistribute": true,
+      "attribution_required": true,
+      "development_status": "approved_for_development",
+      "release_conditions": [
+        "repeat legal and resource metadata review",
+        "retain quality quarantine",
+        "display source and latest source update"
+      ]
+    },
+    "fr-irve-dynamic-pan": {
+      "country": "FR",
+      "role": "experimental_availability",
+      "publisher_update": "real_time_subject_to_producer_delay_and_short_cache",
+      "fetch_policy": "disabled_until_quality_gate_then_bulk_1_to_5_minutes",
+      "licence": "Licence Ouverte 2.0",
+      "commercial_use": true,
+      "cache": true,
+      "transform": true,
+      "redistribute": true,
+      "attribution_required": true,
+      "development_status": "validating",
+      "release_conditions": [
+        "identity reconciliation passes",
+        "sustained lag monitoring passes",
+        "repeat legal and resource metadata review"
+      ]
+    },
+    "fr-qualicharge-irve": {
+      "country": "FR",
+      "role": "dynamic_availability_supplement",
+      "publisher_update": "continuous",
+      "fetch_policy": "bulk_1_to_5_minutes_with_backoff",
+      "licence": "Licence Ouverte 2.0",
+      "commercial_use": true,
+      "cache": true,
+      "transform": true,
+      "redistribute": true,
+      "attribution_required": true,
+      "development_status": "approved_for_development",
+      "release_conditions": [
+        "coverage limitations remain visible",
+        "repeat legal and resource metadata review",
+        "display source and latest source update"
+      ]
+    },
+    "es-miteco-ripree": {
+      "country": "ES",
+      "role": "canonical_static_inventory",
+      "publisher_update": "irregular",
+      "fetch_policy": "at_most_daily_with_content_hash",
+      "licence": "MITECO open-data legal notice",
+      "commercial_use": true,
+      "cache": true,
+      "transform": true,
+      "redistribute": true,
+      "attribution_required": true,
+      "development_status": "approved_for_development",
+      "release_conditions": [
+        "repeat legal and export metadata review",
+        "preserve update and reuse metadata",
+        "use prescribed origin wording"
+      ]
+    },
+    "es-ree-reve": {
+      "country": "ES",
+      "role": "candidate_availability_and_tariffs",
+      "publisher_update": "operator_changes_sent_automatically_without_published_sla",
+      "fetch_policy": "disabled_until_written_authorisation_and_production_quota",
+      "licence": "Red Electrica website legal notice plus service approval",
+      "commercial_use": false,
+      "cache": false,
+      "transform": false,
+      "redistribute": false,
+      "attribution_required": true,
+      "development_status": "validating",
+      "release_conditions": [
+        "written commercial reuse permission",
+        "approved external API key",
+        "usable production quota",
+        "storage and redistribution terms",
+        "attribution approval",
+        "identity reconciliation"
+      ]
+    }
+  },
+  "required_provenance": [
+    "source_id",
+    "source_url",
+    "licence_or_terms_version",
+    "source_updated_at",
+    "fetched_at",
+    "content_hash",
+    "adapter_version",
+    "validation_result"
+  ]
+}

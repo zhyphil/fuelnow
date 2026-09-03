@@ -4,7 +4,7 @@
 > 需求来源：[france_spain_driver_decision_engine_project.md](./france_spain_driver_decision_engine_project.md)  
 > 当前状态：进行中  
 > 当前阶段：Phase 1 — Data Feasibility Spike
-> 下一项任务：`P1-EV-02` 记录各 EV 数据源更新频率与许可证要求
+> 下一项任务：`P1-EV-03` 决定 V1 可承诺的实时性范围
 > 最后更新：2026-09-04
 
 ## 使用方法
@@ -143,7 +143,7 @@ V1 的核心验收结果是：
 - [x] `P1-EV-ES-01` 验证西班牙 RIPREE 公共充电静态数据源，确认 43,610 个连接器行、36,465 个 PDC 和 12,214 个安装点，并记录三级身份、解析及异常隔离规则（2026-09-04；[验证报告](./docs/data/spain-ev-static-source.md)；[固定 profile/sample](./fixtures/spain-ev/)）
 - [x] `P1-EV-ES-02` 验证西班牙 Reve/SGV 动态 availability 与价格：平台内 95.90% EVSE 为 OCPI 动态来源，价格筛选覆盖 91.48% 地点；记录 API key、5 次/小时及逐点精确状态限制（2026-09-04；[验证报告](./docs/data/spain-ev-dynamic-coverage.md)；[固定 profile/sample](./fixtures/spain-ev/)）
 - [x] `P1-EV-01` 验证并统一两国 EV 的 service point → EVSE → connector 层级、接口/功率/运营商映射及状态优先级，容量和 availability 均按 EVSE 计数（2026-09-04；[验证报告](./docs/data/unified-ev-fields-validation.md)；[机器映射](./fixtures/ev/unified-field-mapping.json)）
-- [ ] `P1-EV-02` 记录各数据源更新频率与许可证要求
+- [x] `P1-EV-02` 记录各 EV 数据源更新频率、时间戳、商用/缓存/再分发、署名及生产门槛；Reve/SGV 因商用授权和 API 配额保持阻塞（2026-09-04；[政策报告](./docs/data/ev-source-licence-update-policy.md)；[机器策略](./fixtures/ev/source-policy.json)）
 - [ ] `P1-EV-03` 决定 V1 可承诺的实时性范围
 
 ## 1.6 数据可行性报告
@@ -469,13 +469,14 @@ V1 的核心验收结果是：
 | 2026-09-03 | 西班牙 Fuel 价格与单位 | 9 个明确产品映射到 V1；液体按 EUR/升，GNC/GNL 按 EUR/公斤；`Fecha` 是当前价格快照断言而非单站提交时间 | 避免混合单位比较和夸大更新时间；保持跨端展示一致 | P1-ES-05、P1-ES-07、P1-FUEL-04 |
 | 2026-09-03 | 西班牙 REST/XLS 组合 | REST `IDEESS` 保持主身份；只对确定的一对一 XLS 行补充 `Toma de datos` 和 `Tipo servicio`，不按行序关联 | REST 缺少单站时间/服务方式，XLS 缺少稳定 ID；同址重复站会造成歧义 | P1-ES-06、P1-ES-07 |
 | 2026-09-04 | EV 统一层级与容量 | 统一为 service point → EVSE → connector；availability 和容量按 EVSE 计算，connector 只表达兼容接口 | 法国按 EVSE 行给 connector flags，西班牙按 connector 行重复 EVSE；直接数 connector 会夸大可同时充电数量 | P1-EV-01 |
+| 2026-09-04 | EV 来源许可与更新政策 | 法国 PAN/QualiCharge 与西班牙 RIPREE 可用于受控开发；Reve/SGV 在书面商用授权、可用配额和再分发条款确认前禁用 | 公开数据许可允许前三类来源缓存、转换和展示；Reve 通用条款不构成 Fuel Now 商用授权 | P1-EV-02 |
 
 # 风险与阻塞记录
 
 | 日期 | 风险或阻塞 | 严重度 | 应对方式 | 状态 |
 |---|---|---|---|---|
 | 2026-09-03 | Air/Wash 价格与设备状态可能覆盖不足 | 高 | Phase 1 量化覆盖率；V1 对未知状态透明展示 | 待验证 |
-| 2026-09-03 | 西班牙 EV 实时 availability/price 虽在 Reve 内覆盖高，但外部 API 需审批密钥、限 5 次/小时且精确状态逐点读取 | 高 | 不依赖匿名 UI API；申请正式访问与生产配额并完成 RIPREE 全量身份关联，在此之前不承诺全国实时 | 已验证，生产接入受阻 |
+| 2026-09-03 | 西班牙 EV 实时 availability/price 虽在 Reve 内覆盖高，但通用条款未授予商用复用，外部 API 还需审批密钥、限 5 次/小时且精确状态逐点读取 | 高 | 不依赖匿名 UI API；取得书面商用缓存/转换/展示授权、正式访问与生产配额，并完成 RIPREE 全量身份关联，在此之前不接入生产或承诺全国实时 | 已验证，生产接入受阻 |
 | 2026-09-03 | Best 权重尚未定义 | 中 | 先采用可解释规则，再根据导航行为校准 | 待处理 |
 | 2026-09-03 | 路线 API 会带来成本和限流 | 中 | Top N 分批计算，增加缓存、用量指标、预算告警和无 ETA 降级；Beta 前复核价格 | 应对方案已定义，待实现 |
 | 2026-09-03 | 法国 Fuel 门户的 typed datetime 偏移与原始 France-local 墙钟语义不一致 | 高 | 从原始 `@maj/@debut` 按 `Europe/Paris` 解析，保留原值，隔离未来时间，并用夏/冬令时测试保护 | 已在 `FranceFuelAdapter` 缓解，待持续监控 |
@@ -548,3 +549,4 @@ V1 的核心验收结果是：
 | 2026-09-04 | 验证西班牙 EV 静态数据源 | 选定官方 MITECO RIPREE 全国导出；43,610 个连接器行覆盖 36,465 个 PDC/12,214 个安装点；确认三级身份、非标准 CSV 解析、重复连接器和容量异常边界；见 `docs/data/spain-ev-static-source.md` |
 | 2026-09-04 | 验证西班牙 EV 动态 availability/price | Reve 内 42,800/44,631 个 EVSE 为 OCPI 动态来源，价格筛选匹配 13,323/14,564 个地点；确认正式 API key、5 次/小时、逐点精确状态及全量身份关联限制；见 `docs/data/spain-ev-dynamic-coverage.md` |
 | 2026-09-04 | 统一验证两国 EV 字段 | 建立 service point → EVSE → connector 模型，固定主要接口、功率隔离、运营商身份和 FR/ES 状态优先级；同步细化 V1 Charge 字段契约；见 `docs/data/unified-ev-fields-validation.md` |
+| 2026-09-04 | 固化 EV 来源更新与许可政策 | 法国 PAN/QualiCharge 和西班牙 RIPREE 可用于受控开发；Reve/SGV 因商用授权、API 配额和再分发条件未闭环而保持生产禁用；见 `docs/data/ev-source-licence-update-policy.md` |
