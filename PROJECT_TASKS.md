@@ -4,7 +4,7 @@
 > 需求来源：[france_spain_driver_decision_engine_project.md](./france_spain_driver_decision_engine_project.md)  
 > 当前状态：进行中  
 > 当前阶段：Phase 0 — 开工决策  
-> 下一项任务：`P0-04` 确定地图、路径规划和 ETA 服务供应商
+> 下一项任务：`P0-05` 确定首批验证城市和跨境测试区域
 > 最后更新：2026-09-03
 
 ## 使用方法
@@ -64,7 +64,7 @@ V1 的核心验收结果是：
 - [x] `P0-01` 确定 V1 首发客户端形态：React Native + Expo + TypeScript，首发 iOS/Android（2026-09-03；[ADR 0001](./docs/decisions/0001-client-platform.md)）
 - [x] `P0-02` 确定后端技术栈、包管理方式和运行环境：Node.js 24 LTS + TypeScript + Fastify + pnpm workspace + Docker Compose（2026-09-03；[ADR 0002](./docs/decisions/0002-backend-stack.md)）
 - [x] `P0-03` 确定数据库方案：PostgreSQL 18 + PostGIS 3.6，使用 geography(Point, 4326)、GiST 与 SQL-first migrations（2026-09-03；[ADR 0003](./docs/decisions/0003-geospatial-database.md)）
-- [ ] `P0-04` 确定地图、路径规划和 ETA 服务供应商
+- [x] `P0-04` 确定地图、路径规划和 ETA 服务：后端 Mapbox Matrix API，客户端 react-native-maps，外部 App 完成导航（2026-09-03；[ADR 0004](./docs/decisions/0004-maps-routing-provider.md)）
 - [ ] `P0-05` 确定首批验证城市和跨境测试区域
 - [ ] `P0-06` 确定 V1 是否完全免登录，默认建议免登录使用核心搜索
 - [ ] `P0-07` 明确位置权限、隐私、数据保存和 GDPR 边界
@@ -458,7 +458,7 @@ V1 的核心验收结果是：
 | 2026-09-03 | 首发客户端 | React Native + Expo + TypeScript；首发 iOS/Android，Web 不纳入 V1 | 单一移动代码库适合定位、导航与跨平台 MVP；保留未来 Web 路径 | P0-01 |
 | 2026-09-03 | 后端技术栈 | Node.js 24 LTS、TypeScript、Fastify、pnpm workspace；本地 Docker Compose、生产 OCI 容器 | 与客户端共享 TypeScript 契约；适合 Adapter、API 与 Worker；保持部署平台中立 | P0-02 |
 | 2026-09-03 | 地理数据库 | PostgreSQL 18 + PostGIS 3.6；geography(Point, 4326) + GiST | 支持米制范围查询、空间索引、关系约束与可追溯数据同步 | P0-03 |
-| 待定 | 路线/ETA 服务 | 待定 | 待确认 | P0-04 |
+| 2026-09-03 | 地图、路线与 ETA | 后端 Mapbox Matrix；客户端 react-native-maps；外部导航 App | 列表和排名不绑定地图 SDK；小规模 1×N Matrix 符合 Top N ETA 计算；HERE 为首选备选 | P0-04 |
 | 待定 | 首发区域 | 待定 | 待确认 | P0-05、P0-11 |
 
 # 风险与阻塞记录
@@ -468,7 +468,7 @@ V1 的核心验收结果是：
 | 2026-09-03 | Air/Wash 价格与设备状态可能覆盖不足 | 高 | Phase 1 量化覆盖率；V1 对未知状态透明展示 | 待验证 |
 | 2026-09-03 | 西班牙 EV 实时 availability/price 覆盖可能不完整 | 高 | 不承诺全国实时；先验证后决定 V1 展示范围 | 待验证 |
 | 2026-09-03 | Best 权重尚未定义 | 中 | 先采用可解释规则，再根据导航行为校准 | 待处理 |
-| 2026-09-03 | 路线 API 会带来成本和限流 | 中 | Top N 才计算路线，增加缓存和降级 | 待处理 |
+| 2026-09-03 | 路线 API 会带来成本和限流 | 中 | Top N 分批计算，增加缓存、用量指标、预算告警和无 ETA 降级；Beta 前复核价格 | 应对方案已定义，待实现 |
 
 # 完成记录
 
@@ -482,3 +482,4 @@ V1 的核心验收结果是：
 | 2026-09-03 | 完成 V1 客户端平台选型 | React Native + Expo + TypeScript；见 `docs/decisions/0001-client-platform.md` |
 | 2026-09-03 | 完成后端技术栈与运行方式选型 | Node.js 24 LTS + TypeScript + Fastify + pnpm workspace；见 `docs/decisions/0002-backend-stack.md` |
 | 2026-09-03 | 完成地理数据库方案选型 | PostgreSQL 18 + PostGIS 3.6；见 `docs/decisions/0003-geospatial-database.md` |
+| 2026-09-03 | 完成地图、路线与 ETA 方案选型 | Mapbox Matrix + react-native-maps + 外部导航；见 `docs/decisions/0004-maps-routing-provider.md` |
