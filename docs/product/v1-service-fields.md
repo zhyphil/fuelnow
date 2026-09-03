@@ -92,6 +92,7 @@ price
 Allowed V1 units include:
 
 - `liter`
+- `kilogram`
 - `kwh`
 - `minute`
 - `session`
@@ -119,7 +120,7 @@ The requested fuel's price may be unknown. If price is unknown or past its decis
 | `fuels[].fuel_type` | Eligibility | enum | Canonical code, not localized label |
 | `fuels[].available` | Required nullable | true/false/null | Null means stock unknown |
 | `fuels[].out_of_stock` | Required nullable | true/false/null | Preserve source observation time |
-| `fuels[].price` | Required nullable | price/null | Unit must be `liter` |
+| `fuels[].price` | Required nullable | price/null | Unit is product-specific: normally `liter`, but CNG/GNC and LNG/GNL use `kilogram` |
 | `fuels[].source_observed_at` | Required nullable | UTC timestamp/null | Must not be replaced by fetch time |
 | `payment_methods` | Optional | string array | Only normalized values with evidence |
 | `discount_programs` | Optional | structured array | Must state membership conditions |
@@ -271,4 +272,3 @@ Addresses and source-provided names retain their original text. The product may 
 - Search-derived distance, ETA, rank, and explanations are not confused with canonical source data.
 - Multi-source conflicts retain provenance.
 - Canonical enums can be localized without changing stored data.
-

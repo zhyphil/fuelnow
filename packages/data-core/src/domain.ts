@@ -57,9 +57,9 @@ export interface NormalizedOpeningHours {
 export interface NormalizedPrice {
   amount: number;
   currency: "EUR";
-  unit: "liter";
-  taxIncluded: null;
-  membershipRequired: null;
+  unit: "liter" | "kilogram";
+  taxIncluded: boolean | null;
+  membershipRequired: boolean | null;
   sourceObservedAt: string | null;
   freshness: Freshness;
   confidence: Confidence;

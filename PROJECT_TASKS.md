@@ -4,7 +4,7 @@
 > 需求来源：[france_spain_driver_decision_engine_project.md](./france_spain_driver_decision_engine_project.md)  
 > 当前状态：进行中  
 > 当前阶段：Phase 1 — Data Feasibility Spike
-> 下一项任务：`P1-ES-05` 验证燃料类型、价格和更新时间字段
+> 下一项任务：`P1-ES-06` 验证临时关闭、24/7 和服务设施字段
 > 最后更新：2026-09-03
 
 ## 使用方法
@@ -104,7 +104,7 @@ V1 的核心验收结果是：
 - [x] `P1-ES-02` 核实 CC BY 4.0 商业使用、缓存、改编、再分发和署名要求，并记录旧通用声明差异（2026-09-03；[核验记录](./docs/data/spain-fuel-licence.md)）
 - [x] `P1-ES-03` 保存 Pinto 市级 17 条原始响应并记录 41 个字符串字段定义（2026-09-03；[样本与字段字典](./docs/data/spain-fuel-fields.md)）
 - [x] `P1-ES-04` 验证全国 11,475 个站点的身份、地址、名称/品牌边界、坐标异常和营业时间语法（2026-09-03；[验证报告](./docs/data/spain-fuel-basic-fields-validation.md)）
-- [ ] `P1-ES-05` 验证燃料类型、价格和更新时间字段
+- [x] `P1-ES-05` 验证 23 个产品价格列、42,619 个价格值、9 个 V1 映射、升/公斤单位及快照时间语义（2026-09-03；[验证报告](./docs/data/spain-fuel-price-validation.md)）
 - [ ] `P1-ES-06` 验证临时关闭、24/7 和服务设施字段
 - [ ] `P1-ES-07` 编写 `SpainFuelAdapter`
 - [ ] `P1-ES-08` 输入 GPS，返回 10 km 内真实加油站
@@ -466,6 +466,7 @@ V1 的核心验收结果是：
 | 2026-09-03 | 新鲜度与可信度 | 按字段计算 Live/Verified/Recent/Stale/Unknown；confidence 独立为 high/medium/low | 不让新抓取的旧值伪装成实时数据，并对不同服务使用不同有效期 | P0-09 |
 | 2026-09-03 | V1 服务字段 | 按搜索准入、必需可空、可选和查询派生字段定义 Fuel/Charge/Air/Wash | 让未知值保持透明，避免用 0、false、closed 或 free 代替缺失数据 | P0-10 |
 | 2026-09-03 | 首发区域 | 全国数据导入与实验性搜索；首轮公开 Beta 质量承诺聚焦 Toulouse–Barcelona 走廊；Paris/Madrid 强制回归 | 先验证跨境核心价值，并将人工验证与运营支持控制在可管理范围 | P0-05、P0-11 |
+| 2026-09-03 | 西班牙 Fuel 价格与单位 | 9 个明确产品映射到 V1；液体按 EUR/升，GNC/GNL 按 EUR/公斤；`Fecha` 是当前价格快照断言而非单站提交时间 | 避免混合单位比较和夸大更新时间；保持跨端展示一致 | P1-ES-05、P1-ES-07、P1-FUEL-04 |
 
 # 风险与阻塞记录
 
@@ -514,3 +515,4 @@ V1 的核心验收结果是：
 | 2026-09-03 | 核实西班牙 Fuel 数据许可与使用约束 | 现代资源 CC BY 4.0 允许商业复用、缓存、改编和再分发；记录旧通用声明差异；见 `docs/data/spain-fuel-licence.md` |
 | 2026-09-03 | 保存西班牙 Fuel 原始样本与字段字典 | 固定 Pinto 市级 17 条完整响应，并记录 41 个源字符串字段；见 `fixtures/spain-fuel/` 与 `docs/data/spain-fuel-fields.md` |
 | 2026-09-03 | 验证西班牙 Fuel 站点基础字段 | 身份和地址完整；确认 `Rótulo` 映射边界、4 个坐标异常及 1,172 种营业时间表达；见 `docs/data/spain-fuel-basic-fields-validation.md` |
+| 2026-09-03 | 验证西班牙 Fuel 产品、价格和时间语义 | 42,619 个价格值格式有效；确定 9 个 V1 映射、液体/气体单位和 `Fecha` 快照边界；见 `docs/data/spain-fuel-price-validation.md` |
