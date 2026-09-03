@@ -27,6 +27,7 @@ Do not silently rewrite an accepted decision when implementation changes directi
 | [0010](./0010-beta-launch-scope.md) | P0-11 | Full stack | National data capability with Toulouse–Barcelona regional Beta |
 | [0011](./0011-osm-air-wash-supplement.md) | P1-AW-01 | Full stack | OSM supplements Air/Wash presence; production does not depend on public Overpass |
 | [0012](./0012-v1-ev-realtime-scope.md) | P1-EV-03 | Full stack | No nationwide Charge real-time claim; conditional France per-EVSE availability and no V1 Charge price comparison |
+| [0013](./0013-v1-scope-after-data-feasibility.md) | P1-RPT-06 | Full stack | Retain four service entries with source-aware capabilities; Fuel full decision modes and limited honest Charge/Air/Wash modes |
 
 The V1 field decision for `P0-10` is maintained as the normative product contract in [V1 service field contract](../product/v1-service-fields.md).
 
@@ -56,6 +57,9 @@ Supplemental data
 EV product capability
   ├─ Field-level freshness/confidence (0009)
   └─ V1 real-time availability and price boundary (0012)
+
+Phase 1 scope gate
+  └─ Capability-aware V1 scope after source measurement (0013)
 ```
 
 ## Creating a new ADR

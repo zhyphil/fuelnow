@@ -1,0 +1,41 @@
+{
+  "task": "P1-RPT-06",
+  "accepted_at": "2026-09-04",
+  "services_retained": ["fuel", "charging", "air", "wash"],
+  "countries_retained": ["FR", "ES"],
+  "beta_supported_area": "toulouse_barcelona_corridor",
+  "mandatory_regression_markets": ["paris", "madrid"],
+  "outside_beta_coverage": "experimental",
+  "capabilities": {
+    "fuel": {
+      "FR": {"nearest": "enabled", "cheapest": "enabled_when_price_eligible", "open_now": "scheduled_only", "available_now": "per_fuel_evidence_not_site_sensor", "best": "enabled"},
+      "ES": {"nearest": "enabled", "cheapest": "enabled_when_price_eligible", "open_now": "scheduled_only", "available_now": "unavailable_stock_unknown", "best": "enabled_without_stock_advantage"}
+    },
+    "charging": {
+      "FR": {"nearest": "enabled", "cheapest": "unavailable", "open_now": "conditional_scheduled_only", "available_now": "conditional_per_evse_qualicharge_live", "fastest": "rated_compatible_power_only", "best": "enabled_without_price"},
+      "ES": {"nearest": "enabled", "cheapest": "unavailable", "open_now": "conditional_scheduled_only", "available_now": "legally_blocked_unknown", "fastest": "rated_compatible_power_only", "best": "enabled_without_live_or_price"}
+    },
+    "air": {
+      "FR": {"nearest": "positive_evidence_only", "cheapest": "unavailable", "open_now": "conditional_service_scoped_hours_only", "available_now": "unavailable_equipment_unknown", "best": "limited"},
+      "ES": {"nearest": "positive_osm_evidence_only", "cheapest": "unavailable", "open_now": "conditional_service_scoped_hours_only", "available_now": "unavailable_equipment_unknown", "best": "limited"}
+    },
+    "wash": {
+      "FR": {"nearest": "positive_evidence_only", "cheapest": "unavailable", "open_now": "conditional_service_scoped_hours_only", "available_now": "unavailable_equipment_unknown", "best": "limited"},
+      "ES": {"nearest": "positive_osm_evidence_only", "cheapest": "unavailable", "open_now": "conditional_service_scoped_hours_only", "available_now": "unavailable_equipment_unknown", "best": "limited"}
+    }
+  },
+  "deferred": [
+    "nationwide_realtime_claims",
+    "charge_cheapest",
+    "spain_charge_available_now",
+    "pan_dynamic_user_visible_results",
+    "air_wash_cheapest",
+    "air_wash_equipment_available_now",
+    "ev_queue_and_complete_time_to_solution",
+    "crowdsourced_verification",
+    "payments_accounts_booking_vehicle_profiles"
+  ],
+  "capability_states": ["enabled", "conditional", "unavailable", "source_unhealthy", "legally_blocked"],
+  "release_test_allows_degraded_external_integrations": true,
+  "public_release_external_gates_remain": true
+}

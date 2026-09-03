@@ -3,8 +3,8 @@
 > 项目：France + Spain Driver Decision Engine  
 > 需求来源：[france_spain_driver_decision_engine_project.md](./france_spain_driver_decision_engine_project.md)  
 > 当前状态：进行中  
-> 当前阶段：Phase 1 — Data Feasibility Spike
-> 下一项任务：`P1-RPT-06` 根据报告最终确认或缩减 V1 范围
+> 当前阶段：Phase 2 — 项目骨架与统一数据层
+> 下一项任务：`P2-ENG-01` 初始化代码仓库与目录结构
 > 最后更新：2026-09-04
 
 ## 使用方法
@@ -153,16 +153,16 @@ V1 的核心验收结果是：
 - [x] `P1-RPT-03` 输出两国四类服务的价格、排班营业状态和当前 availability 已知/缺失率，区分原始字段、决策级可用性与不可测分母（2026-09-04；[缺失率报告](./docs/data/decision-field-missingness-report.md)；[机器汇总](./fixtures/reports/decision-field-missingness.json)）
 - [x] `P1-RPT-04` 输出 Fuel 价格、EV 动态状态、静态修改时间及 OSM 编辑时间分布，并建立时区、过期值、坐标、重复 ID、功率、未来时间、关联与标签冲突异常目录（2026-09-04；[新鲜度/异常报告](./docs/data/freshness-anomaly-report.md)；[机器汇总](./fixtures/reports/freshness-anomaly-summary.json)）
 - [x] `P1-RPT-05` 输出每个数据/路线依赖的风险、直接与运营成本、容量预算、监控、故障降级矩阵及不可自动关闭的发布门槛（2026-09-04；[风险/成本/降级报告](./docs/data/source-risk-cost-degradation-report.md)；[机器策略](./fixtures/reports/source-risk-cost-degradation.json)）
-- [ ] `P1-RPT-06` 根据报告最终确认或缩减 V1 范围
+- [x] `P1-RPT-06` 根据真实数据保留四个服务入口，但收缩为能力感知 V1：Fuel 支持完整决策模式；Charge/Air/Wash 禁止无依据的 Cheapest/Available now，保留可信静态发现与明确 Unknown（2026-09-04；[ADR 0013](./docs/decisions/0013-v1-scope-after-data-feasibility.md)；[能力矩阵](./fixtures/reports/v1-scope-after-phase1.json)）
 
 ## Phase 1 验收门槛
 
-- [ ] 给定法国或西班牙 GPS，可返回 10 km 内真实 Fuel Top 10
-- [ ] Fuel 已支持 Nearest、Cheapest 和 Open now
-- [ ] 每项结果均包含来源及更新时间
-- [ ] Air/Wash 实际覆盖率已有量化结论
-- [ ] EV 静态与实时数据能力已有量化结论
-- [ ] 产品范围已根据真实数据能力重新确认
+- [x] 给定法国或西班牙 GPS，可在全部固定城市/郊区/机场/高速场景返回 10 km 内真实 Fuel Top 10（数据不足 10 条时不得填充；当前最少场景为 10 条）
+- [x] Fuel 已支持统一 Nearest、Cheapest 和 scheduled Open now，并覆盖跨时区/跨午夜/Unknown 降级
+- [x] 每项归一化 Fuel 结果均包含来源、来源 URL、source updated_at 依据及独立 fetched_at
+- [x] Air/Wash 实际覆盖率、价格与设备状态缺失已量化
+- [x] EV 静态密度、动态关联、新鲜度、价格与许可证/API 能力已量化
+- [x] 产品范围已根据真实数据能力重新确认为能力感知 V1
 
 ---
 
@@ -225,8 +225,8 @@ V1 的核心验收结果是：
 - [ ] `P3-SEA-04` 缓存路线结果并控制第三方接口成本
 - [ ] `P3-SEA-05` 处理路线不可达、超时和限流
 - [ ] `P3-SEA-06` 实现 Nearest，优先按真实 ETA 排序
-- [ ] `P3-SEA-07` 实现 Cheapest
-- [ ] `P3-SEA-08` 实现 Open now
+- [ ] `P3-SEA-07` 实现 capability-aware Cheapest：V1 仅 Fuel 启用，Charge/Air/Wash 返回明确 unavailable reason
+- [ ] `P3-SEA-08` 实现 capability-aware Open now：Fuel 使用站点排班；Charge/Air/Wash 仅使用服务专属时间证据
 - [ ] `P3-SEA-09` 处理无结果、价格未知和状态未知
 
 ## 3.2 营业时间
@@ -246,7 +246,7 @@ V1 的核心验收结果是：
 - [ ] `P3-BEST-05` 定义 Fuel 专属 Best 公式
 - [ ] `P3-BEST-06` 将预计加油量、车辆油耗和绕路成本纳入 Fuel 计算
 - [ ] `P3-BEST-07` 定义 EV 专属 Best/Time-to-Solution 公式
-- [ ] `P3-BEST-08` 将 ETA、等待时间、充电时间和价格纳入 EV 计算
+- [ ] `P3-BEST-08` 将 ETA、兼容额定功率及符合门槛的 availability 纳入 EV 计算；等待时间、实际充电时长和价格仅在未来有决策级证据时启用
 - [ ] `P3-BEST-09` 定义 Air 和 Wash 的 Best 降级规则
 - [ ] `P3-BEST-10` 对缺失、过期和低可信数据降权
 - [ ] `P3-BEST-11` 为推荐生成用户可理解的解释
@@ -268,7 +268,7 @@ V1 的核心验收结果是：
 ## Phase 3 验收门槛
 
 - [ ] 四类服务均可通过统一 API 搜索
-- [ ] Nearest、Cheapest、Open now、Best 均有明确一致的行为
+- [ ] Nearest、Cheapest、Open now、Best 均按 ADR 0013 capability matrix 返回明确一致的 enabled/conditional/unavailable 行为
 - [ ] Best 结果包含可理解的推荐理由
 - [ ] 数据缺失或第三方服务失败时仍能提供合理降级结果
 
@@ -289,12 +289,12 @@ V1 的核心验收结果是：
 ## 4.2 搜索结果
 
 - [ ] `P4-RES-01` 实现列表优先的结果页
-- [ ] `P4-RES-02` 实现 Nearest/Cheapest/Open now/Best 切换
+- [ ] `P4-RES-02` 实现 capability-aware Nearest/Cheapest/Open now/Best 切换，隐藏或解释不可用能力
 - [ ] `P4-RES-03` 显示名称、地址、距离和 ETA
 - [ ] `P4-RES-04` 显示价格、营业状态和服务状态
 - [ ] `P4-RES-05` 显示数据更新时间、来源和可信度
 - [ ] `P4-RES-06` 显示 Fuel 类型、价格和缺货信息
-- [ ] `P4-RES-07` 显示 EV 功率、接口、可用数量和价格
+- [ ] `P4-RES-07` 显示 EV 功率、接口、条件可用数量；价格不可比较或西班牙动态未启用时明确显示 Unknown
 - [ ] `P4-RES-08` 显示 Air 免费/收费/未知和设备状态
 - [ ] `P4-RES-09` 显示 Wash 类型和价格
 - [ ] `P4-RES-10` 显示 Best 推荐理由
@@ -471,6 +471,7 @@ V1 的核心验收结果是：
 | 2026-09-04 | EV 统一层级与容量 | 统一为 service point → EVSE → connector；availability 和容量按 EVSE 计算，connector 只表达兼容接口 | 法国按 EVSE 行给 connector flags，西班牙按 connector 行重复 EVSE；直接数 connector 会夸大可同时充电数量 | P1-EV-01 |
 | 2026-09-04 | EV 来源许可与更新政策 | 法国 PAN/QualiCharge 与西班牙 RIPREE 可用于受控开发；Reve/SGV 在书面商用授权、可用配额和再分发条款确认前禁用 | 公开数据许可允许前三类来源缓存、转换和展示；Reve 通用条款不构成 Fuel Now 商用授权 | P1-EV-02 |
 | 2026-09-04 | V1 EV 实时能力边界 | 不承诺两国全国实时 availability/price；法国仅逐 EVSE 条件显示 Live，西班牙动态与两国 Charge Cheapest 默认禁用 | 实测法国 5 分钟内状态占全国静态 PDC 不足 1%，西班牙 Reve 未获商用/API 条件；避免把部分或旧数据包装成全国实时 | P1-EV-03 |
+| 2026-09-04 | Phase 1 后 V1 范围 | 保留 France/Spain 四入口；Fuel 完整决策，Charge/Air/Wash 按来源能力启用、条件启用或明确不可用 | 实测数据支持静态发现，但不能支持所有服务的价格/实时状态；能力矩阵同时保留产品价值和真实性 | P1-RPT-06 |
 
 # 风险与阻塞记录
 
@@ -559,3 +560,4 @@ V1 的核心验收结果是：
 | 2026-09-04 | 汇总决策字段缺失率 | 分别量化 Fuel/Charge 价格、排班营业与实时状态，以及 Air/Wash 价格/设备状态的 Unknown 边界；见 `docs/data/decision-field-missingness-report.md` |
 | 2026-09-04 | 汇总新鲜度与异常样本 | 量化 Fuel/Charge/静态/OSM 时间分布并登记时区、过期、坐标、身份、功率、未来时间和标签冲突样本；见 `docs/data/freshness-anomaly-report.md` |
 | 2026-09-04 | 完成来源风险、成本与降级方案 | 为开放数据、OSM、Reve 与 Mapbox 建立成本驱动、预算控制、故障降级和发布门槛；见 `docs/data/source-risk-cost-degradation-report.md` |
+| 2026-09-04 | 完成 Phase 1 并确认 V1 范围 | 六项 Phase 1 验收门槛通过；保留四类服务但采用 capability-aware 行为，进入 Phase 2；见 `docs/decisions/0013-v1-scope-after-data-feasibility.md` |
