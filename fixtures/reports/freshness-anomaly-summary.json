@@ -1,0 +1,76 @@
+{
+  "task": "P1-RPT-04",
+  "generated_at": "2026-09-04",
+  "freshness": {
+    "france_fuel_price": {
+      "captured_at": "2026-09-03T23:15:11Z",
+      "source_rows": 9804,
+      "price_observations": 32711,
+      "compressed_response_sha256": "cf02bc507695827432a9c966582c98ba3cf7a825c1cf77a4d450d050cd1b65cf",
+      "live_le_15m": 0,
+      "recent_15m_to_24h": 16264,
+      "stale_24h_to_7d": 10607,
+      "unknown_gt_7d": 5840
+    },
+    "spain_fuel_station_observation": {
+      "captured_at": "2026-09-03T21:00:00Z",
+      "stations": 11475,
+      "live_le_15m": 0,
+      "recent_15m_to_24h": 8050,
+      "stale_24h_to_7d": 3291,
+      "unknown_gt_7d": 134,
+      "ambiguous_supplement_joins": 2
+    },
+    "france_qualicharge_availability": {
+      "captured_at": "2026-09-03T22:12:21Z",
+      "dynamic_ids": 75107,
+      "national_static_ids": 166337,
+      "live_le_5m": 705,
+      "recent_5_to_15m": 1495,
+      "stale_15_to_60m": 5511,
+      "unknown_gt_60m": 67396,
+      "live_exact_state_before_connector_checks": 686,
+      "live_available_before_connector_checks": 501
+    },
+    "france_pan_dynamic_availability": {
+      "captured_at": "2026-09-03T22:12:21Z",
+      "latest_unique_ids": 104908,
+      "live_le_5m": 958,
+      "live_le_5m_matched_static": 947,
+      "recent_5_to_15m": 1513,
+      "stale_15_to_60m": 6556,
+      "unknown_gt_60m": 95881,
+      "duplicate_ids": 11283,
+      "conflicting_duplicate_ids": 5769
+    },
+    "spain_reve_diagnostic": {
+      "captured_at": "2026-09-03T22:25:33Z",
+      "ocpi_evses": 18,
+      "age_minutes_min": 47.63,
+      "age_minutes_median": 516.61,
+      "age_minutes_max": 16381.55,
+      "representative": false
+    },
+    "static_modification_calendar_age": {
+      "france_pan": {"rows": 166339, "future": 56, "within_30d": 69398, "days_31_to_90": 16369, "days_91_to_365": 53769, "over_365d": 26747},
+      "spain_ripree": {"rows": 43610, "future": 0, "within_30d": 778, "days_31_to_90": 596, "days_91_to_365": 16614, "over_365d": 25622}
+    },
+    "osm_edit_age_not_equipment_verification": {
+      "air": {"unique_candidates": 428, "within_30d": 27, "days_31_to_90": 16, "days_91_to_365": 112, "over_365d": 273},
+      "wash": {"unique_candidates": 329, "within_30d": 22, "days_31_to_90": 10, "days_91_to_365": 51, "over_365d": 246}
+    }
+  },
+  "anomalies": [
+    {"case_id": "fr_fuel_typed_timezone", "source_id": "fr-fuel-realtime-v2", "source_record": "35300004/E10", "issue": "typed portal offset changes raw France-local wall-clock meaning", "action": "parse raw time in Europe/Paris and alert on divergence"},
+    {"case_id": "fr_fuel_expired_price", "source_id": "fr-fuel-realtime-v2", "source_record": "13130005/E85", "issue": "observation from 2024-12-04 remains in current export", "action": "exclude old amount from Cheapest and Best advantage"},
+    {"case_id": "es_fuel_zero_coordinates", "source_id": "es-miteco-fuel-prices", "source_records": ["11988", "16499", "12883"], "issue": "zero coordinates", "action": "quarantine"},
+    {"case_id": "es_fuel_swapped_coordinates", "source_id": "es-miteco-fuel-prices", "source_record": "16268", "issue": "apparently swapped latitude/longitude", "action": "quarantine without auto-swap"},
+    {"case_id": "fr_pan_duplicate_pdc", "source_id": "fr-irve-static-pan", "source_records": ["FRC2AEDE0120B1GNAC00061K", "FRC2AEDE0240B1GP2C00058M"], "issue": "duplicate PDC identities", "action": "quarantine duplicate groups"},
+    {"case_id": "fr_pan_invalid_power", "source_id": "fr-irve-static-pan", "source_record": "FRLMSE12348882602", "raw_value": "160000.0 kW", "issue": "implausible nominal power", "action": "quarantine power field"},
+    {"case_id": "fr_pan_future_date", "source_id": "fr-irve-static-pan", "source_record": "FRGOBEIES20241113854900031", "raw_value": "2026-12-30", "issue": "future source modification date", "action": "ignore for freshness and alert"},
+    {"case_id": "fr_pan_no_connector", "source_id": "fr-irve-static-pan", "source_record": "FR55CEFR06000B0U1N1", "issue": "no supported connector flag", "action": "exclude from connector-specific eligibility"},
+    {"case_id": "es_ripree_duplicate_connector", "source_id": "es-miteco-ripree", "source_records": ["ES*WEN*EDBJZFREGENAL12/8bdff9af-d279-4a9f-6e06-84977eb91aff", "ES*WEN*EDBJZFREGENAL11/1a809117-2ea7-b05d-eead-edbbb8695a9d"], "issue": "each composite key occurs four times", "action": "quarantine duplicate key groups"},
+    {"case_id": "es_ripree_low_power", "source_id": "es-miteco-ripree", "source_record": "ES*ATE*E00019/1", "raw_value": "0,06 kW", "issue": "implausible maximum power", "action": "quarantine power field"},
+    {"case_id": "osm_contradictory_air", "source_id": "openstreetmap", "source_records": ["node/8378736085", "node/9569670407"], "issue": "amenity=compressed_air with compressed_air=no", "action": "explicit negative wins; exclude from Air eligibility"}
+  ]
+}

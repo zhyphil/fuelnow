@@ -4,7 +4,7 @@
 > 需求来源：[france_spain_driver_decision_engine_project.md](./france_spain_driver_decision_engine_project.md)  
 > 当前状态：进行中  
 > 当前阶段：Phase 1 — Data Feasibility Spike
-> 下一项任务：`P1-RPT-04` 输出新鲜度分布和异常数据样本
+> 下一项任务：`P1-RPT-05` 输出数据源风险、成本和降级方案
 > 最后更新：2026-09-04
 
 ## 使用方法
@@ -151,7 +151,7 @@ V1 的核心验收结果是：
 - [x] `P1-RPT-01` 输出 France/Spain Fuel、Charge、Air、Wash 全部选定来源到统一模型的字段映射、派生规则、不可用边界及机器可读清单（2026-09-04；[字段映射报告](./docs/data/source-field-mapping-report.md)；[机器映射](./fixtures/reports/source-field-mapping.json)）
 - [x] `P1-RPT-02` 汇总 Fuel 全国来源规模/目标区域密度、Air/Wash 来源确认率与 OSM 候选、EV 静态密度及动态关联/新鲜覆盖，并严格区分不可比较分母（2026-09-04；[覆盖率报告](./docs/data/service-coverage-report.md)；[机器汇总](./fixtures/reports/service-coverage.json)）
 - [x] `P1-RPT-03` 输出两国四类服务的价格、排班营业状态和当前 availability 已知/缺失率，区分原始字段、决策级可用性与不可测分母（2026-09-04；[缺失率报告](./docs/data/decision-field-missingness-report.md)；[机器汇总](./fixtures/reports/decision-field-missingness.json)）
-- [ ] `P1-RPT-04` 输出新鲜度分布和异常数据样本
+- [x] `P1-RPT-04` 输出 Fuel 价格、EV 动态状态、静态修改时间及 OSM 编辑时间分布，并建立时区、过期值、坐标、重复 ID、功率、未来时间、关联与标签冲突异常目录（2026-09-04；[新鲜度/异常报告](./docs/data/freshness-anomaly-report.md)；[机器汇总](./fixtures/reports/freshness-anomaly-summary.json)）
 - [ ] `P1-RPT-05` 输出数据源风险、成本和降级方案
 - [ ] `P1-RPT-06` 根据报告最终确认或缩减 V1 范围
 
@@ -555,3 +555,4 @@ V1 的核心验收结果是：
 | 2026-09-04 | 汇总全部来源字段映射 | 建立 Fuel、Charge、Air、Wash 的跨来源 canonical 字段、派生/补充/不可用边界，并统一西班牙 Fuel source ID；见 `docs/data/source-field-mapping-report.md` |
 | 2026-09-04 | 汇总四类服务覆盖率 | 统一 Fuel 区域密度、Air/Wash 来源确认率与 OSM 候选、Charge 静态规模及动态/新鲜覆盖，禁止混用不同分母；见 `docs/data/service-coverage-report.md` |
 | 2026-09-04 | 汇总决策字段缺失率 | 分别量化 Fuel/Charge 价格、排班营业与实时状态，以及 Air/Wash 价格/设备状态的 Unknown 边界；见 `docs/data/decision-field-missingness-report.md` |
+| 2026-09-04 | 汇总新鲜度与异常样本 | 量化 Fuel/Charge/静态/OSM 时间分布并登记时区、过期、坐标、身份、功率、未来时间和标签冲突样本；见 `docs/data/freshness-anomaly-report.md` |
