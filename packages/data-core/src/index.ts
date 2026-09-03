@@ -28,3 +28,14 @@ export type {
   SpainFuelSupplement,
   SpainFuelSupplementMatchResult,
 } from "./spain-fuel/SpainFuelAdapter.js";
+export {
+  DEFAULT_SPAIN_FUEL_RADIUS_M,
+  findNearbySpainFuelStations,
+} from "./spain-fuel/findNearbySpainFuelStations.js";
+export type {
+  NearbySpainFuelIssue,
+  NearbySpainFuelSearchContext,
+  NearbySpainFuelSearchOptions,
+  NearbySpainFuelSearchResult,
+  NearbySpainFuelStation,
+} from "./spain-fuel/findNearbySpainFuelStations.js";
