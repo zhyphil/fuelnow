@@ -4,7 +4,7 @@
 > 需求来源：[france_spain_driver_decision_engine_project.md](./france_spain_driver_decision_engine_project.md)  
 > 当前状态：进行中  
 > 当前阶段：Phase 2 — 项目骨架与统一数据层
-> 下一项任务：`P2-ENG-01` 初始化代码仓库与目录结构
+> 下一项任务：`P2-ENG-02` 配置开发、测试和生产环境
 > 最后更新：2026-09-04
 
 ## 使用方法
@@ -172,7 +172,7 @@ V1 的核心验收结果是：
 
 ## 2.1 工程基础
 
-- [ ] `P2-ENG-01` 初始化代码仓库与目录结构
+- [x] `P2-ENG-01` 将仓库初始化为 pnpm monorepo，建立 `apps/api`、`apps/mobile`、`packages/contracts`、`packages/config` 和现有 `packages/data-core` 的稳定职责/依赖边界（2026-09-04；[结构说明](./docs/architecture/repository-structure.md)）
 - [ ] `P2-ENG-02` 配置开发、测试和生产环境
 - [ ] `P2-ENG-03` 提供 `.env.example`，确保密钥不进入版本库
 - [ ] `P2-ENG-04` 配置代码格式、静态检查和测试命令
@@ -561,3 +561,4 @@ V1 的核心验收结果是：
 | 2026-09-04 | 汇总新鲜度与异常样本 | 量化 Fuel/Charge/静态/OSM 时间分布并登记时区、过期、坐标、身份、功率、未来时间和标签冲突样本；见 `docs/data/freshness-anomaly-report.md` |
 | 2026-09-04 | 完成来源风险、成本与降级方案 | 为开放数据、OSM、Reve 与 Mapbox 建立成本驱动、预算控制、故障降级和发布门槛；见 `docs/data/source-risk-cost-degradation-report.md` |
 | 2026-09-04 | 完成 Phase 1 并确认 V1 范围 | 六项 Phase 1 验收门槛通过；保留四类服务但采用 capability-aware 行为，进入 Phase 2；见 `docs/decisions/0013-v1-scope-after-data-feasibility.md` |
+| 2026-09-04 | 建立正式 monorepo 目录骨架 | pnpm 纳入 API、mobile、contracts、config 与 data-core 五个 workspace，并定义单向依赖和服务端凭据边界；见 `docs/architecture/repository-structure.md` |
