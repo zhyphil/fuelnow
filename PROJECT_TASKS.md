@@ -4,7 +4,7 @@
 > 需求来源：[france_spain_driver_decision_engine_project.md](./france_spain_driver_decision_engine_project.md)  
 > 当前状态：进行中  
 > 当前阶段：Phase 0 — 开工决策  
-> 下一项任务：`P0-01` 确定 V1 首发客户端形态  
+> 下一项任务：`P0-02` 确定后端技术栈、包管理方式和运行环境
 > 最后更新：2026-09-03
 
 ## 使用方法
@@ -61,7 +61,7 @@ V1 的核心验收结果是：
 目标：明确会影响数据、架构和客户端实现的必要决策，但不在这一阶段过度设计。
 
 - [x] `P0-00` 初始化本地 Git 仓库、连接 GitHub 并建立 `main` 分支跟踪（2026-09-03）
-- [ ] `P0-01` 确定 V1 首发客户端形态：Web/PWA、React Native、Flutter 或原生 App
+- [x] `P0-01` 确定 V1 首发客户端形态：React Native + Expo + TypeScript，首发 iOS/Android（2026-09-03；[ADR 0001](./docs/decisions/0001-client-platform.md)）
 - [ ] `P0-02` 确定后端技术栈、包管理方式和运行环境
 - [ ] `P0-03` 确定数据库方案，默认评估 PostgreSQL + PostGIS
 - [ ] `P0-04` 确定地图、路径规划和 ETA 服务供应商
@@ -455,7 +455,7 @@ V1 的核心验收结果是：
 
 | 日期 | 决策 | 选择 | 理由 | 影响的任务 |
 |---|---|---|---|---|
-| 待定 | 首发客户端 | 待定 | 待确认 | P0-01 |
+| 2026-09-03 | 首发客户端 | React Native + Expo + TypeScript；首发 iOS/Android，Web 不纳入 V1 | 单一移动代码库适合定位、导航与跨平台 MVP；保留未来 Web 路径 | P0-01 |
 | 待定 | 后端技术栈 | 待定 | 待确认 | P0-02 |
 | 待定 | 路线/ETA 服务 | 待定 | 待确认 | P0-04 |
 | 待定 | 首发区域 | 待定 | 待确认 | P0-05、P0-11 |
@@ -478,3 +478,4 @@ V1 的核心验收结果是：
 | 2026-09-03 | 建立项目任务清单 | `PROJECT_TASKS.md` |
 | 2026-09-03 | 连接 GitHub 仓库并推送项目文档 | `https://github.com/zhyphil/fuelnow`，`main` 跟踪 `origin/main` |
 | 2026-09-03 | 建立 Conventional Commits 与自动提交推送工作流 | `AGENTS.md`、`CONTRIBUTING.md` |
+| 2026-09-03 | 完成 V1 客户端平台选型 | React Native + Expo + TypeScript；见 `docs/decisions/0001-client-platform.md` |
