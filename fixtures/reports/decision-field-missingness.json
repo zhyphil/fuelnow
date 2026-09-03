@@ -1,0 +1,69 @@
+{
+  "task": "P1-RPT-03",
+  "generated_at": "2026-09-04",
+  "fuel": {
+    "FR": {
+      "stations": 9804,
+      "stations_with_any_price": 9687,
+      "stations_without_any_price": 117,
+      "scheduled_hours": {"known": 8463, "missing": 1341, "known_percent": 86.32, "missing_percent": 13.68},
+      "live_site_closure": {"known": 0, "missing_percent": 100},
+      "price_by_fuel": {
+        "diesel": {"known": 9637, "missing": 167, "missing_percent": 1.70},
+        "sp95": {"known": 2976, "missing": 6828, "missing_percent": 69.65},
+        "e85": {"known": 3942, "missing": 5862, "missing_percent": 59.79},
+        "lpg": {"known": 1506, "missing": 8298, "missing_percent": 84.64},
+        "sp95_e10": {"known": 7365, "missing": 2439, "missing_percent": 24.88},
+        "sp98": {"known": 7148, "missing": 2656, "missing_percent": 27.09}
+      }
+    },
+    "ES": {
+      "stations": 11475,
+      "stations_with_any_v1_price": 11449,
+      "stations_without_v1_road_fuel": 26,
+      "scheduled_hours": {"known": 11475, "missing": 0, "known_percent": 100, "missing_percent": 0},
+      "live_site_closure": {"known": 0, "missing_percent": 100},
+      "fuel_stock": {"known": 0, "missing_percent": 100},
+      "supplement_observation_join": {"known": 11473, "missing": 2, "missing_percent": 0.02},
+      "price_by_fuel": {
+        "sp95": {"known": 10915, "missing": 560, "missing_percent": 4.88},
+        "sp95_e10": {"known": 29, "missing": 11446, "missing_percent": 99.75},
+        "sp98": {"known": 5507, "missing": 5968, "missing_percent": 52.01},
+        "e85": {"known": 2, "missing": 11473, "missing_percent": 99.98},
+        "diesel": {"known": 11109, "missing": 366, "missing_percent": 3.19},
+        "premium_diesel": {"known": 5771, "missing": 5704, "missing_percent": 49.71},
+        "lpg": {"known": 979, "missing": 10496, "missing_percent": 91.47},
+        "cng": {"known": 141, "missing": 11334, "missing_percent": 98.77},
+        "lng": {"known": 98, "missing": 11377, "missing_percent": 99.15}
+      }
+    }
+  },
+  "air": {
+    "FR": {"eligible": 5450, "price_known": 0, "price_missing_percent": 100, "working_status_known": 0, "working_status_missing_percent": 100},
+    "ES": {"eligible_denominator": "not_measurable_source_has_no_facility_field"}
+  },
+  "wash": {
+    "FR": {"eligible": 4052, "price_known": 0, "price_missing_percent": 100, "detailed_type_known": 0, "detailed_type_missing_percent": 100, "working_status_known": 0, "working_status_missing_percent": 100},
+    "ES": {"eligible_denominator": "not_measurable_source_has_no_facility_field"}
+  },
+  "charge": {
+    "FR": {
+      "static_rows": 166339,
+      "static_evses": 166337,
+      "raw_hours": {"known": 166339, "known_percent": 100},
+      "free_paid": {"known": 129362, "known_percent": 77.77},
+      "tariff_text": {"known": 35280, "known_percent": 21.21},
+      "comparable_price": {"known": 0, "known_percent": 0, "missing_percent": 100},
+      "qualicharge_v1_current": {"matched_any_age": 75092, "observed_le_5m": 705, "exact_state_le_5m_before_connector_checks": 686, "available_le_5m_before_connector_checks": 501, "cannot_support_current_exact_state": 165651, "cannot_support_current_exact_state_percent": 99.59}
+    },
+    "ES": {
+      "static_evses": 36465,
+      "static_connector_rows": 43610,
+      "opening_classification": {"known_rows": 42529, "known_percent": 97.52, "unavailable_rows": 1081, "unavailable_percent": 2.48},
+      "ripree_comparable_price": {"known": 0, "missing_percent": 100},
+      "ripree_availability": {"known": 0, "missing_percent": 100},
+      "reve_production_enabled_price_percent": 0,
+      "reve_production_enabled_availability_percent": 0
+    }
+  }
+}
