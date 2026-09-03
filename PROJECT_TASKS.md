@@ -4,7 +4,7 @@
 > 需求来源：[france_spain_driver_decision_engine_project.md](./france_spain_driver_decision_engine_project.md)  
 > 当前状态：进行中  
 > 当前阶段：Phase 1 — Data Feasibility Spike
-> 下一项任务：`P1-ES-03` 保存一份原始数据样本并记录字段定义
+> 下一项任务：`P1-ES-04` 验证站名、地址、坐标、品牌和营业时间字段
 > 最后更新：2026-09-03
 
 ## 使用方法
@@ -102,7 +102,7 @@ V1 的核心验收结果是：
 
 - [x] `P1-ES-01` 找到并验证 MITECO 全国 REST JSON、区域过滤/参考列表与 XLS 快照（2026-09-03；[调查记录](./docs/data/spain-fuel-source.md)）
 - [x] `P1-ES-02` 核实 CC BY 4.0 商业使用、缓存、改编、再分发和署名要求，并记录旧通用声明差异（2026-09-03；[核验记录](./docs/data/spain-fuel-licence.md)）
-- [ ] `P1-ES-03` 保存一份原始数据样本并记录字段定义
+- [x] `P1-ES-03` 保存 Pinto 市级 17 条原始响应并记录 41 个字符串字段定义（2026-09-03；[样本与字段字典](./docs/data/spain-fuel-fields.md)）
 - [ ] `P1-ES-04` 验证站名、地址、坐标、品牌和营业时间字段
 - [ ] `P1-ES-05` 验证燃料类型、价格和更新时间字段
 - [ ] `P1-ES-06` 验证临时关闭、24/7 和服务设施字段
@@ -511,3 +511,4 @@ V1 的核心验收结果是：
 | 2026-09-03 | 完成法国 Fuel 多地理场景验证 | Paris、Toulouse、Blagnac 郊区/机场和 A9 高速场景全部通过；17 项测试通过；见 `docs/data/france-fuel-geography-validation.md` |
 | 2026-09-03 | 找到并探测西班牙官方 Fuel 数据源 | MITECO 全国 REST JSON 返回 11,475 站点，并验证区域过滤、参考列表与 XLS；见 `docs/data/spain-fuel-source.md` |
 | 2026-09-03 | 核实西班牙 Fuel 数据许可与使用约束 | 现代资源 CC BY 4.0 允许商业复用、缓存、改编和再分发；记录旧通用声明差异；见 `docs/data/spain-fuel-licence.md` |
+| 2026-09-03 | 保存西班牙 Fuel 原始样本与字段字典 | 固定 Pinto 市级 17 条完整响应，并记录 41 个源字符串字段；见 `fixtures/spain-fuel/` 与 `docs/data/spain-fuel-fields.md` |
