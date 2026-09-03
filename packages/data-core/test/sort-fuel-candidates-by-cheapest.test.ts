@@ -14,6 +14,7 @@ interface CandidateOptions {
   unit?: NormalizedPrice["unit"];
   available?: boolean | null;
   outOfStock?: boolean | null;
+  freshness?: NormalizedPrice["freshness"];
 }
 
 function makeCandidate(
@@ -39,6 +40,7 @@ function makeCandidate(
                   amount: price,
                   currency: "EUR",
                   unit: options.unit ?? "liter",
+                  freshness: options.freshness ?? "recent",
                 },
         },
       ],
@@ -96,6 +98,21 @@ describe("sortFuelCandidatesByCheapest", () => {
         (candidate) => candidate.servicePoint.id,
       ),
     ).toEqual(["es:1", "fr:1", "fr:2"]);
+  });
+
+  it("does not let stale or unknown prices win through an old low amount", () => {
+    const candidates = [
+      makeCandidate("recent", 500, { price: 1.95, freshness: "recent" }),
+      makeCandidate("stale-near", 100, { price: 1.5, freshness: "stale" }),
+      makeCandidate("stale-far", 300, { price: 1.4, freshness: "stale" }),
+      makeCandidate("unknown", 10, { price: 1.2, freshness: "unknown" }),
+    ];
+
+    expect(
+      sortFuelCandidatesByCheapest(candidates, "sp95").map(
+        (candidate) => candidate.servicePoint.id,
+      ),
+    ).toEqual(["recent", "stale-near", "stale-far", "unknown"]);
   });
 
   it("accepts kilogram prices for gas fuels without mutating input", () => {

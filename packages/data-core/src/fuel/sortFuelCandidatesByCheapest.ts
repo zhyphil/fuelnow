@@ -6,10 +6,15 @@ function expectedUnit(fuelType: FuelType): NormalizedPrice["unit"] {
   return fuelType === "cng" || fuelType === "lng" ? "kilogram" : "liter";
 }
 
-function comparablePrice(
+interface PriceRank {
+  tier: 0 | 1 | 2;
+  amount: number | null;
+}
+
+function priceRank(
   candidate: FuelDistanceCandidate,
   fuelType: FuelType,
-): number | null {
+): PriceRank {
   const fuel = candidate.servicePoint.fuels.find(
     (item) => item.fuelType === fuelType,
   );
@@ -19,7 +24,7 @@ function comparablePrice(
     fuel.available === false ||
     fuel.outOfStock === true
   ) {
-    return null;
+    return { tier: 2, amount: null };
   }
   if (fuel.price.currency !== "EUR" || fuel.price.unit !== expectedUnit(fuelType)) {
     throw new Error(`Incomparable ${fuelType} price unit or currency`);
@@ -27,13 +32,19 @@ function comparablePrice(
   if (!Number.isFinite(fuel.price.amount) || fuel.price.amount <= 0) {
     throw new RangeError(`${fuelType} price must be positive and finite`);
   }
-  return fuel.price.amount;
+  if (fuel.price.freshness === "live" || fuel.price.freshness === "recent") {
+    return { tier: 0, amount: fuel.price.amount };
+  }
+  if (fuel.price.freshness === "stale") {
+    return { tier: 1, amount: null };
+  }
+  return { tier: 2, amount: null };
 }
 
 export function sortFuelCandidatesByCheapest<
   TCandidate extends FuelDistanceCandidate,
 >(candidates: readonly TCandidate[], fuelType: FuelType): TCandidate[] {
-  const prices = new Map<TCandidate, number | null>();
+  const prices = new Map<TCandidate, PriceRank>();
   for (const candidate of candidates) {
     if (
       !Number.isFinite(candidate.straightLineDistanceM) ||
@@ -43,20 +54,21 @@ export function sortFuelCandidatesByCheapest<
         "straightLineDistanceM must be a finite non-negative number",
       );
     }
-    prices.set(candidate, comparablePrice(candidate, fuelType));
+    prices.set(candidate, priceRank(candidate, fuelType));
   }
 
   return [...candidates].sort((left, right) => {
-    const leftPrice = prices.get(left) ?? null;
-    const rightPrice = prices.get(right) ?? null;
-    if (leftPrice !== null && rightPrice !== null && leftPrice !== rightPrice) {
-      return leftPrice - rightPrice;
+    const leftPrice = prices.get(left) as PriceRank;
+    const rightPrice = prices.get(right) as PriceRank;
+    if (leftPrice.tier !== rightPrice.tier) {
+      return leftPrice.tier - rightPrice.tier;
     }
-    if (leftPrice !== null && rightPrice === null) {
-      return -1;
-    }
-    if (leftPrice === null && rightPrice !== null) {
-      return 1;
+    if (
+      leftPrice.amount !== null &&
+      rightPrice.amount !== null &&
+      leftPrice.amount !== rightPrice.amount
+    ) {
+      return leftPrice.amount - rightPrice.amount;
     }
     return (
       left.straightLineDistanceM - right.straightLineDistanceM ||
