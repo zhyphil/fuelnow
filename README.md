@@ -12,3 +12,5 @@ The project has completed its Phase 1 data-feasibility review. Fuel supports the
 Current implementation work proceeds through Phase 2, then the decision API, mobile client and release-test gates. Every completed checklist task is verified, committed separately with a scoped Conventional Commit, and pushed to `origin/main`.
 
 The pnpm monorepo layout is documented in [`docs/architecture/repository-structure.md`](./docs/architecture/repository-structure.md).
+
+For local configuration, copy [`.env.example`](./.env.example) to an untracked `.env`. Provider credentials are optional and remain blank; the default configuration disables source synchronization and paid routing.
