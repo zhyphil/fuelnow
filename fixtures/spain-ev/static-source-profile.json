@@ -1,0 +1,136 @@
+{
+  "captured_at": "2026-09-03T22:17:55Z",
+  "dataset_url": "https://catalogo.datosabiertos.miteco.gob.es/catalogo/es/dataset/6ee8d46f-93bd-478f-8e29-3ba4f6d8405c",
+  "catalog_url": "https://datos.gob.es/es/catalogo/e05068001-puntos-de-recarga-de-vehiculos-electricos",
+  "export_page_url": "https://energia.serviciosmin.gob.es/Ripree/ExportarInstalaciones/Export",
+  "export_request": {
+    "method": "POST",
+    "url": "https://energia.serviciosmin.gob.es/Ripree/ExportarInstalaciones/GenerarExcel",
+    "content_type": "application/json",
+    "body": {
+      "soloConsolidado": true
+    }
+  },
+  "file": {
+    "bytes": 45114644,
+    "sha256": "a7309940ecb040a87fe15b1cf0becbb0640f17e18aa55d1577d574f4e6f626ca",
+    "encoding": "UTF-16LE without BOM",
+    "delimiter": ";",
+    "field_count": 27,
+    "row_count": 43610,
+    "exact_duplicate_rows": 0
+  },
+  "identity": {
+    "unique_installation_codes": 12214,
+    "unique_charge_point_ids": 36465,
+    "unique_charge_point_codes": 36465,
+    "unique_connector_ids_without_parent": 21329,
+    "unique_charge_point_connector_keys": 43604,
+    "duplicate_charge_point_connector_rows": 6,
+    "duplicate_charge_point_connector_keys": [
+      {
+        "charge_point_id": "ES*WEN*EDBJZFREGENAL12",
+        "connector_id": "8bdff9af-d279-4a9f-6e06-84977eb91aff",
+        "rows": 4
+      },
+      {
+        "charge_point_id": "ES*WEN*EDBJZFREGENAL11",
+        "connector_id": "1a809117-2ea7-b05d-eead-edbbb8695a9d",
+        "rows": 4
+      }
+    ],
+    "charge_point_ids_mapped_to_multiple_codes": 0,
+    "charge_point_ids_mapped_to_multiple_installations": 0,
+    "charge_point_ids_with_multiple_connector_rows": 4963,
+    "charge_point_ids_with_more_than_4_connector_rows": 53,
+    "charge_point_ids_with_more_than_10_connector_rows": 30,
+    "max_connector_rows_for_one_charge_point_id": 84
+  },
+  "coverage": {
+    "coordinates_present_and_parsed": 43610,
+    "coordinates_inside_catalog_bounds": 43610,
+    "operator_name_present": 43610,
+    "operator_code_present": 43610,
+    "operator_code_count": 153,
+    "power_present_and_parsed": 43610,
+    "power_min_kw": 0.06,
+    "power_max_kw": 1000,
+    "power_non_positive": 0,
+    "power_above_1000_kw": 0,
+    "payment_methods_present": 43610,
+    "payment_method_distinct_values": 1058,
+    "accessibility_known": 4204,
+    "services_present": 4741,
+    "opening_type_24_7": 36984,
+    "opening_type_habitual": 5545,
+    "opening_type_unavailable": 1081
+  },
+  "connector_type_counts": {
+    "IEC_62196_T2": 27821,
+    "IEC_62196_T2_COMBO": 10573,
+    "CHADEMO": 3826,
+    "DOMESTIC_F": 1169,
+    "IEC_60309_2_single_16": 106,
+    "IEC_62196_T1": 64,
+    "IEC_60309_2_three_32": 24,
+    "DOMESTIC_E": 7,
+    "IEC_62196_T1_COMBO": 6,
+    "DOMESTIC_A": 6,
+    "IEC_62196_T3A": 4,
+    "IEC_62196_T3C": 1,
+    "TeslaConnectorEurope": 1,
+    "IEC_60309_2_three_16": 1,
+    "DOMESTIC_L": 1
+  },
+  "charge_type_counts": {
+    "DC": 14803,
+    "AC_3_PHASE": 21092,
+    "AC_1_PHASE": 7715
+  },
+  "connector_format_counts": {
+    "Cable": 23548,
+    "Socket": 20062
+  },
+  "source_update": {
+    "present_and_parsed": 43610,
+    "min": "2023-07-04",
+    "max": "2026-08-31",
+    "after_capture_date": 0,
+    "within_30_days": 778,
+    "within_30_days_percent": 1.78,
+    "catalog_distribution_last_updated": "2026-06-01",
+    "catalog_update_frequency": "irregular"
+  },
+  "fixed_geographies_10km": {
+    "madrid": {
+      "connector_rows": 2669,
+      "charge_points": 2382,
+      "installations": 607,
+      "operators": 33
+    },
+    "barcelona": {
+      "connector_rows": 4079,
+      "charge_points": 2791,
+      "installations": 696,
+      "operators": 34
+    },
+    "el_prat": {
+      "connector_rows": 594,
+      "charge_points": 498,
+      "installations": 178,
+      "operators": 24
+    },
+    "la_jonquera": {
+      "connector_rows": 48,
+      "charge_points": 42,
+      "installations": 16,
+      "operators": 9
+    }
+  },
+  "dynamic_capability": {
+    "availability_field_present": false,
+    "tariff_or_price_field_present": false,
+    "payment_methods_are_price_evidence": false
+  }
+}
+
