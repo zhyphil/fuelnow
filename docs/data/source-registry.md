@@ -14,7 +14,7 @@ This registry is the source of truth for datasets and external providers conside
 
 | Source ID | Status | Country/service | Publisher/provider | Dataset/service | Licence/terms | Verification note |
 |---|---|---|---|---|---|---|
-| `fr-fuel-daily` | candidate | FR / Fuel, Air, Wash | Ministères économiques et financiers | Prix des carburants — flux quotidien | Catalogue currently shows Licence Ouverte 1.0 | Verify whether the real-time feed is preferable and record its exact licence |
+| `fr-fuel-realtime-v2` | validating | FR / Fuel, Air, Wash | DGCCRF / Ministères économiques et financiers | Prix des carburants en France — Flux instantané — v2 | Portal metadata shows Licence Ouverte 2.0; formal verification pending P1-FR-02 | Official metadata, Records API, and CSV/JSON/GeoJSON exports verified reachable on 2026-09-03 |
 | `es-miteco-fuel` | candidate | ES / Fuel, Air, Wash | MITECO | Instalaciones de suministro de combustibles | Unverified | Capture official resource/API terms and commercial-reuse evidence in Phase 1 |
 | `fr-irve` | candidate | FR / Charge | French national transport/open-data publishers | National IRVE datasets | Unverified per selected resource | Select static/dynamic resources and verify each licence separately |
 | `es-miteco-ev` | candidate | ES / Charge | MITECO | Puntos de Recarga de Vehículos Eléctricos | Unverified | Validate static and dynamic terms separately where applicable |
@@ -50,4 +50,3 @@ Approved sources must appear in:
 4. the application-wide Data Sources & Licences page
 
 See [ADR 0008](../decisions/0008-source-attribution.md) for the full policy.
-
