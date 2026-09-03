@@ -13,6 +13,13 @@ export type {
   NearbyFranceFuelSearchResult,
   NearbyFranceFuelStation,
 } from "./france-fuel/findNearbyFranceFuelStations.js";
+export { normalizeFuelSourceRecord } from "./fuel/normalizeFuelSourceRecord.js";
+export type {
+  FranceFuelSourceRecord,
+  FuelSourceAdapters,
+  FuelSourceRecord,
+  SpainFuelSourceRecord,
+} from "./fuel/normalizeFuelSourceRecord.js";
 export {
   assertValidGeoPoint,
   haversineDistanceMeters,

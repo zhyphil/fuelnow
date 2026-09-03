@@ -153,3 +153,7 @@ export interface AdapterContext {
   existingCreatedAt?: string;
   sourceSyncHealthy?: boolean;
 }
+
+export interface SourceAdapter<TContext extends AdapterContext> {
+  adapt(input: unknown, context: TContext): AdapterResult;
+}

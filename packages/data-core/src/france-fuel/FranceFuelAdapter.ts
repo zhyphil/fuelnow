@@ -12,6 +12,7 @@ import type {
   OpeningDay,
   OpeningInterval,
   ServiceType,
+  SourceAdapter,
 } from "../domain.js";
 
 const SOURCE_ID = "fr-fuel-realtime-v2" as const;
@@ -633,7 +634,7 @@ function latestTimestamp(values: Array<string | null>): string | null {
   );
 }
 
-export class FranceFuelAdapter {
+export class FranceFuelAdapter implements SourceAdapter<AdapterContext> {
   adapt(input: unknown, context: AdapterContext): AdapterResult {
     const issues: AdapterIssue[] = [];
     const fetchedAt = parseFetchedAt(context.fetchedAt);

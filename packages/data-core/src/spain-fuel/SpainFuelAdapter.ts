@@ -12,6 +12,7 @@ import type {
   NormalizedServicePoint,
   OpeningDay,
   OpeningInterval,
+  SourceAdapter,
 } from "../domain.js";
 
 const SOURCE_ID = "es-miteco-fuel-prices";
@@ -684,7 +685,7 @@ export class SpainFuelSupplementIndex {
   }
 }
 
-export class SpainFuelAdapter {
+export class SpainFuelAdapter implements SourceAdapter<SpainFuelAdapterContext> {
   adapt(input: unknown, context: SpainFuelAdapterContext): AdapterResult {
     const issues: AdapterIssue[] = [];
     const fetchedAt = parseFetchedAt(context.fetchedAt);
