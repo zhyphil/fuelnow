@@ -3,8 +3,8 @@
 > 项目：France + Spain Driver Decision Engine  
 > 需求来源：[france_spain_driver_decision_engine_project.md](./france_spain_driver_decision_engine_project.md)  
 > 当前状态：进行中  
-> 当前阶段：Phase 0 — 开工决策  
-> 下一项任务：`P0-12` 记录所有决策及理由到“决策记录”章节
+> 当前阶段：Phase 1 — Data Feasibility Spike
+> 下一项任务：`P1-FR-01` 找到法国官方 Fuel 数据源、接口或下载 feed
 > 最后更新：2026-09-03
 
 ## 使用方法
@@ -72,13 +72,13 @@ V1 的核心验收结果是：
 - [x] `P0-09` 定义 Live、Verified、Recent、Stale、Unknown 的时间标准，并将 freshness 与 confidence 分离（2026-09-03；[ADR 0009](./docs/decisions/0009-freshness-confidence.md)）
 - [x] `P0-10` 定义 Fuel、Charge、Air、Wash 的搜索准入字段、必需可空字段、可选字段和缺失值语义（2026-09-03；[V1 字段契约](./docs/product/v1-service-fields.md)）
 - [x] `P0-11` 确定发布范围：全国数据能力 + Toulouse–Barcelona 走廊区域 Beta，Paris/Madrid 作为强制异地回归市场（2026-09-03；[ADR 0010](./docs/decisions/0010-beta-launch-scope.md)）
-- [ ] `P0-12` 记录所有决策及理由到“决策记录”章节
+- [x] `P0-12` 核对决策记录并建立 ADR 索引（2026-09-03；[决策索引](./docs/decisions/README.md)）
 
 ## Phase 0 验收门槛
 
-- [ ] 首发平台、后端、数据库和路线服务均已确定
-- [ ] 数据新鲜度与可信度规则有明确书面定义
-- [ ] 已确定数据验证区域和 V1 发布边界
+- [x] 首发平台、后端、数据库和路线服务均已确定
+- [x] 数据新鲜度与可信度规则有明确书面定义
+- [x] 已确定数据验证区域和 V1 发布边界
 
 ---
 
@@ -496,3 +496,4 @@ V1 的核心验收结果是：
 | 2026-09-03 | 定义按字段的新鲜度与可信度语义 | 五级 freshness + 独立 confidence；见 `docs/decisions/0009-freshness-confidence.md` |
 | 2026-09-03 | 定义 V1 四类服务字段契约 | 明确搜索准入、未知值、价格、状态、来源和查询派生字段；见 `docs/product/v1-service-fields.md` |
 | 2026-09-03 | 确定 V1 发布测试与区域 Beta 范围 | 全国数据能力 + Toulouse–Barcelona 走廊质量承诺；见 `docs/decisions/0010-beta-launch-scope.md` |
+| 2026-09-03 | 完成 Phase 0 开工决策 | 所有任务和验收门槛完成；ADR 索引见 `docs/decisions/README.md` |
