@@ -4,7 +4,7 @@
 > 需求来源：[france_spain_driver_decision_engine_project.md](./france_spain_driver_decision_engine_project.md)  
 > 当前状态：进行中  
 > 当前阶段：Phase 1 — Data Feasibility Spike
-> 下一项任务：`P1-FR-09` 验证 Paris、Toulouse、郊区和高速附近样本
+> 下一项任务：`P1-ES-01` 找到西班牙 MITECO Fuel API 或官方数据源
 > 最后更新：2026-09-03
 
 ## 使用方法
@@ -96,7 +96,7 @@ V1 的核心验收结果是：
 - [x] `P1-FR-06` 验证整站关闭不可得、24/24 自动付款语义及 Air/Wash 服务字段覆盖（2026-09-03；[验证报告](./docs/data/france-fuel-status-services-validation.md)）
 - [x] `P1-FR-07` 编写并测试 `FranceFuelAdapter`，覆盖字段归一化、时区、缺货、营业时间及 Air/Wash 语义（2026-09-03；7 tests）
 - [x] `P1-FR-08` 实现 GPS 直线距离查询并返回 Toulouse 中心 10 km 内 70 个真实 Fuel 结果（2026-09-03；[验证报告](./docs/data/france-fuel-nearby-validation.md)；12 tests）
-- [ ] `P1-FR-09` 验证 Paris、Toulouse、郊区和高速附近样本
+- [x] `P1-FR-09` 验证 Paris、Toulouse、Blagnac 郊区/机场和 A9 高速服务区真实样本（2026-09-03；[验证报告](./docs/data/france-fuel-geography-validation.md)；17 tests）
 
 ## 1.2 Spain Fuel
 
@@ -507,3 +507,4 @@ V1 的核心验收结果是：
 | 2026-09-03 | 验证法国 Fuel 关闭、24/7 与设施字段 | 整站临时关闭不可得；区分自动付款与站点 24/7；验证 Air/Wash 标签；见 `docs/data/france-fuel-status-services-validation.md` |
 | 2026-09-03 | 实现法国 Fuel 数据适配器 | 建立最小 TypeScript 数据包；真实 fixture、时区、缺货、营业时间及设施映射共 7 项测试通过；见 `packages/data-core/` |
 | 2026-09-03 | 实现法国 Fuel 10 km GPS 查询 | Toulouse 官方 12 km 边界样本中正确返回 70 个 10 km 内结果，距离与源 API 相差均小于 2 m；见 `docs/data/france-fuel-nearby-validation.md` |
+| 2026-09-03 | 完成法国 Fuel 多地理场景验证 | Paris、Toulouse、Blagnac 郊区/机场和 A9 高速场景全部通过；17 项测试通过；见 `docs/data/france-fuel-geography-validation.md` |
