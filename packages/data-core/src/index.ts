@@ -21,6 +21,16 @@ export type {
   SpainFuelSourceRecord,
 } from "./fuel/normalizeFuelSourceRecord.js";
 export {
+  DEFAULT_FUEL_SEARCH_RADIUS_M,
+  MAX_FUEL_SEARCH_RADIUS_M,
+  selectNearbyFuelCandidates,
+} from "./fuel/selectNearbyFuelCandidates.js";
+export type {
+  FuelDistanceCandidate,
+  FuelDistanceSelection,
+  FuelDistanceSelectionOptions,
+} from "./fuel/selectNearbyFuelCandidates.js";
+export {
   assertValidGeoPoint,
   haversineDistanceMeters,
 } from "./geo/haversine.js";

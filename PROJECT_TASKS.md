@@ -4,7 +4,7 @@
 > 需求来源：[france_spain_driver_decision_engine_project.md](./france_spain_driver_decision_engine_project.md)  
 > 当前状态：进行中  
 > 当前阶段：Phase 1 — Data Feasibility Spike
-> 下一项任务：`P1-FUEL-02` 支持按直线距离进行附近粗筛
+> 下一项任务：`P1-FUEL-03` 支持 Nearest 排序
 > 最后更新：2026-09-03
 
 ## 使用方法
@@ -113,7 +113,7 @@ V1 的核心验收结果是：
 ## 1.3 Fuel 统一验证
 
 - [x] `P1-FUEL-01` 将两国 Fuel 数据转换为统一模型并提供 country-discriminated 公共入口（2026-09-03；[验证报告](./docs/data/unified-fuel-model-validation.md)；40 tests）
-- [ ] `P1-FUEL-02` 支持按直线距离进行附近粗筛
+- [x] `P1-FUEL-02` 支持统一模型按直线距离进行附近粗筛、边界包含和 Fuel 准入（2026-09-03；[验证报告](./docs/data/unified-fuel-distance-validation.md)；44 tests）
 - [ ] `P1-FUEL-03` 支持 Nearest 排序
 - [ ] `P1-FUEL-04` 支持 Cheapest 排序
 - [ ] `P1-FUEL-05` 支持 Open now 筛选
@@ -523,3 +523,4 @@ V1 的核心验收结果是：
 | 2026-09-03 | 实现西班牙 Fuel 10 km GPS 查询 | Madrid 独立边界 fixture 中正确返回 219 个 10 km 内结果，支持稳定排序、限制和逐行错误；见 `docs/data/spain-fuel-nearby-validation.md` |
 | 2026-09-03 | 完成西班牙 Fuel 多地理场景验证 | Madrid、Barcelona、El Prat 郊区/机场和 La Jonquera AP-7 高速场景全部通过；38 项测试通过；见 `docs/data/spain-fuel-geography-validation.md` |
 | 2026-09-03 | 统一法国与西班牙 Fuel 模型入口 | 两国真实记录经 country-discriminated 入口转换为同一 `NormalizedServicePoint` 契约；40 项测试通过；见 `docs/data/unified-fuel-model-validation.md` |
+| 2026-09-03 | 实现统一 Fuel 直线距离粗筛 | 对两国统一模型执行 0–100 km Haversine 半径筛选，保持输入顺序并验证精确边界；44 项测试通过；见 `docs/data/unified-fuel-distance-validation.md` |
