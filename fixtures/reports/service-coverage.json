@@ -1,0 +1,92 @@
+{
+  "task": "P1-RPT-02",
+  "generated_at": "2026-09-04",
+  "fuel": {
+    "FR": {
+      "national_source_rows": 9804,
+      "real_world_denominator_known": false,
+      "eligible_10km": {"paris": 141, "toulouse": 70, "blagnac": 55, "a9_villages_catalans": 10}
+    },
+    "ES": {
+      "national_source_rows": 11475,
+      "real_world_denominator_known": false,
+      "eligible_10km": {"madrid": 219, "barcelona": 162, "el_prat": 116, "la_jonquera": 25}
+    },
+    "cross_border_la_jonquera_25km": {"total": 88, "FR": 21, "ES": 67}
+  },
+  "air": {
+    "FR": {
+      "source_denominator": 9804,
+      "confirmed_present": 5450,
+      "confirmed_present_percent": 55.59,
+      "fixed_scenarios": {
+        "paris": {"denominator": 141, "confirmed": 101, "percent": 71.63},
+        "toulouse": {"denominator": 70, "confirmed": 36, "percent": 51.43},
+        "a9_villages_catalans": {"denominator": 10, "confirmed": 7, "percent": 70},
+        "la_jonquera_fr_25km": {"denominator": 21, "confirmed": 15, "percent": 71.43}
+      }
+    },
+    "ES": {"source_denominator": 11475, "confirmed_present": 0, "coverage": "unavailable_source_has_no_field"},
+    "osm_candidates_10km": {"paris": 224, "toulouse": 66, "barcelona": 72, "madrid": 67}
+  },
+  "wash": {
+    "FR": {
+      "source_denominator": 9804,
+      "confirmed_present": 4052,
+      "confirmed_present_percent": 41.33,
+      "automatic": 3389,
+      "manual": 2535,
+      "both": 1872,
+      "fixed_scenarios": {
+        "paris": {"denominator": 141, "confirmed": 91, "percent": 64.54},
+        "toulouse": {"denominator": 70, "confirmed": 40, "percent": 57.14},
+        "a9_villages_catalans": {"denominator": 10, "confirmed": 6, "percent": 60},
+        "la_jonquera_fr_25km": {"denominator": 21, "confirmed": 10, "percent": 47.62}
+      }
+    },
+    "ES": {"source_denominator": 11475, "confirmed_present": 0, "coverage": "unavailable_source_has_no_field"},
+    "osm_candidates_10km": {"paris": 81, "toulouse": 81, "barcelona": 69, "madrid": 95}
+  },
+  "charge_static": {
+    "FR": {
+      "source": "fr-irve-static-pan",
+      "service_points": 48181,
+      "unique_evses": 166337,
+      "rows": 166339,
+      "fixed_geographies": {
+        "paris_10km": {"evses": 12398, "service_points": 1575},
+        "toulouse_10km": {"evses": 2351, "service_points": 541},
+        "a9_villages_catalans_10km": {"evses": 147, "service_points": 43},
+        "la_jonquera_25km": {"evses": 266, "service_points": 93}
+      }
+    },
+    "ES": {
+      "source": "es-miteco-ripree",
+      "service_points": 12214,
+      "unique_evses": 36465,
+      "connector_rows": 43610,
+      "fixed_geographies": {
+        "madrid_10km": {"evses": 2382, "service_points": 607},
+        "barcelona_10km": {"evses": 2791, "service_points": 696},
+        "el_prat_10km": {"evses": 498, "service_points": 178},
+        "la_jonquera_10km": {"evses": 42, "service_points": 16}
+      }
+    }
+  },
+  "charge_dynamic": {
+    "FR": {
+      "national_static_evses": 166337,
+      "qualicharge": {"matched": 75092, "matched_percent": 45.14, "live_le_5m": 705, "live_percent_of_static": 0.42, "le_60m": 7711, "le_60m_percent_of_static": 4.64},
+      "pan_beta": {"matched": 101688, "matched_percent": 61.13, "live_le_5m": 958, "live_percent_of_static": 0.58, "le_60m": 9027, "le_60m_percent_of_static": 5.43},
+      "dynamic_price_fields": 0
+    },
+    "ES": {
+      "reve_internal_dynamic_evses": 42800,
+      "reve_internal_total_evses": 44631,
+      "reve_internal_dynamic_percent": 95.9,
+      "ripree_intersection_measured": false,
+      "enabled_production_availability_percent": 0,
+      "enabled_production_price_percent": 0
+    }
+  }
+}
