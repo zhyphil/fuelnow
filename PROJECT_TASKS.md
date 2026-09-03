@@ -4,7 +4,7 @@
 > 需求来源：[france_spain_driver_decision_engine_project.md](./france_spain_driver_decision_engine_project.md)  
 > 当前状态：进行中  
 > 当前阶段：Phase 1 — Data Feasibility Spike
-> 下一项任务：`P1-WASH-03` 统计两国 Wash 字段的实际覆盖率
+> 下一项任务：`P1-WASH-04` 评估 Wash 类型和价格字段覆盖率
 > 最后更新：2026-09-04
 
 ## 使用方法
@@ -132,7 +132,7 @@ V1 的核心验收结果是：
 - [x] `P1-AIR-05` 评估 Air 设备可用/损坏状态：法国 5,450 条 100% Unknown，西班牙不可测（2026-09-03；[评估报告](./docs/data/air-equipment-status-coverage-validation.md)）
 - [x] `P1-WASH-01` 验证法国自动/手动洗车服务字段，严格保留来源标签且不把 `Laverie` 误判为洗车（2026-09-03；[验证报告](./docs/data/france-wash-field-validation.md)；88 tests）
 - [x] `P1-WASH-02` 验证西班牙 REST/XLS 无 Lavado、Wash 类型、价格或设备字段，且服务方式不得误映射（2026-09-04；[验证报告](./docs/data/spain-wash-field-validation.md)；90 tests）
-- [ ] `P1-WASH-03` 统计两国 Wash 字段的实际覆盖率
+- [x] `P1-WASH-03` 统计两国 Wash 来源确认覆盖率：法国 41.33%，西班牙当前来源能力不可用（2026-09-04；[覆盖率报告](./docs/data/wash-coverage-validation.md)；90 tests）
 - [ ] `P1-WASH-04` 评估 Wash 类型和价格字段覆盖率
 - [ ] `P1-AW-01` 决定是否使用 OpenStreetMap 补充 POI 与服务属性
 
@@ -539,3 +539,4 @@ V1 的核心验收结果是：
 | 2026-09-03 | 评估 Air 设备状态覆盖 | 法国 5,450 个 Air-positive 记录均无 working/broken/verified 时间，状态 100% Unknown；西班牙不可测；见 `docs/data/air-equipment-status-coverage-validation.md` |
 | 2026-09-03 | 验证法国 Fuel 的 Wash 字段 | 全国 4,052/9,804 条含自动或手动洗车标签；244 条固定样本严格匹配 presence，`Laverie` 不误映射；88 项测试通过；见 `docs/data/france-wash-field-validation.md` |
 | 2026-09-04 | 验证西班牙 Fuel 的 Wash 字段边界 | REST 41 字段、XLS 40 列均无 Wash/类型/价格/设备字段；684 条固定样本保持 Unknown，服务方式不误映射；90 项测试通过；见 `docs/data/spain-wash-field-validation.md` |
+| 2026-09-04 | 量化两国 Wash 来源覆盖 | 法国全国 4,052/9,804（41.33%）明确声明 Wash；西班牙 MITECO 无该字段，0 known-positive 不能解释为现实中不存在；见 `docs/data/wash-coverage-validation.md` |
