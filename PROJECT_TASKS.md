@@ -16,6 +16,7 @@
 - 完成任务时，在该任务下补充完成日期、结果或相关文件/API 链接。
 - 只有满足阶段验收条件后，才进入下一阶段。
 - 每次完成工作后，同时更新文档顶部的“当前状态”“当前阶段”“下一项任务”和“最后更新”。
+- 每个完成项单独提交并推送到 `origin/main`；提交格式遵循 `type(frontend|backend|fullstack): description`。
 
 ---
 
@@ -476,3 +477,4 @@ V1 的核心验收结果是：
 |---|---|---|
 | 2026-09-03 | 建立项目任务清单 | `PROJECT_TASKS.md` |
 | 2026-09-03 | 连接 GitHub 仓库并推送项目文档 | `https://github.com/zhyphil/fuelnow`，`main` 跟踪 `origin/main` |
+| 2026-09-03 | 建立 Conventional Commits 与自动提交推送工作流 | `AGENTS.md`、`CONTRIBUTING.md` |
