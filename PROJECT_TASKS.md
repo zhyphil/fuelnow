@@ -4,7 +4,7 @@
 > 需求来源：[france_spain_driver_decision_engine_project.md](./france_spain_driver_decision_engine_project.md)  
 > 当前状态：进行中  
 > 当前阶段：Phase 1 — Data Feasibility Spike
-> 下一项任务：`P1-FUEL-09` 验证 Perpignan/Girona 一带的跨境查询
+> 下一项任务：`P1-FUEL-10` 人工对照抽查真实站点与价格
 > 最后更新：2026-09-03
 
 ## 使用方法
@@ -120,7 +120,7 @@ V1 的核心验收结果是：
 - [x] `P1-FUEL-06` 每个结果返回可追溯 source、source URL 和来源命名空间（2026-09-03；[验证报告](./docs/data/unified-fuel-source-attribution-validation.md)；66 tests）
 - [x] `P1-FUEL-07` 每个结果返回有依据的 source updated_at、依据类型及独立系统 fetched_at（2026-09-03；[验证报告](./docs/data/unified-fuel-source-timestamps-validation.md)；69 tests）
 - [x] `P1-FUEL-08` 明确并实现价格未知/Stale/过期、缺货、关闭及 Unknown 的显示和决策规则（2026-09-03；[验证报告](./docs/data/unified-fuel-decision-state-validation.md)；78 tests）
-- [ ] `P1-FUEL-09` 验证 Perpignan/Girona 一带的跨境查询
+- [x] `P1-FUEL-09` 验证 Perpignan–La Jonquera–Girona 边境查询合并两国结果且不丢弃更近跨国站点（2026-09-03；[验证报告](./docs/data/cross-border-fuel-search-validation.md)；80 tests）
 - [ ] `P1-FUEL-10` 人工对照抽查真实站点与价格
 
 ## 1.4 Air 和 Wash 数据验证
@@ -530,3 +530,4 @@ V1 的核心验收结果是：
 | 2026-09-03 | 验证统一 Fuel 来源署名 | Toulouse 70 条与 Madrid 219 条结果全部返回来源 ID、名称和 HTTPS URL，全局 ID 可反查来源；66 项测试通过；见 `docs/data/unified-fuel-source-attribution-validation.md` |
 | 2026-09-03 | 验证统一 Fuel 来源时间 | Toulouse 70 条使用 source observed，Madrid 219 条使用 snapshot published，并始终与系统 fetched_at 分离；69 项测试通过；见 `docs/data/unified-fuel-source-timestamps-validation.md` |
 | 2026-09-03 | 定义统一 Fuel 显示和决策状态 | 价格 Current/Stale/Expired/Unknown、库存、关闭与本地化 warning code 形成可执行契约；78 项测试通过；见 `docs/data/unified-fuel-decision-state-validation.md` |
+| 2026-09-03 | 验证 Perpignan–Girona 跨境 Fuel 查询 | La Jonquera 25 km 返回法国 21 + 西班牙 67 条；北侧边境点保留更近西班牙站；80 项测试通过；见 `docs/data/cross-border-fuel-search-validation.md` |
