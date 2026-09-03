@@ -4,7 +4,7 @@
 > 需求来源：[france_spain_driver_decision_engine_project.md](./france_spain_driver_decision_engine_project.md)  
 > 当前状态：进行中  
 > 当前阶段：Phase 0 — 开工决策  
-> 下一项任务：`P0-07` 明确位置权限、隐私、数据保存和 GDPR 边界
+> 下一项任务：`P0-08` 明确官方数据来源的署名展示方式
 > 最后更新：2026-09-03
 
 ## 使用方法
@@ -67,7 +67,7 @@ V1 的核心验收结果是：
 - [x] `P0-04` 确定地图、路径规划和 ETA 服务：后端 Mapbox Matrix API，客户端 react-native-maps，外部 App 完成导航（2026-09-03；[ADR 0004](./docs/decisions/0004-maps-routing-provider.md)）
 - [x] `P0-05` 确定首批验证城市和跨境测试区域：Paris、Toulouse、Carcassonne、Perpignan、La Jonquera、Girona、Barcelona、Madrid（2026-09-03；[ADR 0005](./docs/decisions/0005-validation-geographies.md)）
 - [x] `P0-06` 确定 V1 账号策略：核心搜索和导航完全免登录，偏好保存在设备本地（2026-09-03；[ADR 0006](./docs/decisions/0006-account-policy.md)）
-- [ ] `P0-07` 明确位置权限、隐私、数据保存和 GDPR 边界
+- [x] `P0-07` 明确位置权限、隐私、数据保存和 GDPR 工程边界：仅前台按需定位、支持手动位置、默认不持久化精确出发点（2026-09-03；[ADR 0007](./docs/decisions/0007-location-privacy.md)）
 - [ ] `P0-08` 明确官方数据来源的署名展示方式
 - [ ] `P0-09` 定义 Live、Verified、Recent、Stale、Unknown 的时间标准
 - [ ] `P0-10` 定义四类服务各自的必需字段与可选字段
@@ -461,6 +461,7 @@ V1 的核心验收结果是：
 | 2026-09-03 | 地图、路线与 ETA | 后端 Mapbox Matrix；客户端 react-native-maps；外部导航 App | 列表和排名不绑定地图 SDK；小规模 1×N Matrix 符合 Top N ETA 计算；HERE 为首选备选 | P0-04 |
 | 2026-09-03 | 数据与搜索验证区域 | Paris、Toulouse、Carcassonne、Perpignan、La Jonquera、Girona、Barcelona、Madrid | 同时覆盖两国大城市、区域城市、跨境走廊和不同站点密度 | P0-05 |
 | 2026-09-03 | V1 账号策略 | 核心搜索与导航免登录；偏好保存在设备本地 | 降低紧急场景使用阻力，避免在数据验证前引入账号、恢复与身份数据范围 | P0-06 |
+| 2026-09-03 | 位置与隐私边界 | 仅前台按需定位；支持手动输入；精确出发点默认不落库、不进日志和分析 | 遵循目的限制、数据最小化和保存期限原则；避免形成位置历史 | P0-07 |
 | 待定 | 首发区域 | 待定 | 待确认 | P0-05、P0-11 |
 
 # 风险与阻塞记录
@@ -487,3 +488,4 @@ V1 的核心验收结果是：
 | 2026-09-03 | 完成地图、路线与 ETA 方案选型 | Mapbox Matrix + react-native-maps + 外部导航；见 `docs/decisions/0004-maps-routing-provider.md` |
 | 2026-09-03 | 固定法国、西班牙及跨境验证区域 | 8 个核心锚点和 Toulouse–Barcelona 走廊；见 `docs/decisions/0005-validation-geographies.md` |
 | 2026-09-03 | 确定 V1 免登录账号策略 | 核心搜索和导航无需账户；见 `docs/decisions/0006-account-policy.md` |
+| 2026-09-03 | 定义位置权限、保存与 GDPR 工程边界 | 前台按需定位且精确出发点默认不持久化；见 `docs/decisions/0007-location-privacy.md` |
