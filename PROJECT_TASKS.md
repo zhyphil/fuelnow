@@ -4,7 +4,7 @@
 > 需求来源：[france_spain_driver_decision_engine_project.md](./france_spain_driver_decision_engine_project.md)  
 > 当前状态：进行中  
 > 当前阶段：Phase 1 — Data Feasibility Spike
-> 下一项任务：`P1-ES-09` 验证 Madrid、Barcelona、郊区和高速附近样本
+> 下一项任务：`P1-FUEL-01` 将两国 Fuel 数据转换为统一模型
 > 最后更新：2026-09-03
 
 ## 使用方法
@@ -108,7 +108,7 @@ V1 的核心验收结果是：
 - [x] `P1-ES-06` 验证 11,475 行 XLS 的单站时间、5,194 个 24/7 站点、服务方式及关闭/Air/Wash 缺失边界（2026-09-03；[验证报告](./docs/data/spain-fuel-status-services-validation.md)）
 - [x] `P1-ES-07` 实现并测试 `SpainFuelAdapter`、营业时间解析、9 种燃料映射、XLS 补充匹配及异常隔离（2026-09-03；[验证报告](./docs/data/spain-fuel-adapter-validation.md)；29 tests）
 - [x] `P1-ES-08` 实现 GPS 直线距离查询并返回 Madrid 中心 10 km 内 219 个真实 Fuel 结果（2026-09-03；[验证报告](./docs/data/spain-fuel-nearby-validation.md)；33 tests）
-- [ ] `P1-ES-09` 验证 Madrid、Barcelona、郊区和高速附近样本
+- [x] `P1-ES-09` 验证 Madrid、Barcelona、El Prat 郊区/机场和 La Jonquera AP-7 高速真实样本（2026-09-03；[验证报告](./docs/data/spain-fuel-geography-validation.md)；38 tests）
 
 ## 1.3 Fuel 统一验证
 
@@ -521,3 +521,4 @@ V1 的核心验收结果是：
 | 2026-09-03 | 验证西班牙 Fuel 关闭、24/7 与服务字段 | XLS 补充单站时间和服务方式；确认关闭、Air/Wash 与设备状态不可得；见 `docs/data/spain-fuel-status-services-validation.md` |
 | 2026-09-03 | 实现西班牙 Fuel 数据适配器 | 真实 Pinto fixture、时间/营业时间、9 种燃料、单位、异常坐标和安全 XLS 补充匹配共 12 项西班牙测试通过；全国 11,475 行验收符合预期；见 `packages/data-core/` |
 | 2026-09-03 | 实现西班牙 Fuel 10 km GPS 查询 | Madrid 独立边界 fixture 中正确返回 219 个 10 km 内结果，支持稳定排序、限制和逐行错误；见 `docs/data/spain-fuel-nearby-validation.md` |
+| 2026-09-03 | 完成西班牙 Fuel 多地理场景验证 | Madrid、Barcelona、El Prat 郊区/机场和 La Jonquera AP-7 高速场景全部通过；38 项测试通过；见 `docs/data/spain-fuel-geography-validation.md` |
