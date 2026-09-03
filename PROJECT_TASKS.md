@@ -4,7 +4,7 @@
 > 需求来源：[france_spain_driver_decision_engine_project.md](./france_spain_driver_decision_engine_project.md)  
 > 当前状态：进行中  
 > 当前阶段：Phase 1 — Data Feasibility Spike
-> 下一项任务：`P1-AW-01` 决定是否使用 OpenStreetMap 补充 POI 与服务属性
+> 下一项任务：`P1-EV-FR-01` 验证法国 IRVE/QualiCharge 静态数据源
 > 最后更新：2026-09-04
 
 ## 使用方法
@@ -134,7 +134,7 @@ V1 的核心验收结果是：
 - [x] `P1-WASH-02` 验证西班牙 REST/XLS 无 Lavado、Wash 类型、价格或设备字段，且服务方式不得误映射（2026-09-04；[验证报告](./docs/data/spain-wash-field-validation.md)；90 tests）
 - [x] `P1-WASH-03` 统计两国 Wash 来源确认覆盖率：法国 41.33%，西班牙当前来源能力不可用（2026-09-04；[覆盖率报告](./docs/data/wash-coverage-validation.md)；90 tests）
 - [x] `P1-WASH-04` 评估 Wash 类型与价格覆盖：法国详细类型和价格均 0% known，西班牙不可测（2026-09-04；[评估报告](./docs/data/wash-type-price-coverage-validation.md)；90 tests）
-- [ ] `P1-AW-01` 决定是否使用 OpenStreetMap 补充 POI 与服务属性
+- [x] `P1-AW-01` 决定使用 OpenStreetMap 补充 Air/Wash POI 与 presence；保持独立来源、禁用客户端直连公共 Overpass，公开 Beta 前完成 ODbL 合并数据库审查（2026-09-04；[ADR 0011](./docs/decisions/0011-osm-air-wash-supplement.md)；[可行性报告](./docs/data/osm-air-wash-feasibility.md)）
 
 ## 1.5 EV 数据验证
 
@@ -541,3 +541,4 @@ V1 的核心验收结果是：
 | 2026-09-04 | 验证西班牙 Fuel 的 Wash 字段边界 | REST 41 字段、XLS 40 列均无 Wash/类型/价格/设备字段；684 条固定样本保持 Unknown，服务方式不误映射；90 项测试通过；见 `docs/data/spain-wash-field-validation.md` |
 | 2026-09-04 | 量化两国 Wash 来源覆盖 | 法国全国 4,052/9,804（41.33%）明确声明 Wash；西班牙 MITECO 无该字段，0 known-positive 不能解释为现实中不存在；见 `docs/data/wash-coverage-validation.md` |
 | 2026-09-04 | 评估 Wash 类型和价格覆盖 | 法国 4,052 个 Wash-positive 记录的详细类型与价格均为 0% known；西班牙无 Wash denominator；见 `docs/data/wash-type-price-coverage-validation.md` |
+| 2026-09-04 | 决定使用 OSM 补充 Air/Wash | 四个目标城市均有明确 Air/Wash 候选；仅采纳显式 presence，生产不依赖公共 Overpass，公开 Beta 前审查 ODbL 合并数据库义务；见 `docs/decisions/0011-osm-air-wash-supplement.md` |

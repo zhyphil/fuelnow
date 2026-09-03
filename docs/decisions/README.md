@@ -25,6 +25,7 @@ Do not silently rewrite an accepted decision when implementation changes directi
 | [0008](./0008-source-attribution.md) | P0-08 | Full stack | Four-level source attribution and field provenance |
 | [0009](./0009-freshness-confidence.md) | P0-09 | Full stack | Field-level freshness separated from confidence |
 | [0010](./0010-beta-launch-scope.md) | P0-11 | Full stack | National data capability with Toulouse–Barcelona regional Beta |
+| [0011](./0011-osm-air-wash-supplement.md) | P1-AW-01 | Full stack | OSM supplements Air/Wash presence; production does not depend on public Overpass |
 
 The V1 field decision for `P0-10` is maintained as the normative product contract in [V1 service field contract](../product/v1-service-fields.md).
 
@@ -47,6 +48,9 @@ Data quality
   ├─ Freshness/confidence (0009)
   ├─ V1 service field contract
   └─ Beta launch scope (0010)
+
+Supplemental data
+  └─ OSM Air/Wash supplement and acquisition boundary (0011)
 ```
 
 ## Creating a new ADR
@@ -58,4 +62,3 @@ Data quality
 5. Define acceptance criteria or reconsideration triggers.
 6. Add the accepted ADR to this index.
 7. Update `PROJECT_TASKS.md` and commit the completed task separately.
-
