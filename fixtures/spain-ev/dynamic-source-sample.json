@@ -1,0 +1,78 @@
+{
+  "fixture": {
+    "captured_at": "2026-09-03T22:25:33Z",
+    "source": "Reve anonymous public map response",
+    "selection": "Four field-diverse EVSEs from the first national list page plus a RIPREE identity check",
+    "note": "This diagnostic sample proves status/tariff shapes and identity boundaries. It is not a representative coverage sample and the anonymous UI endpoint is not a production contract."
+  },
+  "records": [
+    {
+      "location_id": "0008eb32-d6c0-4485-a41f-1d81566db05b",
+      "location_name": "Repsol, Elorrio, Vía Pública",
+      "source_type": "OCPI",
+      "evse_id": "ES*REP*E3125*1",
+      "status": "AVAILABLE",
+      "status_updated_at": "2026-09-03T19:51:14.829Z",
+      "connector": {
+        "standard": "IEC_62196_T2",
+        "format": "SOCKET",
+        "max_electric_power_w": 22080,
+        "tariff_human": "0.36 EUR/kWh",
+        "energy_price_ex_vat": 0.36,
+        "vat": 21
+      },
+      "ripree_static_id_join": true
+    },
+    {
+      "location_id": "0013a3cf-5523-4391-95d1-775137d6ce23",
+      "location_name": "BARRANCO",
+      "source_type": "OCPI",
+      "evse_id": "ES*EMP*E000095064011",
+      "status": "CHARGING",
+      "status_updated_at": "2026-09-03T20:30:28.420Z",
+      "connector": {
+        "standard": "IEC_62196_T2",
+        "format": "SOCKET",
+        "max_electric_power_w": 22080,
+        "tariff_human": "Gratuito",
+        "price_components": []
+      },
+      "ripree_static_id_join": false
+    },
+    {
+      "location_id": "002bf62d-c368-4261-972a-89f5a12fd38c",
+      "location_name": "M-Madrid-015",
+      "source_type": "OCPI",
+      "evse_id": "ES*IBD*E166352*1",
+      "status": "AVAILABLE",
+      "status_updated_at": "2026-09-03T21:23:30.512Z",
+      "connector": {
+        "standard": "IEC_62196_T2_COMBO",
+        "format": "CABLE",
+        "max_electric_power_w": 50000,
+        "energy_price_ex_vat": 0.54,
+        "flat_reservation_expires_price_ex_vat": 1,
+        "vat": 21
+      },
+      "ripree_static_id_join": false
+    },
+    {
+      "location_id": "00284519-655e-42da-918f-a9a267f58194",
+      "location_name": "Avinguda_Jaume_III_18",
+      "source_type": "RIPREE",
+      "evse_id": "ES*EMA*EMELIBMALLO106",
+      "public_map_status": "AVAILABLE",
+      "status_updated_at": "2026-03-02T08:47:30.142Z",
+      "fuel_now_availability": "UNKNOWN",
+      "connector": {
+        "standard": "IEC_62196_T2",
+        "format": "SOCKET",
+        "max_electric_power_w": 22000,
+        "tariffs": []
+      },
+      "ripree_static_id_join": true,
+      "boundary": "A RIPREE-only record has no operator-fed dynamic status. Fuel Now must not treat its public-map AVAILABLE label as live availability."
+    }
+  ]
+}
+

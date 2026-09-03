@@ -4,7 +4,7 @@
 > 需求来源：[france_spain_driver_decision_engine_project.md](./france_spain_driver_decision_engine_project.md)  
 > 当前状态：进行中  
 > 当前阶段：Phase 1 — Data Feasibility Spike
-> 下一项任务：`P1-EV-ES-02` 验证西班牙实时 availability 与价格覆盖率
+> 下一项任务：`P1-EV-01` 验证 connector、power、operator 和状态字段
 > 最后更新：2026-09-04
 
 ## 使用方法
@@ -141,7 +141,7 @@ V1 的核心验收结果是：
 - [x] `P1-EV-FR-01` 验证法国 IRVE/QualiCharge 静态数据源，选择 PAN Beta consolidation 为唯一静态主清单并记录质量隔离规则（2026-09-04；[验证报告](./docs/data/france-ev-static-source.md)；[固定 profile/sample](./fixtures/france-ev/)）
 - [x] `P1-EV-FR-02` 验证法国动态 availability 与价格：PAN 匹配 61.13% 静态 PDC，但仅 5.43% 在 60 分钟内；动态价格 0%（2026-09-04；[验证报告](./docs/data/france-ev-dynamic-coverage.md)；[固定 profile/sample](./fixtures/france-ev/)）
 - [x] `P1-EV-ES-01` 验证西班牙 RIPREE 公共充电静态数据源，确认 43,610 个连接器行、36,465 个 PDC 和 12,214 个安装点，并记录三级身份、解析及异常隔离规则（2026-09-04；[验证报告](./docs/data/spain-ev-static-source.md)；[固定 profile/sample](./fixtures/spain-ev/)）
-- [ ] `P1-EV-ES-02` 验证西班牙实时 availability 与价格覆盖率
+- [x] `P1-EV-ES-02` 验证西班牙 Reve/SGV 动态 availability 与价格：平台内 95.90% EVSE 为 OCPI 动态来源，价格筛选覆盖 91.48% 地点；记录 API key、5 次/小时及逐点精确状态限制（2026-09-04；[验证报告](./docs/data/spain-ev-dynamic-coverage.md)；[固定 profile/sample](./fixtures/spain-ev/)）
 - [ ] `P1-EV-01` 验证 connector、power、operator 和状态字段
 - [ ] `P1-EV-02` 记录各数据源更新频率与许可证要求
 - [ ] `P1-EV-03` 决定 V1 可承诺的实时性范围
@@ -474,7 +474,7 @@ V1 的核心验收结果是：
 | 日期 | 风险或阻塞 | 严重度 | 应对方式 | 状态 |
 |---|---|---|---|---|
 | 2026-09-03 | Air/Wash 价格与设备状态可能覆盖不足 | 高 | Phase 1 量化覆盖率；V1 对未知状态透明展示 | 待验证 |
-| 2026-09-03 | 西班牙 EV 实时 availability/price 覆盖可能不完整 | 高 | 不承诺全国实时；先验证后决定 V1 展示范围 | 待验证 |
+| 2026-09-03 | 西班牙 EV 实时 availability/price 虽在 Reve 内覆盖高，但外部 API 需审批密钥、限 5 次/小时且精确状态逐点读取 | 高 | 不依赖匿名 UI API；申请正式访问与生产配额并完成 RIPREE 全量身份关联，在此之前不承诺全国实时 | 已验证，生产接入受阻 |
 | 2026-09-03 | Best 权重尚未定义 | 中 | 先采用可解释规则，再根据导航行为校准 | 待处理 |
 | 2026-09-03 | 路线 API 会带来成本和限流 | 中 | Top N 分批计算，增加缓存、用量指标、预算告警和无 ETA 降级；Beta 前复核价格 | 应对方案已定义，待实现 |
 | 2026-09-03 | 法国 Fuel 门户的 typed datetime 偏移与原始 France-local 墙钟语义不一致 | 高 | 从原始 `@maj/@debut` 按 `Europe/Paris` 解析，保留原值，隔离未来时间，并用夏/冬令时测试保护 | 已在 `FranceFuelAdapter` 缓解，待持续监控 |
@@ -545,3 +545,4 @@ V1 的核心验收结果是：
 | 2026-09-04 | 验证法国 EV 静态数据源 | PAN Beta 49 字段含 166,339 个 PDC/48,181 个站；QualiCharge 99.97% 已包含，禁止重复叠加；记录重复 ID、坐标、功率和时间异常；见 `docs/data/france-ev-static-source.md` |
 | 2026-09-04 | 验证法国 EV 动态 availability/price | PAN 动态匹配 61.13% 静态 PDC，但最新去重后仅 5.43% 静态 PDC 在 60 分钟内；11,283 个重复 ID；动态价格字段为 0；见 `docs/data/france-ev-dynamic-coverage.md` |
 | 2026-09-04 | 验证西班牙 EV 静态数据源 | 选定官方 MITECO RIPREE 全国导出；43,610 个连接器行覆盖 36,465 个 PDC/12,214 个安装点；确认三级身份、非标准 CSV 解析、重复连接器和容量异常边界；见 `docs/data/spain-ev-static-source.md` |
+| 2026-09-04 | 验证西班牙 EV 动态 availability/price | Reve 内 42,800/44,631 个 EVSE 为 OCPI 动态来源，价格筛选匹配 13,323/14,564 个地点；确认正式 API key、5 次/小时、逐点精确状态及全量身份关联限制；见 `docs/data/spain-ev-dynamic-coverage.md` |

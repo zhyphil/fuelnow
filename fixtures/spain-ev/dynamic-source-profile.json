@@ -1,0 +1,108 @@
+{
+  "captured_at": "2026-09-03T22:24:40Z",
+  "provider": "Red Eléctrica de España",
+  "system": "Reve / Sistema de Gestión y Visualización (SGV)",
+  "product_url": "https://www.mapareve.es",
+  "official_information_url": "https://www.ree.es/es/transicion-ecologica/electrificacion/reve-puntos-de-recarga",
+  "external_api": {
+    "documentation_url": "https://www.mapareve.es/docs/api/external/v1",
+    "openapi_url": "https://www.mapareve.es/api/external/v1/docs/api-docs.json",
+    "openapi_bytes": 29180,
+    "openapi_sha256": "123299aaba297826fda84d3c687f4f3490369eb77057b63203af566f66f9793a",
+    "version": "v1.0.0",
+    "authentication": "x-api-key",
+    "request_limit_per_user_per_hour": 5,
+    "access_request_url": "https://www.mapareve.es/api-contacto",
+    "unauthenticated_operational_status_probe_http_status": 403,
+    "endpoints": {
+      "locations": "/api/external/v1/locations",
+      "bulk_operational_status": "/api/external/v1/evses/operational_status",
+      "individual_full_status": "/api/external/v1/evses/{evse_id}/status",
+      "bulk_connector_tariffs": "/api/external/v1/connectors/tariffs"
+    },
+    "pagination_max_items": 100,
+    "incremental_cursor": "date_from"
+  },
+  "platform_counts": {
+    "source": "Anonymous Reve public stats response",
+    "endpoint": "https://www.mapareve.es/api/public/v1/stats",
+    "endpoint_is_supported_for_production": false,
+    "cpos": {
+      "total": 149,
+      "ocpi_dynamic": 58,
+      "ocpi_dynamic_percent": 38.93
+    },
+    "locations": {
+      "total": 14564,
+      "ocpi_dynamic": 13958,
+      "ocpi_dynamic_percent": 95.84
+    },
+    "evses": {
+      "total": 44631,
+      "ocpi_dynamic": 42800,
+      "ocpi_dynamic_percent": 95.9
+    },
+    "connectors": {
+      "total": 49495,
+      "ocpi_dynamic": 47200,
+      "ocpi_dynamic_percent": 95.36
+    }
+  },
+  "price_location_proxy": {
+    "source": "Anonymous Reve public locations response using the UI energy-price range",
+    "endpoint": "https://www.mapareve.es/api/public/v1/locations",
+    "endpoint_is_supported_for_production": false,
+    "filter": {
+      "energy_price_min": 0,
+      "energy_price_max": 1
+    },
+    "matching_locations": 13323,
+    "all_locations": 14564,
+    "all_location_percent": 91.48,
+    "ocpi_dynamic_locations": 13958,
+    "ocpi_location_percent": 95.45,
+    "limitation": "This is a location-level UI filter proxy. It is not exact EVSE or connector tariff coverage."
+  },
+  "first_page_diagnostic_sample": {
+    "captured_at": "2026-09-03T22:25:33Z",
+    "selection": "First 10 locations returned for the national bounding box; deterministic diagnostic, not a representative national sample",
+    "locations": 10,
+    "ocpi_locations": 9,
+    "ripree_static_locations": 1,
+    "evses": 19,
+    "ocpi_evses": 18,
+    "ocpi_statuses": {
+      "AVAILABLE": 13,
+      "CHARGING": 2,
+      "OUTOFORDER": 3
+    },
+    "ocpi_status_change_age_minutes": {
+      "min": 47.63,
+      "median": 516.61,
+      "max": 16381.55
+    },
+    "connectors": 23,
+    "connectors_with_tariffs": 21
+  },
+  "ripree_relationship": {
+    "ripree_static_unique_evses": 36465,
+    "reve_total_evses": 44631,
+    "counts_are_not_directly_comparable": true,
+    "national_identity_intersection_measured": false,
+    "reason": "The authorised external API is required for a complete snapshot and the two systems have different snapshot times and inventories."
+  },
+  "release_conclusion": {
+    "official_dynamic_source_exists": true,
+    "availability_platform_coverage_is_high": true,
+    "exact_static_to_dynamic_join_is_verified_nationally": false,
+    "exact_connector_price_coverage_is_verified_nationally": false,
+    "production_access_ready": false,
+    "blockers": [
+      "API key approval",
+      "quota sufficient for initial sync and ongoing service",
+      "terms and attribution review",
+      "full RIPREE-to-SGV identity reconciliation"
+    ]
+  }
+}
+
