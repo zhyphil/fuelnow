@@ -4,7 +4,7 @@
 > 需求来源：[france_spain_driver_decision_engine_project.md](./france_spain_driver_decision_engine_project.md)  
 > 当前状态：进行中  
 > 当前阶段：Phase 1 — Data Feasibility Spike
-> 下一项任务：`P1-ES-04` 验证站名、地址、坐标、品牌和营业时间字段
+> 下一项任务：`P1-ES-05` 验证燃料类型、价格和更新时间字段
 > 最后更新：2026-09-03
 
 ## 使用方法
@@ -103,7 +103,7 @@ V1 的核心验收结果是：
 - [x] `P1-ES-01` 找到并验证 MITECO 全国 REST JSON、区域过滤/参考列表与 XLS 快照（2026-09-03；[调查记录](./docs/data/spain-fuel-source.md)）
 - [x] `P1-ES-02` 核实 CC BY 4.0 商业使用、缓存、改编、再分发和署名要求，并记录旧通用声明差异（2026-09-03；[核验记录](./docs/data/spain-fuel-licence.md)）
 - [x] `P1-ES-03` 保存 Pinto 市级 17 条原始响应并记录 41 个字符串字段定义（2026-09-03；[样本与字段字典](./docs/data/spain-fuel-fields.md)）
-- [ ] `P1-ES-04` 验证站名、地址、坐标、品牌和营业时间字段
+- [x] `P1-ES-04` 验证全国 11,475 个站点的身份、地址、名称/品牌边界、坐标异常和营业时间语法（2026-09-03；[验证报告](./docs/data/spain-fuel-basic-fields-validation.md)）
 - [ ] `P1-ES-05` 验证燃料类型、价格和更新时间字段
 - [ ] `P1-ES-06` 验证临时关闭、24/7 和服务设施字段
 - [ ] `P1-ES-07` 编写 `SpainFuelAdapter`
@@ -478,6 +478,7 @@ V1 的核心验收结果是：
 | 2026-09-03 | 法国 Fuel 门户的 typed datetime 偏移与原始 France-local 墙钟语义不一致 | 高 | 从原始 `@maj/@debut` 按 `Europe/Paris` 解析，保留原值，隔离未来时间，并用夏/冬令时测试保护 | 已在 `FranceFuelAdapter` 缓解，待持续监控 |
 | 2026-09-03 | 当前开发机 Node.js 22 低于项目锁定的 Node.js 24 LTS | 中 | `.nvmrc` 和 `engines` 固定 Node 24；当前兼容性测试通过，CI/发布环境必须使用 Node 24 | 发布环境待落实 |
 | 2026-09-03 | MITECO 现代资源的 CC BY 4.0 与旧政府通用声明的“不得更改内容/元数据”措辞存在解释差异 | 高 | 保留原始数据、明确标记 Fuel Now 转换、完整署名；公开 Beta 前由法务复核当时有效条款 | 技术开发获准，发布门槛未关闭 |
+| 2026-09-03 | MITECO 全国 Fuel 快照中存在 3 个零坐标和 1 个疑似经纬度互换记录 | 中 | 对西班牙服务区域做地理边界校验并隔离异常；不自动交换坐标 | 待在 `SpainFuelAdapter` 实现 |
 
 # 完成记录
 
@@ -512,3 +513,4 @@ V1 的核心验收结果是：
 | 2026-09-03 | 找到并探测西班牙官方 Fuel 数据源 | MITECO 全国 REST JSON 返回 11,475 站点，并验证区域过滤、参考列表与 XLS；见 `docs/data/spain-fuel-source.md` |
 | 2026-09-03 | 核实西班牙 Fuel 数据许可与使用约束 | 现代资源 CC BY 4.0 允许商业复用、缓存、改编和再分发；记录旧通用声明差异；见 `docs/data/spain-fuel-licence.md` |
 | 2026-09-03 | 保存西班牙 Fuel 原始样本与字段字典 | 固定 Pinto 市级 17 条完整响应，并记录 41 个源字符串字段；见 `fixtures/spain-fuel/` 与 `docs/data/spain-fuel-fields.md` |
+| 2026-09-03 | 验证西班牙 Fuel 站点基础字段 | 身份和地址完整；确认 `Rótulo` 映射边界、4 个坐标异常及 1,172 种营业时间表达；见 `docs/data/spain-fuel-basic-fields-validation.md` |
