@@ -158,7 +158,7 @@ Do not treat a missing price as proof of a shortage. Use explicit availability/r
 
 ## Freshness interpretation
 
-The documented 10-minute feed update does not make every station price Live. Each fuel price has its own `*_maj` observation time. Freshness must be calculated from that field-level timestamp under ADR 0009.
+The documented 10-minute feed update does not make every station price Live. Each fuel price has its own source observation time. Freshness must be calculated from that field-level time under ADR 0009, after applying the source timezone policy documented in [price validation](./france-fuel-price-validation.md).
 
 Portal metadata observed on 2026-09-03 also stated that catalogue harvesting was configured at 15 minutes while the underlying data updates every 10 minutes. The adapter must measure real delay rather than assuming a fixed SLA.
 
@@ -173,4 +173,3 @@ Portal metadata observed on 2026-09-03 also stated that catalogue harvesting was
 ## Conclusion
 
 `prix-des-carburants-en-france-flux-instantane-v2` is the selected official source for the France Fuel feasibility spike. Its metadata, record API, and CSV/JSON/GeoJSON exports were reachable and returned usable station, fuel-price, timestamp, shortage, opening-hours, and service fields on 2026-09-03.
-

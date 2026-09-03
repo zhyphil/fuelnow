@@ -114,7 +114,7 @@ Each fuel has an optional shortage start timestamp and type. Observed types incl
 - Prefer `geom.lon` and `geom.lat` for the initial adapter; retain but do not trust the scaled text coordinates until the conversion is independently tested.
 - Preserve `id` as a source identifier. Namespaced internal identity should be `fr-fuel-realtime-v2:{id}` to avoid future cross-source collisions.
 - Preserve raw source values alongside normalized values during the spike so that parsing failures can be audited.
-- Parse source datetimes as offset-aware instants and preserve the original value in raw evidence.
+- Parse raw price/shortage datetimes as `Europe/Paris` local wall-clock values, convert them to UTC with a timezone-aware library, and preserve the original value. The portal's flattened offset is not canonical; see [price validation](./france-fuel-price-validation.md).
 - Do not infer station brand: the selected dataset metadata exposes no explicit brand field.
 - Do not infer human-attended opening from `horaires_automate_24_24`.
 - Do not infer fuel availability solely from price presence or absence.
