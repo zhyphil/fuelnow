@@ -67,3 +67,5 @@ pnpm check
 ```
 
 It verifies formatting, lint rules, TypeScript types and all workspace tests in that order. To apply formatting before rerunning the gate, use `pnpm format`.
+
+GitHub Actions runs the same command for pull requests and pushes to `main`. Keep local checks green before pushing rather than relying on CI as the first feedback loop.

@@ -4,7 +4,7 @@
 > 需求来源：[france_spain_driver_decision_engine_project.md](./france_spain_driver_decision_engine_project.md)  
 > 当前状态：进行中  
 > 当前阶段：Phase 2 — 项目骨架与统一数据层
-> 下一项任务：`P2-ENG-05` 配置持续集成检查
+> 下一项任务：`P2-ENG-06` 编写本地启动和开发说明
 > 最后更新：2026-09-04
 
 ## 使用方法
@@ -176,7 +176,7 @@ V1 的核心验收结果是：
 - [x] `P2-ENG-02` 定义 development/test/production 三环境的解析优先级、隔离、安全默认值、API/worker 角色边界与 release-test 生产一致性，并提供共享解析器和 5 项测试（2026-09-04；[环境说明](./docs/architecture/environments.md)；95 tests）
 - [x] `P2-ENG-03` 提供安全默认的根 `.env.example`，区分 API/worker/mobile 公开与服务端变量，所有同步/付费功能默认关闭、密钥留空，并验证真实 `.env*` 被 Git 忽略（2026-09-04；[配置与密钥说明](./docs/architecture/configuration-and-secrets.md)）
 - [x] `P2-ENG-04` 配置 Prettier、ESLint、TypeScript 与 Vitest 的统一 `pnpm check` 质量门槛，锁定工具版本并提供自动格式化命令（2026-09-04；95 tests）
-- [ ] `P2-ENG-05` 配置持续集成检查
+- [x] `P2-ENG-05` 配置 GitHub Actions，在 PR 和 `main` 推送时以 Node.js 24、锁定的 pnpm 和冻结 lockfile 执行同一 `pnpm check`，使用只读权限、测试环境和同步禁用安全边界（2026-09-04；[CI 说明](./docs/architecture/continuous-integration.md)）
 - [ ] `P2-ENG-06` 编写本地启动和开发说明
 
 ## 2.2 统一模型
@@ -565,3 +565,4 @@ V1 的核心验收结果是：
 | 2026-09-04 | 配置开发、测试和生产环境语义 | 建立三环境严格解析、安全/隔离矩阵和 release-test 生产行为，测试默认禁止 live source；见 `docs/architecture/environments.md` |
 | 2026-09-04 | 建立环境变量与密钥模板 | 新增安全默认 `.env.example`，服务端密钥留空、同步和付费路线默认关闭，明确移动端公开变量边界；见 `docs/architecture/configuration-and-secrets.md` |
 | 2026-09-04 | 建立本地代码质量门槛 | 配置 Prettier、ESLint、TypeScript 和 Vitest，统一以 `pnpm check` 顺序执行格式、静态、类型与 95 项测试检查 |
+| 2026-09-04 | 接入持续集成质量门槛 | GitHub Actions 在 PR/`main` 上以 Node.js 24、冻结 lockfile、只读权限和禁用来源同步的测试环境执行完整 `pnpm check`；见 `docs/architecture/continuous-integration.md` |
