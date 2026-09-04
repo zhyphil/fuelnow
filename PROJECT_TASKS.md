@@ -4,7 +4,7 @@
 > 需求来源：[france_spain_driver_decision_engine_project.md](./france_spain_driver_decision_engine_project.md)  
 > 当前状态：进行中  
 > 当前阶段：Phase 2 — 项目骨架与统一数据层
-> 下一项任务：`P2-MOD-02` 定义 Fuel 专属字段
+> 下一项任务：`P2-MOD-03` 定义 EV 专属字段
 > 最后更新：2026-09-04
 
 ## 使用方法
@@ -182,7 +182,7 @@ V1 的核心验收结果是：
 ## 2.2 统一模型
 
 - [x] `P2-MOD-01` 以 TypeBox 建立共享 `ServicePointSchema` 及派生 TypeScript 类型，覆盖身份、国家、非空服务分类、可空显示信息、WGS84 坐标、结构化地址、时区和 UTC 生命周期字段，并以 7 项运行时契约测试拒绝非法/未声明数据（2026-09-04；[契约说明](./docs/architecture/service-point-contract.md)）
-- [ ] `P2-MOD-02` 定义 Fuel 专属字段
+- [x] `P2-MOD-02` 建立 Fuel point/offer/price/discount TypeBox 契约及派生类型，区分未知价格与零价、availability/缺货/原因/观测时间，并以语义校验保证 Fuel capability、燃油唯一性及 liter/kilogram 单位一致（2026-09-04；7 项新测试；[Fuel 契约说明](./docs/architecture/fuel-contract.md)）
 - [ ] `P2-MOD-03` 定义 EV 专属字段
 - [ ] `P2-MOD-04` 定义 Air 专属字段
 - [ ] `P2-MOD-05` 定义 Wash 专属字段
@@ -568,3 +568,4 @@ V1 的核心验收结果是：
 | 2026-09-04 | 接入持续集成质量门槛 | GitHub Actions 在 PR/`main` 上以 Node.js 24、冻结 lockfile、只读权限和禁用来源同步的测试环境执行完整 `pnpm check`；见 `docs/architecture/continuous-integration.md` |
 | 2026-09-04 | 完成本地开发指南 | 固化 Node/pnpm 版本、首次安装、workspace 命令、来源安全、逐任务提交流程和常见故障处理；见 `docs/development/local-development.md` |
 | 2026-09-04 | 建立基础 ServicePoint 契约 | TypeBox 同源生成运行时 Schema 和 TypeScript 类型，覆盖身份、服务分类、位置、地址和生命周期字段，以 7 项测试固定空值与非法输入边界；见 `docs/architecture/service-point-contract.md` |
+| 2026-09-04 | 建立 Fuel 专属契约 | 定义 Fuel offer/price/discount 字段，以运行时 Schema 和语义校验区分未知/零价、库存状态并固定燃油唯一性与计价单位；见 `docs/architecture/fuel-contract.md` |

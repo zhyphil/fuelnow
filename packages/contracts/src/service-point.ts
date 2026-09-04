@@ -3,7 +3,7 @@ import { Type, type Static, type TSchema } from "@sinclair/typebox";
 export const COUNTRY_CODES = ["FR", "ES"] as const;
 export const SERVICE_TYPES = ["fuel", "charging", "air", "wash"] as const;
 
-const NonBlankTextSchema = Type.String({
+export const NonBlankStringSchema = Type.String({
   minLength: 1,
   maxLength: 500,
   pattern: ".*\\S.*",
@@ -24,7 +24,7 @@ export const ServiceTypeSchema = Type.Union(
   { $id: "ServiceType" },
 );
 
-const NullableTextSchema = Type.Union([NonBlankTextSchema, Type.Null()]);
+const NullableTextSchema = Type.Union([NonBlankStringSchema, Type.Null()]);
 
 export const StructuredAddressSchema = Type.Object(
   {
