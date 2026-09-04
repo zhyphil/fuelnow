@@ -3,6 +3,10 @@ import type {
   ServicePointCandidate,
 } from "../src/search/PostgresCandidateSearch.js";
 import type { ServicePointDetailPort } from "../src/detail/PostgresServicePointDetail.js";
+import type {
+  ServicePointEvidence,
+  ServicePointEvidencePort,
+} from "../src/evidence/PostgresServicePointEvidence.js";
 import type { CandidateSearchPort } from "../src/search/expandingCandidateSearch.js";
 import { afterEach, describe, expect, it } from "vitest";
 
@@ -48,6 +52,80 @@ class FakeCandidateSearch implements CandidateSearchPort {
   }
 }
 
+function serviceEvidence(
+  servicePointId: string,
+  serviceType: ServicePointEvidence["serviceType"],
+): ServicePointEvidence {
+  return {
+    servicePointId,
+    serviceType,
+    source: null,
+    serviceOpeningStatus: "unknown",
+    serviceOpeningStatusEvaluatedAt: null,
+    fuelOffers:
+      serviceType === "fuel"
+        ? [
+            {
+              fuelType: "diesel",
+              sourceFuelId: "diesel",
+              sourceLabel: "Diesel",
+              available: true,
+              outOfStock: false,
+              unavailableReason: null,
+              sourceObservedAt: "2026-09-04T06:00:00.000Z",
+              price: {
+                amount: 1.65,
+                currency: "EUR",
+                unit: "liter",
+                taxIncluded: true,
+                membershipRequired: false,
+                sourceObservedAt: "2026-09-04T06:00:00.000Z",
+                freshness: "recent",
+                confidence: "high",
+              },
+            },
+          ]
+        : [],
+    charging:
+      serviceType === "charging"
+        ? {
+            operator: null,
+            network: null,
+            connectorTypes: ["ccs_combo_2"],
+            maximumRatedPowerKw: 150,
+            totalEvses: 2,
+          }
+        : null,
+    air:
+      serviceType === "air"
+        ? {
+            workingStatus: "unknown",
+            free: null,
+            priceAmount: null,
+            access: "unknown",
+            lastVerifiedAt: null,
+          }
+        : null,
+    wash:
+      serviceType === "wash"
+        ? {
+            workingStatus: "unknown",
+            startingPriceAmount: null,
+            washTypes: ["unknown"],
+            lastVerifiedAt: null,
+          }
+        : null,
+  };
+}
+
+const servicePointEvidence: ServicePointEvidencePort = {
+  async findEvidence({ servicePointIds, serviceTypes }) {
+    return servicePointIds.flatMap((servicePointId) =>
+      serviceTypes.map((serviceType) => serviceEvidence(servicePointId, serviceType)),
+    );
+  },
+};
+
 const servicePointDetails: ServicePointDetailPort = {
   async findById() {
     return null;
@@ -67,7 +145,11 @@ describe("GET /v1/nearby", () => {
         ? Array.from({ length: 10 }, (_, index) => candidate(index))
         : [],
     );
-    const app = createApiApp({ candidateSearch: search, servicePointDetails });
+    const app = createApiApp({
+      candidateSearch: search,
+      servicePointDetails,
+      servicePointEvidence,
+    });
     apps.push(app);
 
     const response = await app.inject({
@@ -101,7 +183,7 @@ describe("GET /v1/nearby", () => {
       resultCount: 10,
     });
     expect(payload.requestId).toEqual(expect.any(String));
-    expect(payload.results[0]).toEqual({
+    expect(payload.results[0]).toMatchObject({
       id: "point-0",
       country: "FR",
       name: "Service point",
@@ -109,6 +191,11 @@ describe("GET /v1/nearby", () => {
       location: { latitude: 44, longitude: 2 },
       lifecycleStatus: "active",
       straightLineDistanceM: 100,
+      evidence: {
+        price: null,
+        freshness: "unknown",
+        confidence: { level: "low", score: null },
+      },
     });
     expect(search.requests).toEqual([
       {
@@ -131,7 +218,11 @@ describe("GET /v1/nearby", () => {
 
   it("returns an honest empty result after reaching the maximum radius", async () => {
     const search = new FakeCandidateSearch(() => []);
-    const app = createApiApp({ candidateSearch: search, servicePointDetails });
+    const app = createApiApp({
+      candidateSearch: search,
+      servicePointDetails,
+      servicePointEvidence,
+    });
     apps.push(app);
 
     const response = await app.inject({
@@ -159,7 +250,11 @@ describe("GET /v1/nearby", () => {
       candidate(0, { country: "ES", straightLineDistanceM: 300 }),
       candidate(1, { country: "ES", straightLineDistanceM: 100 }),
     ]);
-    const app = createApiApp({ candidateSearch: search, servicePointDetails });
+    const app = createApiApp({
+      candidateSearch: search,
+      servicePointDetails,
+      servicePointEvidence,
+    });
     apps.push(app);
 
     const response = await app.inject({
@@ -207,7 +302,11 @@ describe("GET /v1/nearby", () => {
         openingStatusEvaluatedAt: "2026-09-04T06:00:00.000Z",
       }),
     ]);
-    const app = createApiApp({ candidateSearch: search, servicePointDetails });
+    const app = createApiApp({
+      candidateSearch: search,
+      servicePointDetails,
+      servicePointEvidence,
+    });
     apps.push(app);
 
     const response = await app.inject({
@@ -235,7 +334,11 @@ describe("GET /v1/nearby", () => {
       ["best", "decision_evidence_unavailable"],
     ] as const) {
       const search = new FakeCandidateSearch(() => [candidate(0)]);
-      const app = createApiApp({ candidateSearch: search, servicePointDetails });
+      const app = createApiApp({
+        candidateSearch: search,
+        servicePointDetails,
+        servicePointEvidence,
+      });
       apps.push(app);
 
       const response = await app.inject({
@@ -259,7 +362,11 @@ describe("GET /v1/nearby", () => {
 
   it("passes a canonical Fuel filter to candidate search and echoes it", async () => {
     const search = new FakeCandidateSearch(() => [candidate(0)]);
-    const app = createApiApp({ candidateSearch: search, servicePointDetails });
+    const app = createApiApp({
+      candidateSearch: search,
+      servicePointDetails,
+      servicePointEvidence,
+    });
     apps.push(app);
 
     const response = await app.inject({
@@ -273,9 +380,9 @@ describe("GET /v1/nearby", () => {
       fuelType: "diesel",
       ranking: {
         requestedSort: "cheapest",
-        appliedSort: "nearest",
-        degraded: true,
-        reason: "decision_evidence_unavailable",
+        appliedSort: "cheapest",
+        degraded: false,
+        reason: null,
       },
     });
     expect(search.requests).toEqual([
@@ -290,9 +397,107 @@ describe("GET /v1/nearby", () => {
     ]);
   });
 
+  it("orders Fuel Cheapest by current price and keeps stale low prices behind", async () => {
+    const search = new FakeCandidateSearch(() => [
+      candidate(0),
+      candidate(1),
+      candidate(2),
+    ]);
+    const pricedEvidence: ServicePointEvidencePort = {
+      async findEvidence({ servicePointIds, serviceTypes }) {
+        const amounts = [1.8, 1.6, 1.4];
+        return servicePointIds.flatMap((servicePointId, index) =>
+          serviceTypes.map((serviceType) => {
+            const item = serviceEvidence(servicePointId, serviceType);
+            const price = item.fuelOffers[0]?.price;
+            if (price !== null && price !== undefined) {
+              price.amount = amounts[index]!;
+              price.freshness = index === 2 ? "stale" : "recent";
+            }
+            return item;
+          }),
+        );
+      },
+    };
+    const app = createApiApp({
+      candidateSearch: search,
+      servicePointDetails,
+      servicePointEvidence: pricedEvidence,
+    });
+    apps.push(app);
+
+    const response = await app.inject({
+      method: "GET",
+      url: "/v1/nearby?latitude=43.6&longitude=1.44&service=fuel&fuelType=diesel&radius=10000&sort=cheapest",
+    });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.json().results.map(({ id }: { id: string }) => id)).toEqual([
+      "point-1",
+      "point-0",
+      "point-2",
+    ]);
+    expect(
+      response
+        .json()
+        .results.map(
+          ({ evidence }: { evidence: { price: unknown } }) => evidence.price,
+        ),
+    ).toMatchObject([
+      { amount: 1.6, freshness: "recent" },
+      { amount: 1.8, freshness: "recent" },
+      { amount: 1.4, freshness: "stale" },
+    ]);
+  });
+
+  it("degrades Fuel Cheapest when every comparable price is unavailable", async () => {
+    const search = new FakeCandidateSearch(() => [candidate(0)]);
+    const unknownPrices: ServicePointEvidencePort = {
+      async findEvidence({ servicePointIds, serviceTypes }) {
+        return servicePointIds.flatMap((servicePointId) =>
+          serviceTypes.map((serviceType) => {
+            const item = serviceEvidence(servicePointId, serviceType);
+            const price = item.fuelOffers[0]?.price;
+            if (price !== null && price !== undefined) {
+              price.sourceObservedAt = "2000-01-01T00:00:00.000Z";
+              price.freshness = "recent";
+            }
+            return item;
+          }),
+        );
+      },
+    };
+    const app = createApiApp({
+      candidateSearch: search,
+      servicePointDetails,
+      servicePointEvidence: unknownPrices,
+    });
+    apps.push(app);
+
+    const response = await app.inject({
+      method: "GET",
+      url: "/v1/nearby?latitude=43.6&longitude=1.44&service=fuel&fuelType=diesel&radius=10000&sort=cheapest",
+    });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.json()).toMatchObject({
+      ranking: {
+        requestedSort: "cheapest",
+        appliedSort: "nearest",
+        degraded: true,
+        reason: "no_eligible_fuel_price",
+      },
+      results: [{ evidence: { price: null, freshness: "unknown" } }],
+    });
+  });
+
   it("rejects unsupported and cross-service Fuel filters before search", async () => {
     const search = new FakeCandidateSearch(() => []);
-    const app = createApiApp({ candidateSearch: search, servicePointDetails });
+    const app = createApiApp({
+      candidateSearch: search,
+      servicePointDetails,
+      servicePointEvidence,
+    });
     apps.push(app);
 
     for (const url of [
@@ -307,7 +512,11 @@ describe("GET /v1/nearby", () => {
 
   it("passes compatible EV connector filters to candidate search and echoes them", async () => {
     const search = new FakeCandidateSearch(() => [candidate(0)]);
-    const app = createApiApp({ candidateSearch: search, servicePointDetails });
+    const app = createApiApp({
+      candidateSearch: search,
+      servicePointDetails,
+      servicePointEvidence,
+    });
     apps.push(app);
 
     const response = await app.inject({
@@ -344,7 +553,11 @@ describe("GET /v1/nearby", () => {
   it("accepts either EV filter independently", async () => {
     for (const suffix of ["connectorType=type_2", "minimumPowerKw=22.5"]) {
       const search = new FakeCandidateSearch(() => []);
-      const app = createApiApp({ candidateSearch: search, servicePointDetails });
+      const app = createApiApp({
+        candidateSearch: search,
+        servicePointDetails,
+        servicePointEvidence,
+      });
       apps.push(app);
 
       const response = await app.inject({
@@ -358,7 +571,11 @@ describe("GET /v1/nearby", () => {
 
   it("rejects unknown, implausible and cross-service EV filters before search", async () => {
     const search = new FakeCandidateSearch(() => []);
-    const app = createApiApp({ candidateSearch: search, servicePointDetails });
+    const app = createApiApp({
+      candidateSearch: search,
+      servicePointDetails,
+      servicePointEvidence,
+    });
     apps.push(app);
 
     for (const url of [
@@ -377,7 +594,11 @@ describe("GET /v1/nearby", () => {
 
   it("rejects missing, out-of-range and unknown query values before search", async () => {
     const search = new FakeCandidateSearch(() => []);
-    const app = createApiApp({ candidateSearch: search, servicePointDetails });
+    const app = createApiApp({
+      candidateSearch: search,
+      servicePointDetails,
+      servicePointEvidence,
+    });
     apps.push(app);
 
     for (const url of [

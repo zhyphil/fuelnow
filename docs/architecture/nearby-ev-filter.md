@@ -41,9 +41,10 @@ range follows the validated normalization boundary; out-of-range source values
 must be quarantined instead of exposed as searchable capability. Power is never
 used to guess an unknown connector type.
 
-`sort=best` remains explicitly degraded to Nearest until `P3-API-06` attaches
-the full EVSE, status, source-quality and ranking evidence to the public API
-pipeline.
+`P3-API-06` exposes connector types, maximum rated power, total EVSE capacity,
+service-scoped source and explicit Unknown price/live availability. `sort=best`
+remains explicitly degraded to Nearest until the following API outcome task
+connects route and gated dynamic evidence without violating ADR 0012.
 
 ## Verification
 

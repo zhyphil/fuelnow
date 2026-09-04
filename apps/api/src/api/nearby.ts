@@ -12,6 +12,11 @@ import type { FastifyInstance } from "fastify";
 import type { TypeBoxTypeProvider } from "@fastify/type-provider-typebox";
 
 import { filterOpenNow } from "../decision/filterOpenNow.js";
+import { rankCheapest } from "../decision/rankCheapest.js";
+import type {
+  ServicePointEvidence,
+  ServicePointEvidencePort,
+} from "../evidence/PostgresServicePointEvidence.js";
 import { rankNearestCandidates } from "../routing/rankNearestCandidates.js";
 import type { CandidateWithRoute } from "../routing/routeTopCandidates.js";
 import type { ServicePointCandidate } from "../search/PostgresCandidateSearch.js";
@@ -20,6 +25,11 @@ import {
   type CandidateSearchPort,
   type ExpandingCandidateSearchRequest,
 } from "../search/expandingCandidateSearch.js";
+import {
+  ServiceEvidenceResponseSchema,
+  effectiveFuelOffers,
+  presentServiceEvidence,
+} from "./serviceEvidence.js";
 
 export const NEARBY_DEFAULT_RADIUS_METRES = 10_000;
 export const NEARBY_MAXIMUM_RADIUS_METRES = 50_000;
@@ -42,6 +52,7 @@ const SortDegradationReasonSchema = Type.Union([
   Type.Literal("fuel_type_required"),
   Type.Literal("price_not_available_for_service"),
   Type.Literal("decision_evidence_unavailable"),
+  Type.Literal("no_eligible_fuel_price"),
   Type.Literal("service_hours_unknown"),
 ]);
 
@@ -84,6 +95,7 @@ export const NearbyServicePointSchema = Type.Object(
     ),
     lifecycleStatus: LifecycleStatusSchema,
     straightLineDistanceM: Type.Number({ minimum: 0 }),
+    evidence: ServiceEvidenceResponseSchema,
   },
   { additionalProperties: false },
 );
@@ -202,6 +214,8 @@ function nearest(candidates: ServicePointCandidate[]): ServicePointCandidate[] {
 
 function sortCandidates(
   candidates: ServicePointCandidate[],
+  evidenceById: ReadonlyMap<string, ServicePointEvidence>,
+  evaluatedAt: string,
   serviceType: ServiceType,
   fuelType: FuelType | undefined,
   requestedSort: SearchSort,
@@ -239,6 +253,43 @@ function sortCandidates(
     };
   }
 
+  if (
+    requestedSort === "cheapest" &&
+    serviceType === "fuel" &&
+    fuelType !== undefined
+  ) {
+    const result = rankCheapest({
+      serviceType,
+      fuelType,
+      candidates: withoutRoutes(candidates).map((candidate) => ({
+        ...candidate,
+        fuelOffers:
+          evidenceById.get(candidate.id) === undefined
+            ? []
+            : effectiveFuelOffers(evidenceById.get(candidate.id)!, evaluatedAt),
+      })),
+    });
+    if (result.capability.state === "enabled") {
+      const candidateById = new Map(
+        candidates.map((candidate) => [candidate.id, candidate]),
+      );
+      return {
+        candidates: result.candidates.map(({ id }) => candidateById.get(id)!),
+        requestedSort,
+        appliedSort: "cheapest",
+        degraded: false,
+        reason: null,
+      };
+    }
+    return {
+      candidates: nearest(candidates),
+      requestedSort,
+      appliedSort: "nearest",
+      degraded: true,
+      reason: "no_eligible_fuel_price",
+    };
+  }
+
   return {
     candidates: nearest(candidates),
     requestedSort,
@@ -258,6 +309,7 @@ function sortCandidates(
 export function registerNearbyRoute(
   app: FastifyInstance,
   candidateSearch: CandidateSearchPort,
+  servicePointEvidence: ServicePointEvidencePort,
 ): void {
   app.withTypeProvider<TypeBoxTypeProvider>().get(
     "/v1/nearby",
@@ -273,25 +325,56 @@ export function registerNearbyRoute(
         candidateSearch,
         searchRequest(request.query),
       );
+      const evidence = await servicePointEvidence.findEvidence({
+        servicePointIds: result.candidates.map(({ id }) => id),
+        serviceTypes: [request.query.service],
+      });
+      const evidenceById = new Map(evidence.map((item) => [item.servicePointId, item]));
+      const candidateIds = new Set(result.candidates.map(({ id }) => id));
+      if (
+        evidence.length !== result.candidates.length ||
+        evidenceById.size !== result.candidates.length ||
+        evidence.some(
+          (item) =>
+            item.serviceType !== request.query.service ||
+            !candidateIds.has(item.servicePointId),
+        )
+      ) {
+        throw new Error("Candidate service evidence is incomplete");
+      }
       const sort = request.query.sort ?? "nearest";
+      const evaluatedAt = new Date().toISOString();
       const sorted = sortCandidates(
         result.candidates,
+        evidenceById,
+        evaluatedAt,
         request.query.service,
         request.query.fuelType,
         sort,
       );
-      const results: NearbyServicePoint[] = sorted.candidates.map((candidate) => ({
-        id: candidate.id,
-        country: candidate.country,
-        name: candidate.name,
-        brand: candidate.brand,
-        location: {
-          latitude: candidate.latitude,
-          longitude: candidate.longitude,
-        },
-        lifecycleStatus: candidate.lifecycleStatus,
-        straightLineDistanceM: candidate.straightLineDistanceM,
-      }));
+      const results: NearbyServicePoint[] = sorted.candidates.map((candidate) => {
+        const candidateEvidence = evidenceById.get(candidate.id)!;
+        return {
+          id: candidate.id,
+          country: candidate.country,
+          name: candidate.name,
+          brand: candidate.brand,
+          location: {
+            latitude: candidate.latitude,
+            longitude: candidate.longitude,
+          },
+          lifecycleStatus: candidate.lifecycleStatus,
+          straightLineDistanceM: candidate.straightLineDistanceM,
+          evidence: presentServiceEvidence(candidateEvidence, {
+            ...(request.query.fuelType === undefined
+              ? {}
+              : { requestedFuelType: request.query.fuelType }),
+            siteOpeningStatus: candidate.openingStatus,
+            siteOpeningStatusEvaluatedAt: candidate.openingStatusEvaluatedAt,
+            evaluatedAt,
+          }),
+        };
+      });
       return {
         requestId: request.id,
         country: request.query.country ?? null,

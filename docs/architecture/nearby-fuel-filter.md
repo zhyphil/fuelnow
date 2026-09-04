@@ -34,9 +34,11 @@ but is temporarily unavailable.” The filter does not invent availability from 
 price row.
 
 `sort=cheapest` with no `fuelType` still reports `fuel_type_required`. With a
-valid Fuel filter it is accepted, but safely remains on Nearest with
-`decision_evidence_unavailable` until `P3-API-06` attaches current comparable
-price evidence to the API pipeline.
+valid Fuel filter, `P3-API-06` now activates Cheapest only when at least one
+non-membership, available, current and unit-compatible price exists. Stale and
+expired low prices cannot outrank current prices; when no comparable price
+exists, the response explicitly falls back to Nearest with
+`no_eligible_fuel_price`.
 
 ## Verification
 

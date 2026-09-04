@@ -33,6 +33,14 @@ connector must satisfy both conditions; the API never combines connector type
 and rated power from different equipment. These filters are rejected for other
 service types, and `unknown` cannot be selected as a compatibility target.
 
+Nearby results now contain an evidence block with separate opening and service
+availability states, a nullable active price, service-scoped source attribution,
+freshness, confidence, and service-specific Fuel/Charge/Air/Wash details. The
+same evidence shape appears per service in the service-point detail response.
+Fuel prices are aged again at response time; values older than seven days are
+hidden from the primary price and cannot win Cheapest. Charge price and live
+availability remain Unknown under the current V1 source-policy gates.
+
 `GET /v1/service-points/:id` resolves one canonical UUID and returns its stable
 location, address, opening and lifecycle detail. Invalid identifiers are rejected
 before data access, while an unknown canonical point returns a traceable 404.
@@ -96,6 +104,12 @@ maps the canonical point plus its declared service types into the HTTP detail
 shape. It validates database values before returning them and keeps closed
 points directly addressable so clients can explain their lifecycle state.
 
+`PostgresServicePointEvidence` performs one bounded batch query for the final
+candidate IDs. It loads current Fuel offers/prices, static Charge connector
+capability, Air/Wash fields and the newest active source record in the requested
+country/service scope. It rejects malformed database evidence before response
+serialization and never receives the user's precise origin.
+
 `findCandidatesWithExpansion` wraps that query with a bounded sparse-area
 policy. It grows the radius geometrically until the requested minimum is met or
 the hard maximum is reached, and returns the attempted radii and stop reason so
@@ -122,7 +136,7 @@ provider response body in application error messages.
 distance. Degraded or non-routed candidates retain their reason and use a
 clearly labelled straight-line fallback; canonical IDs resolve exact ties.
 
-The decision engine's `rankCheapest` enables price ranking only for Fuel with a
+The public API uses the decision engine's `rankCheapest` to enable price ranking only for Fuel with a
 requested fuel type and at least one current comparable price. Other services,
 or Fuel searches without an eligible price, return a shared capability reason
 instead of a fabricated Cheapest result.

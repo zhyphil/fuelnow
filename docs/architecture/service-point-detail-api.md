@@ -11,13 +11,15 @@ Fuel Now can resolve one canonical service point by its UUID. The route uses an
 injected detail-reader port for isolated HTTP tests, while the runnable process
 uses `PostgresServicePointDetail` and a parameterized primary-key query.
 
-The initial detail response contains:
+The detail response contains:
 
 - canonical ID, country, service types, optional name and brand;
 - destination coordinates and nullable structured address;
 - IANA timezone, normalized opening hours and evaluated opening status;
 - temporary-closure evidence and canonical lifecycle state, change time and
-  closure reason; and
+  closure reason;
+- one evidence block for every declared service, including price/status/source
+  quality and service-specific capability; and
 - canonical creation and update timestamps.
 
 Permanently or temporarily closed points remain retrievable by an exact detail
@@ -39,16 +41,17 @@ The database mapper rejects invalid coordinates, country/service enums,
 addresses, opening state, lifecycle combinations and timestamps instead of
 serializing corrupt canonical data.
 
-## Deliberate boundaries
+## Evidence extension
 
-This step exposes stable canonical detail only. It does not yet attach Fuel
-prices, EV connector availability, Air/Wash status, source attribution,
-freshness or confidence. Those evidence-bearing response fields are introduced
-by `P3-API-06` after filtering and sorting semantics are connected.
+`P3-API-06` extended the original stable canonical detail with a `services`
+array. It uses the same response schema and PostgreSQL evidence reader as nearby
+results, preventing result cards and details from disagreeing about Unknown,
+source attribution or freshness. A detail request has no active Fuel type, so it
+returns available Fuel types without selecting an arbitrary primary price.
 
 ## Verification
 
-Six tests cover the parameterized PostgreSQL lookup, field conversion, nullable
+Six original tests cover the parameterized PostgreSQL lookup, field conversion, nullable
 addresses, unknown IDs, corrupt-row rejection, successful HTTP serialization,
-404 behavior and validation before data access. The complete repository quality
-gate has 485 passing tests.
+404 behavior and validation before data access. Shared evidence tests added by
+`P3-API-06` cover the extended response.

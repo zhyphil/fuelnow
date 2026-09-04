@@ -26,20 +26,17 @@ The route requires coordinates and one canonical `fuel`, `charging`, `air` or
 - stop after at least 10 candidates; and
 - at most 50 returned candidates.
 
-Optional country, custom radius and sort controls were added by `P3-API-03`.
-Fuel type and EV connector/power controls belong to their following checklist
-tasks. Unknown query keys fail validation instead of being discarded.
+Optional country, custom radius and sort controls were added by `P3-API-03`;
+Fuel type and EV connector/power filters were added by `P3-API-04/05`. Unknown
+query keys fail validation instead of being discarded.
 
 ## Response
 
 The response contains a request ID, requested service, expansion trace, result
-count and basic canonical points. Each point currently contains identity,
-country, optional name/brand, point coordinates, lifecycle status and precise
-straight-line distance.
-
-No price, source-quality or service-specific equipment claims are fabricated at
-this stage. Those response fields are added only when the later API tasks connect
-their normalized evidence.
+count and canonical points. Each point contains identity, country, optional
+name/brand, destination coordinates, lifecycle status, precise straight-line
+distance and the evidence block defined by `P3-API-06`: price, opening/service
+status, scoped source attribution, freshness, confidence and service details.
 
 The exact request origin is neither returned nor stored by the API. Candidate
 coordinates are returned because the selected destination must be displayable

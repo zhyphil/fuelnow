@@ -10,9 +10,17 @@ import { Type, type Static } from "@sinclair/typebox";
 import type { FastifyInstance } from "fastify";
 
 import type { ServicePointDetailPort } from "../detail/PostgresServicePointDetail.js";
+import type { ServicePointEvidencePort } from "../evidence/PostgresServicePointEvidence.js";
+import {
+  ServiceEvidenceResponseSchema,
+  presentServiceEvidence,
+} from "./serviceEvidence.js";
 
 const UUID_PATTERN = "^[0-9a-fA-F]{8}-(?:[0-9a-fA-F]{4}-){3}[0-9a-fA-F]{12}$";
 const CountrySchema = Type.Union([Type.Literal("FR"), Type.Literal("ES")]);
+const ServiceTypeWithoutIdSchema = Type.Union(
+  SERVICE_TYPES.map((serviceType) => Type.Literal(serviceType)),
+);
 const NullableTextSchema = Type.Union([Type.String({ minLength: 1 }), Type.Null()]);
 const AddressSchema = Type.Object(
   {
@@ -81,6 +89,16 @@ export const ServicePointDetailSchema = Type.Object(
     ),
     createdAt: UtcTimestampSchema,
     updatedAt: UtcTimestampSchema,
+    services: Type.Array(
+      Type.Object(
+        {
+          serviceType: ServiceTypeWithoutIdSchema,
+          evidence: ServiceEvidenceResponseSchema,
+        },
+        { additionalProperties: false },
+      ),
+      { minItems: 1, maxItems: SERVICE_TYPES.length },
+    ),
   },
   { additionalProperties: false },
 );
@@ -113,6 +131,7 @@ export type ServicePointNotFoundResponse = Static<
 export function registerServicePointDetailRoute(
   app: FastifyInstance,
   servicePointDetails: ServicePointDetailPort,
+  servicePointEvidence: ServicePointEvidencePort,
 ): void {
   app.withTypeProvider<TypeBoxTypeProvider>().get(
     "/v1/service-points/:id",
@@ -134,6 +153,25 @@ export function registerServicePointDetailRoute(
           message: "Service point not found",
         });
       }
+
+      const evidence = await servicePointEvidence.findEvidence({
+        servicePointIds: [detail.id],
+        serviceTypes: detail.serviceTypes,
+      });
+      const expectedServices = new Set(detail.serviceTypes);
+      if (
+        evidence.length !== detail.serviceTypes.length ||
+        new Set(evidence.map(({ serviceType }) => serviceType)).size !==
+          evidence.length ||
+        evidence.some(
+          (item) =>
+            item.servicePointId !== detail.id ||
+            !expectedServices.has(item.serviceType),
+        )
+      ) {
+        throw new Error("Service-point detail evidence is incomplete");
+      }
+      const evaluatedAt = new Date().toISOString();
 
       return {
         requestId: request.id,
@@ -162,6 +200,14 @@ export function registerServicePointDetailRoute(
           },
           createdAt: detail.createdAt,
           updatedAt: detail.updatedAt,
+          services: evidence.map((item) => ({
+            serviceType: item.serviceType,
+            evidence: presentServiceEvidence(item, {
+              siteOpeningStatus: detail.openingStatus,
+              siteOpeningStatusEvaluatedAt: detail.openingStatusEvaluatedAt,
+              evaluatedAt,
+            }),
+          })),
         },
       } satisfies ServicePointDetailResponse;
     },

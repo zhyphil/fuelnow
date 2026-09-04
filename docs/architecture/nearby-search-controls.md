@@ -37,12 +37,12 @@ the public API pipeline. `open_now` uses site schedule evidence for Fuel and
 service-scoped schedule evidence for Charge, Air and Wash. If every relevant
 schedule is Unknown, the response safely falls back to Nearest.
 
-`cheapest` and `best` are accepted base sort values. Fuel and EV candidate
-filters are available; decision evidence is deliberately attached by the
-following API task. Until then the response's `ranking` object reports
-`appliedSort: nearest`,
-`degraded: true` and a stable reason. It never labels distance ordering as a
-successful price or Best ranking.
+`cheapest` and `best` are accepted base sort values. Fuel Cheapest is enabled
+only with a requested fuel and at least one current comparable price; otherwise
+it reports an explicit Nearest fallback. Charge/Air/Wash Cheapest stays
+unavailable by capability. Best remains explicitly degraded until route and
+full decision evidence are connected; the API never labels distance ordering as
+a successful Best ranking.
 
 The response echoes the effective optional country, requested sort, search
 radius trace and ranking outcome. Unknown keys and invalid enum/radius values

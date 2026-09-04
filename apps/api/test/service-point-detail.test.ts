@@ -6,6 +6,10 @@ import {
   type ServicePointDetail,
   type ServicePointDetailPort,
 } from "../src/detail/PostgresServicePointDetail.js";
+import type {
+  ServicePointEvidence,
+  ServicePointEvidencePort,
+} from "../src/evidence/PostgresServicePointEvidence.js";
 import type { CandidateSearchPort } from "../src/search/expandingCandidateSearch.js";
 
 const POINT_ID = "00000000-0000-4000-8000-000000000101";
@@ -88,6 +92,40 @@ const candidateSearch: CandidateSearchPort = {
     return [];
   },
 };
+const servicePointEvidence: ServicePointEvidencePort = {
+  async findEvidence({ servicePointIds, serviceTypes }) {
+    return servicePointIds.flatMap((servicePointId) =>
+      serviceTypes.map((serviceType): ServicePointEvidence => ({
+        servicePointId,
+        serviceType,
+        source: null,
+        serviceOpeningStatus: "unknown",
+        serviceOpeningStatusEvaluatedAt: null,
+        fuelOffers: [],
+        charging: null,
+        air:
+          serviceType === "air"
+            ? {
+                workingStatus: "unknown",
+                free: null,
+                priceAmount: null,
+                access: "unknown",
+                lastVerifiedAt: null,
+              }
+            : null,
+        wash:
+          serviceType === "wash"
+            ? {
+                workingStatus: "unknown",
+                startingPriceAmount: null,
+                washTypes: ["unknown"],
+                lastVerifiedAt: null,
+              }
+            : null,
+      })),
+    );
+  },
+};
 const apps: Array<ReturnType<typeof createApiApp>> = [];
 
 afterEach(async () => {
@@ -152,7 +190,11 @@ describe("PostgreSQL service-point detail reader", () => {
 describe("GET /v1/service-points/:id", () => {
   it("returns canonical location, opening and lifecycle detail", async () => {
     const servicePointDetails = new FakeServicePointDetails(detail());
-    const app = createApiApp({ candidateSearch, servicePointDetails });
+    const app = createApiApp({
+      candidateSearch,
+      servicePointDetails,
+      servicePointEvidence,
+    });
     apps.push(app);
 
     const response = await app.inject({
@@ -161,7 +203,7 @@ describe("GET /v1/service-points/:id", () => {
     });
 
     expect(response.statusCode).toBe(200);
-    expect(response.json()).toEqual({
+    expect(response.json()).toMatchObject({
       requestId: expect.any(String),
       servicePoint: {
         id: POINT_ID,
@@ -185,6 +227,11 @@ describe("GET /v1/service-points/:id", () => {
         },
         createdAt: "2026-01-15T10:00:00.000Z",
         updatedAt: "2026-01-15T12:00:00.000Z",
+        services: [
+          { serviceType: "air", evidence: { freshness: "unknown" } },
+          { serviceType: "fuel", evidence: { freshness: "unknown" } },
+          { serviceType: "wash", evidence: { freshness: "unknown" } },
+        ],
       },
     });
     expect(servicePointDetails.ids).toEqual([POINT_ID]);
@@ -192,7 +239,11 @@ describe("GET /v1/service-points/:id", () => {
 
   it("returns a stable 404 response for an unknown service point", async () => {
     const servicePointDetails = new FakeServicePointDetails(null);
-    const app = createApiApp({ candidateSearch, servicePointDetails });
+    const app = createApiApp({
+      candidateSearch,
+      servicePointDetails,
+      servicePointEvidence,
+    });
     apps.push(app);
 
     const response = await app.inject({
@@ -211,7 +262,11 @@ describe("GET /v1/service-points/:id", () => {
 
   it("rejects an invalid identifier before accessing the detail reader", async () => {
     const servicePointDetails = new FakeServicePointDetails(detail());
-    const app = createApiApp({ candidateSearch, servicePointDetails });
+    const app = createApiApp({
+      candidateSearch,
+      servicePointDetails,
+      servicePointEvidence,
+    });
     apps.push(app);
 
     const response = await app.inject({
