@@ -18,6 +18,11 @@ export type {
   RouteCacheStore,
   RouteUsageReservation,
 } from "./routeCache.js";
+export { rankNearestCandidates } from "./rankNearestCandidates.js";
+export type {
+  NearestRankingBasis,
+  RankedNearestCandidate,
+} from "./rankNearestCandidates.js";
 export { routeTopCandidates } from "./routeTopCandidates.js";
 export type {
   CandidateRouteStatus,

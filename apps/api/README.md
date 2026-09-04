@@ -83,3 +83,7 @@ cells become per-destination `unreachable`; timeout, rate limit, budget and
 provider failures keep every candidate with `eta=null` and a reason code. The
 Mapbox adapter emits sanitized errors and never includes its token, URL or
 provider response body in application error messages.
+
+`rankNearestCandidates` orders valid routed candidates by ETA and then road
+distance. Degraded or non-routed candidates retain their reason and use a
+clearly labelled straight-line fallback; canonical IDs resolve exact ties.

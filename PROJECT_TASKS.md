@@ -4,7 +4,7 @@
 > 需求来源：[france_spain_driver_decision_engine_project.md](./france_spain_driver_decision_engine_project.md)  
 > 当前状态：进行中  
 > 当前阶段：Phase 3 — 搜索、路线与决策引擎
-> 下一项任务：`P3-SEA-06` 实现 Nearest，优先按真实 ETA 排序
+> 下一项任务：`P3-SEA-07` 实现 capability-aware Cheapest
 > 最后更新：2026-09-04
 
 ## 使用方法
@@ -224,7 +224,7 @@ V1 的核心验收结果是：
 - [x] `P3-SEA-03` 按直线距离稳定选取 Top N，通过 provider-neutral 1×N Matrix 计算驾车距离和 ETA，并按 canonical ID 安全合并；实现 Mapbox adapter，显式限制 traffic 请求为 1 origin + 最多 9 destinations，返回计算时间、profile、traffic/cache metadata，未进入 Top N 的候选保留且明确标记未请求（2026-09-04；252 tests；[Top N 路线说明](./docs/architecture/top-candidate-routing.md)）
 - [x] `P3-SEA-04` 建立不持久化精确 origin 的单目的地路线缓存：三位小数 origin cell 仅进入 SHA-256 key，TTL 默认 5 分钟/最大 15 分钟；只为 cache miss 原子预留月度 Matrix elements，预算 0 禁止付费 miss，持久记录 request/reserved/success/failed 且结算不可重复，单次最多 9 elements（2026-09-04；264 tests；[路线缓存与预算说明](./docs/architecture/route-cache-budget.md)）
 - [x] `P3-SEA-05` 将 Mapbox null matrix cell 标记为单目的地 unreachable；2.5 秒默认/10 秒最大超时、HTTP 429 reset、网络/HTTP 和非法响应均映射为脱敏 reason code，预算拒绝不发请求；无论 partial 或整体失败均保留全部候选与直线距离，ETA/road distance 保持 null，不盲目重试或伪造值（2026-09-04；268 tests；[路线失败降级说明](./docs/architecture/route-failure-degradation.md)）
-- [ ] `P3-SEA-06` 实现 Nearest，优先按真实 ETA 排序
+- [x] `P3-SEA-06` 实现不可变、稳定的 Nearest 排名：有有效路线时按 ETA、road distance、直线距离、canonical ID 排序；unreachable/unavailable/not requested 候选保留 reason 并在其后按直线距离+ID 降级排序，每项明确标记 driving_eta 或 straight_line_distance，拒绝不一致路线与重复 ID（2026-09-04；273 tests；[Nearest 排名说明](./docs/architecture/nearest-ranking.md)）
 - [ ] `P3-SEA-07` 实现 capability-aware Cheapest：V1 仅 Fuel 启用，Charge/Air/Wash 返回明确 unavailable reason
 - [ ] `P3-SEA-08` 实现 capability-aware Open now：Fuel 使用站点排班；Charge/Air/Wash 仅使用服务专属时间证据
 - [ ] `P3-SEA-09` 处理无结果、价格未知和状态未知
@@ -592,3 +592,4 @@ V1 的核心验收结果是：
 | 2026-09-04 | 实现 Top N 路线距离与 ETA | 最近候选经 provider-neutral 的 1×N Matrix 获取真实驾车距离和 ETA；Mapbox traffic 请求限制为 origin + 最多 9 个目的地并按 ID 安全合并；完整质量门槛 252 项测试通过；见 `docs/architecture/top-candidate-routing.md` |
 | 2026-09-04 | 建立路线缓存与成本硬门槛 | 精确起点不落库，短时缓存按 coarse cell 的哈希复用；仅 cache miss 原子占用月度 element 预算并记录成功/失败，预算 0 时不调用付费服务；完整质量门槛 264 项测试通过；见 `docs/architecture/route-cache-budget.md` |
 | 2026-09-04 | 实现路线失败诚实降级 | 不可达、超时、限流、预算和 provider/响应错误均转为明确 reason；保留全部候选及直线距离，绝不伪造驾车距离或 ETA，provider 错误不泄露 token/URL/body；完整质量门槛 268 项测试通过；见 `docs/architecture/route-failure-degradation.md` |
+| 2026-09-04 | 实现 Nearest 稳定排名 | 有真实路线时优先 ETA 并以 road/straight distance 和 ID 决胜；无路线候选保留原因并明确按直线距离降级，输入不被修改；完整质量门槛 273 项测试通过；见 `docs/architecture/nearest-ranking.md` |
