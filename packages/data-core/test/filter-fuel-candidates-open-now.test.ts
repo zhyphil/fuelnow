@@ -61,8 +61,15 @@ function makeCandidate(
 describe("filterFuelCandidatesOpenNow", () => {
   it("recognizes 24/7 schedules in France and Spain timezones", () => {
     const alwaysOpen: NormalizedOpeningHours = {
-      ...makeHours(1, []),
+      parseStatus: "parsed",
+      days: Array.from({ length: 7 }, (_, index) => ({
+        day: (index + 1) as OpeningDay["day"],
+        status: "open" as const,
+        intervals: [{ opensAt: "00:00", closesAt: "00:00", spansFullDay: true }],
+      })),
       siteSchedule24Seven: true,
+      unattendedFuelPayment24Seven: null,
+      raw: "24/7",
     };
     const result = filterFuelCandidatesOpenNow(
       [
@@ -78,6 +85,20 @@ describe("filterFuelCandidatesOpenNow", () => {
     );
     expect(result.closedCandidates).toEqual([]);
     expect(result.unknownCandidates).toEqual([]);
+  });
+
+  it("does not trust an inconsistent 24/7 flag", () => {
+    const inconsistent = makeHours(1, [
+      { opensAt: "08:00", closesAt: "18:00", spansFullDay: false },
+    ]);
+    inconsistent.siteSchedule24Seven = true;
+
+    expect(
+      filterFuelCandidatesOpenNow(
+        [makeCandidate("invalid-flag", inconsistent)],
+        "2026-09-07T10:00:00Z",
+      ).unknownCandidates,
+    ).toHaveLength(1);
   });
 
   it("uses local weekday/time with an inclusive open and exclusive close", () => {

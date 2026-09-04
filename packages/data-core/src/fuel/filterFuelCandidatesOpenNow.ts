@@ -66,6 +66,21 @@ function isCarriedOverFromPreviousDay(
   });
 }
 
+function hasValidFullWeekSchedule(openingHours: NormalizedOpeningHours): boolean {
+  return (
+    openingHours.days.length === 7 &&
+    new Set(openingHours.days.map(({ day }) => day)).size === 7 &&
+    openingHours.days.every(
+      (day) =>
+        day.status === "open" &&
+        day.intervals.some(
+          ({ opensAt, closesAt, spansFullDay }) =>
+            spansFullDay && opensAt === "00:00" && closesAt === "00:00",
+        ),
+    )
+  );
+}
+
 export function evaluateOpeningStatusAt(
   openingHours: NormalizedOpeningHours | null,
   timezone: "Europe/Paris" | "Europe/Madrid",
@@ -75,7 +90,7 @@ export function evaluateOpeningStatusAt(
     return "unknown";
   }
   if (openingHours.siteSchedule24Seven) {
-    return "open";
+    return hasValidFullWeekSchedule(openingHours) ? "open" : "unknown";
   }
 
   const local = instant.setZone(timezone);

@@ -30,6 +30,21 @@ function warning(code: string, field: string, message: string): AdapterIssue {
   return { code, severity: "warning", field, message };
 }
 
+function normalizedIntervals(intervals: readonly OpeningInterval[]): OpeningInterval[] {
+  const fullDay = intervals.find(({ spansFullDay }) => spansFullDay);
+  if (fullDay !== undefined) return [fullDay];
+
+  const unique = new Map<string, OpeningInterval>();
+  for (const interval of intervals) {
+    unique.set(`${interval.opensAt}-${interval.closesAt}`, interval);
+  }
+  return [...unique.values()].sort(
+    (left, right) =>
+      left.opensAt.localeCompare(right.opensAt) ||
+      left.closesAt.localeCompare(right.closesAt),
+  );
+}
+
 function franceTime(value: unknown): string | null {
   if (typeof value !== "string" || !/^\d{2}\.\d{2}$/.test(value)) return null;
   const [hourText, minuteText] = value.split(".");
@@ -69,13 +84,24 @@ function parseFranceIntervals(
       );
       continue;
     }
+    const spansFullDay = opensAt === "00:00" && closesAt === "00:00";
+    if (opensAt === closesAt && !spansFullDay) {
+      issues.push(
+        warning(
+          "invalid_opening_interval_duration",
+          "horaires",
+          "Equal opening and closing times are valid only for 00.00 full-day intervals",
+        ),
+      );
+      continue;
+    }
     intervals.push({
       opensAt,
       closesAt,
-      spansFullDay: opensAt === "00:00" && closesAt === "00:00",
+      spansFullDay,
     });
   }
-  return intervals;
+  return normalizedIntervals(intervals);
 }
 
 function parseFranceOpeningHours(
@@ -223,13 +249,16 @@ function parseSpainIntervals(value: string): OpeningInterval[] | null {
     ) {
       return null;
     }
+    const opensAt = `${openHour.padStart(2, "0")}:${openMinute}`;
+    const closesAt = `${closeHour.padStart(2, "0")}:${closeMinute}`;
+    if (opensAt === closesAt) return null;
     intervals.push({
-      opensAt: `${openHour.padStart(2, "0")}:${openMinute}`,
-      closesAt: `${closeHour.padStart(2, "0")}:${closeMinute}`,
+      opensAt,
+      closesAt,
       spansFullDay: false,
     });
   }
-  return intervals;
+  return normalizedIntervals(intervals);
 }
 
 function parseSpainOpeningHours(rawValue: unknown): SourceOpeningHoursParseResult {
@@ -271,7 +300,7 @@ function parseSpainOpeningHours(rawValue: unknown): SourceOpeningHoursParseResul
     : [];
   const days = SPAIN_DAY_TOKENS.map((_, index): OpeningDay => {
     const day = (index + 1) as OpeningDay["day"];
-    const intervals = intervalsByDay.get(day) ?? [];
+    const intervals = normalizedIntervals(intervalsByDay.get(day) ?? []);
     return {
       day,
       status: intervals.length > 0 ? "open" : partial ? "unknown" : "closed",

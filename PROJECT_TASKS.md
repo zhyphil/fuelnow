@@ -4,7 +4,7 @@
 > 需求来源：[france_spain_driver_decision_engine_project.md](./france_spain_driver_decision_engine_project.md)  
 > 当前状态：进行中  
 > 当前阶段：Phase 3 — 搜索、路线与决策引擎
-> 下一项任务：`P3-OPEN-02` 支持 24/7、跨午夜和分段营业
+> 下一项任务：`P3-OPEN-03` 处理 Europe/Paris 与 Europe/Madrid 时区
 > 最后更新：2026-09-04
 
 ## 使用方法
@@ -232,7 +232,7 @@ V1 的核心验收结果是：
 ## 3.2 营业时间
 
 - [x] `P3-OPEN-01` 将法国 `horaires` 内嵌 JSON/`HH.mm`/关闭标记与西班牙 `Horario` 文本/西语星期/范围统一到同一 country-aware 解析入口；两国 Adapter 移除重复解析代码，保留来源字段、partial warning、法国自助 Fuel 标记与西班牙未证明日期 Unknown 边界（2026-09-04；322 tests；[解析器说明](./docs/architecture/source-opening-hours-parser.md)）
-- [ ] `P3-OPEN-02` 支持 24/7、跨午夜和分段营业
+- [x] `P3-OPEN-02` 固化两国 24/7、跨午夜、分段营业及开门含/关门不含边界：仅法国 `00.00–00.00` 与西班牙 `24H` 可声明全天，24/7 标记必须由 7 个完整日期支撑；跨日延续至次日本地关门时刻，分段区间去重稳定排序，非零点同开同关降级而不误判全天（2026-09-04；329 tests；[高级营业时间说明](./docs/architecture/advanced-opening-hours.md)）
 - [ ] `P3-OPEN-03` 处理 Europe/Paris 与 Europe/Madrid 时区
 - [ ] `P3-OPEN-04` 处理节假日未知和临时关闭状态
 - [ ] `P3-OPEN-05` 对无法解析的营业时间降级为 Unknown
@@ -597,3 +597,4 @@ V1 的核心验收结果是：
 | 2026-09-04 | 实现 capability-aware Open now | 数据库隔离站点与服务专属排班证据；Fuel 使用站点状态，Charge/Air/Wash 仅凭服务专属状态 conditional 启用，Unknown 不冒充营业且临时关闭优先；真实 PostgreSQL/PostGIS 验证通过，完整质量门槛 300 项测试通过；见 `docs/architecture/capability-aware-open-now.md` |
 | 2026-09-04 | 统一空结果与 Unknown 响应 | 明确区分附近无站点、无可比价格、排班 Unknown、全部关闭与能力禁用；保留字段级 Unknown 计数/提示并提供扩圈或 Nearest 回退；完整质量门槛 315 项测试通过；见 `docs/architecture/search-empty-and-unknown-outcomes.md` |
 | 2026-09-04 | 统一法国/西班牙营业时间解析入口 | 法国 JSON `HH.mm` 与西班牙文本星期/范围统一输出 NormalizedOpeningHours，两国 Adapter 删除重复逻辑并保留 partial/Unknown 语义；完整质量门槛 322 项测试通过；见 `docs/architecture/source-opening-hours-parser.md` |
+| 2026-09-04 | 固化 24/7、跨午夜与分段营业语义 | 两国排班统一使用开门含/关门不含边界，跨日延续、分段空档、区间去重排序与同开同关异常均有确定行为；完整质量门槛 329 项测试通过；见 `docs/architecture/advanced-opening-hours.md` |
