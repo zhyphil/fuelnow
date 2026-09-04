@@ -24,6 +24,10 @@ const mergeMigrationUrl = new URL(
   "../db/migrations/0005_service_point_merge.sql",
   import.meta.url,
 );
+const lifecycleMigrationUrl = new URL(
+  "../db/migrations/0006_source_lifecycle.sql",
+  import.meta.url,
+);
 
 describe("initial PostgreSQL/PostGIS schema", () => {
   it("enables PostGIS and uses WGS84 geography points", async () => {
@@ -148,5 +152,37 @@ describe("initial PostgreSQL/PostGIS schema", () => {
     expect(migration).toContain("'review_required'");
     expect(migration).toContain("target_service_point_id IS NULL");
     expect(migration).toContain("service_point_match_decisions_review_idx");
+  });
+
+  it("models source records and canonical points without hard deletion", async () => {
+    const migration = await readFile(lifecycleMigrationUrl, "utf8");
+
+    expect(migration).toContain(
+      "lifecycle_status IN ('active', 'missing', 'deleted', 'withdrawn')",
+    );
+    expect(migration).toContain(
+      "'active', 'temporarily_closed', 'permanently_closed', 'unverified'",
+    );
+    expect(migration).not.toMatch(
+      /\bDELETE FROM (?:source_records|service_points|fuel_offers)\b/,
+    );
+  });
+
+  it("records immutable source, closure and Fuel availability events", async () => {
+    const migration = await readFile(lifecycleMigrationUrl, "utf8");
+
+    expect(migration).toContain("CREATE TABLE source_record_lifecycle_events");
+    expect(migration).toContain("CREATE TABLE service_point_lifecycle_events");
+    expect(migration).toContain("CREATE TABLE fuel_offer_availability_events");
+    expect(migration.match(/ON DELETE RESTRICT/g)?.length).toBeGreaterThanOrEqual(3);
+  });
+
+  it("provides explicit missing, deletion and source-withdrawal operations", async () => {
+    const migration = await readFile(lifecycleMigrationUrl, "utf8");
+
+    expect(migration).toContain("FUNCTION mark_source_records_missing");
+    expect(migration).toContain("FUNCTION mark_source_record_deleted");
+    expect(migration).toContain("FUNCTION withdraw_data_source");
+    expect(migration).toContain("source_records_withdrawn_source_guard");
   });
 });

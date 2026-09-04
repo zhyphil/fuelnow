@@ -53,6 +53,22 @@ export { sortFuelCandidatesByNearest } from "./fuel/sortFuelCandidatesByNearest.
 export { assertValidGeoPoint, haversineDistanceMeters } from "./geo/haversine.js";
 export type { GeoPoint } from "./geo/haversine.js";
 export {
+  deriveFuelAvailability,
+  deriveServicePointLifecycle,
+  resolveSourceRecordLifecycle,
+  SOURCE_RECORD_LIFECYCLE_STATUSES,
+} from "./lifecycle/resolveLifecycle.js";
+export type {
+  FuelAvailabilityEvidence,
+  FuelAvailabilityState,
+  ServicePointLifecycleEvidence,
+  ServicePointLifecycleStatus,
+  SourceRecordLifecycleEvent,
+  SourceRecordLifecycleEventType,
+  SourceRecordLifecycleState,
+  SourceRecordLifecycleStatus,
+} from "./lifecycle/resolveLifecycle.js";
+export {
   matchCanonicalServicePoint,
   selectCanonicalField,
 } from "./merge/matchServicePoint.js";
