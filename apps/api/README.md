@@ -87,3 +87,8 @@ provider response body in application error messages.
 `rankNearestCandidates` orders valid routed candidates by ETA and then road
 distance. Degraded or non-routed candidates retain their reason and use a
 clearly labelled straight-line fallback; canonical IDs resolve exact ties.
+
+The decision engine's `rankCheapest` enables price ranking only for Fuel with a
+requested fuel type and at least one current comparable price. Other services,
+or Fuel searches without an eligible price, return a shared capability reason
+instead of a fabricated Cheapest result.

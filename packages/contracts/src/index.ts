@@ -16,6 +16,18 @@ export type {
   AirWorkingStatus,
 } from "./air.js";
 export {
+  CAPABILITY_REASON_CODES,
+  CAPABILITY_STATES,
+  CapabilityReasonCodeSchema,
+  CapabilityStateSchema,
+  DecisionCapabilitySchema,
+} from "./capability.js";
+export type {
+  CapabilityReasonCode,
+  CapabilityState,
+  DecisionCapability,
+} from "./capability.js";
+export {
   CHARGING_PRICE_UNITS,
   ChargingCapabilitySchema,
   ChargingPriceSchema,
