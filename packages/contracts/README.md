@@ -11,3 +11,5 @@ Service-specific fields are added by the remaining Phase 2 model tasks. Source, 
 `FuelServicePointSchema` adds normalized Fuel offers and `isFuelServicePoint` enforces cross-field capability, uniqueness and unit rules that are not represented by the JSON Schema alone.
 
 `ChargingServicePointSchema` preserves the ServicePoint → EVSE → connector hierarchy. Its semantic predicate verifies EVSE capacity, dynamic status timestamps, identifier uniqueness and availability summary counts.
+
+`AirServicePointSchema` keeps equipment presence, operation, access, free/paid state and price independent. Its semantic predicate requires positive source evidence and rejects unverifiable or contradictory known states.

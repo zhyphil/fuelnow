@@ -1,4 +1,21 @@
 export {
+  AIR_ACCESS_LEVELS,
+  AIR_WORKING_STATUSES,
+  AirAccessSchema,
+  AirCapabilitySchema,
+  AirPriceSchema,
+  AirServicePointSchema,
+  AirWorkingStatusSchema,
+  isAirServicePoint,
+} from "./air.js";
+export type {
+  AirAccess,
+  AirCapability,
+  AirPrice,
+  AirServicePoint,
+  AirWorkingStatus,
+} from "./air.js";
+export {
   CHARGING_CONFIDENCE_LEVELS,
   CHARGING_FRESHNESS_LEVELS,
   CHARGING_PRICE_UNITS,
