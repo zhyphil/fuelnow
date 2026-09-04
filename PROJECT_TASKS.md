@@ -4,7 +4,7 @@
 > 需求来源：[france_spain_driver_decision_engine_project.md](./france_spain_driver_decision_engine_project.md)  
 > 当前状态：进行中  
 > 当前阶段：Phase 2 — 项目骨架与统一数据层
-> 下一项任务：`P2-DB-05` 建立不同来源的站点去重与合并规则
+> 下一项任务：`P2-DB-06` 处理删除、关闭、缺货和来源撤回
 > 最后更新：2026-09-04
 
 ## 使用方法
@@ -197,7 +197,7 @@ V1 的核心验收结果是：
 - [x] `P2-DB-02` 建立 1 个 PostGIS GiST 位置索引和 8 个国家/服务/状态/Fuel/EV 常用筛选索引，迁移执行器按编号顺序发现并跳过已记录版本；真实 PostgreSQL 验证索引 ready/valid，`EXPLAIN` 确认半径、服务类型和最新 Fuel 价格查询分别使用目标索引（2026-09-04；167 tests；[索引说明](./docs/architecture/database-indexes.md)）
 - [x] `P2-DB-03` 以 `(source_id, source_record_id)` 保存并唯一约束来源原始身份，提供防旧数据覆盖的事务 upsert；真实数据库验证相同输入不变、较新输入原地更新、过时输入不覆盖且始终只有一条身份记录（2026-09-04；170 tests；[来源幂等说明](./docs/architecture/source-record-idempotency.md)）
 - [x] `P2-DB-04` 建立 provider-neutral 分页原始数据导入与 PostgreSQL 增量 checkpoint，逐页事务原子提交 raw records + cursor/high watermark，支持恢复、取消、最大页数、停滞和时间倒退保护；真实数据库验证 checkpoint 推进后完整回滚（2026-09-04；178 tests；[增量导入说明](./docs/architecture/incremental-source-import.md)）
-- [ ] `P2-DB-05` 建立不同来源的站点去重与合并规则
+- [x] `P2-DB-05` 建立可解释的跨来源站点匹配与字段合并规则：仅可信共同 ID 或 100 m 内强地址一致可自动匹配，禁止仅凭距离/跨国/门牌冲突合并，近分候选进入 review；持久化版本化决定与理由并按时间+可信度合并字段（2026-09-04；190 tests；[去重合并说明](./docs/architecture/service-point-deduplication.md)）
 - [ ] `P2-DB-06` 处理删除、关闭、缺货和来源撤回
 - [ ] `P2-DB-07` 记录每次同步时间、数量、错误和耗时
 - [ ] `P2-DB-08` 配置更新失败重试与告警
@@ -580,3 +580,4 @@ V1 的核心验收结果是：
 | 2026-09-04 | 建立地理位置和常用筛选索引 | 创建 9 个空间/常用筛选索引；数据库确认均 ready/valid，执行计划实际使用 GiST、service type 与 latest Fuel price 索引；完整质量门槛 167 项测试通过；见 `docs/architecture/database-indexes.md` |
 | 2026-09-04 | 建立来源原始身份与同步幂等 | 以来源+原始 ID 唯一约束 raw record，事务验证重复输入不变、较新输入更新、过时输入不覆盖且无重复；完整质量门槛 170 项测试通过；见 `docs/architecture/source-record-idempotency.md` |
 | 2026-09-04 | 建立原始数据导入与增量更新 | worker 按已保存 checkpoint 分页读取，逐页原子提交 raw records 与下一 cursor/high watermark，覆盖恢复、失败回滚、停滞、循环和时间倒退防护；完整质量门槛 178 项测试通过；见 `docs/architecture/incremental-source-import.md` |
+| 2026-09-04 | 建立跨来源站点去重与合并规则 | 可信 ID/强地址才允许自动匹配，近分候选转人工复核，字段选择禁止旧值或低可信新值降级；数据库保留版本、得分和理由；完整质量门槛 190 项测试通过；见 `docs/architecture/service-point-deduplication.md` |

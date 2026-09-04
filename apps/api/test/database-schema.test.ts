@@ -20,6 +20,10 @@ const sourceIdempotencyVerificationUrl = new URL(
   "../db/migrations/verify-source-idempotency.sql",
   import.meta.url,
 );
+const mergeMigrationUrl = new URL(
+  "../db/migrations/0005_service_point_merge.sql",
+  import.meta.url,
+);
 
 describe("initial PostgreSQL/PostGIS schema", () => {
   it("enables PostGIS and uses WGS84 geography points", async () => {
@@ -126,5 +130,23 @@ describe("initial PostgreSQL/PostGIS schema", () => {
     expect(verification).toContain("Newer source payload did not update in place");
     expect(verification).toContain("Older source payload overwrote the current record");
     expect(verification).toContain("ROLLBACK;");
+  });
+
+  it("stores one auditable cross-source match decision per raw record", async () => {
+    const migration = await readFile(mergeMigrationUrl, "utf8");
+
+    expect(migration).toContain("CREATE TABLE service_point_match_decisions");
+    expect(migration).toContain(
+      "source_record_id bigint PRIMARY KEY REFERENCES source_records(id)",
+    );
+    expect(migration).toContain("rule_version text NOT NULL");
+  });
+
+  it("keeps ambiguous matches unlinked and queryable for review", async () => {
+    const migration = await readFile(mergeMigrationUrl, "utf8");
+
+    expect(migration).toContain("'review_required'");
+    expect(migration).toContain("target_service_point_id IS NULL");
+    expect(migration).toContain("service_point_match_decisions_review_idx");
   });
 });

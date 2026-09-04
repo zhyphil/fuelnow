@@ -52,6 +52,20 @@ export { sortFuelCandidatesByCheapest } from "./fuel/sortFuelCandidatesByCheapes
 export { sortFuelCandidatesByNearest } from "./fuel/sortFuelCandidatesByNearest.js";
 export { assertValidGeoPoint, haversineDistanceMeters } from "./geo/haversine.js";
 export type { GeoPoint } from "./geo/haversine.js";
+export {
+  matchCanonicalServicePoint,
+  selectCanonicalField,
+} from "./merge/matchServicePoint.js";
+export type {
+  CanonicalField,
+  CanonicalServicePointMatchCandidate,
+  ScoredServicePointCandidate,
+  ServicePointMatchAddress,
+  ServicePointMatchDecision,
+  ServicePointMatchReason,
+  ServicePointMatchSubject,
+  TrustedServicePointIdentifier,
+} from "./merge/matchServicePoint.js";
 export { resolveSourceUpdatedAt } from "./source/resolveSourceUpdatedAt.js";
 export type { ResolvedSourceUpdate } from "./source/resolveSourceUpdatedAt.js";
 export {
