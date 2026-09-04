@@ -1,3 +1,5 @@
+export { buildSearchOutcome } from "./buildSearchOutcome.js";
+export type { SearchOutcomeInput } from "./buildSearchOutcome.js";
 export { filterOpenNow } from "./filterOpenNow.js";
 export type {
   OpenNowRequest,

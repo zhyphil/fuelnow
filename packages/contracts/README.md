@@ -12,6 +12,9 @@ Service-specific fields are added by the remaining Phase 2 model tasks. Source, 
 
 `DecisionCapabilitySchema` centralizes enabled/conditional/unavailable states
 and localizable reason codes shared by backend decisions and mobile rendering.
+`SearchOutcomeSchema` separately describes successful, empty and degraded result
+sets with bounded Unknown counts, localizable warnings and safe fallback actions;
+clients never infer Free, Closed or Not found from a nullable field.
 
 `ChargingServicePointSchema` preserves the ServicePoint → EVSE → connector hierarchy. Its semantic predicate verifies EVSE capacity, dynamic status timestamps, identifier uniqueness and availability summary counts.
 

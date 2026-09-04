@@ -100,3 +100,8 @@ service-scoped evidence for Charge, Air and Wash. It returns enabled or
 conditional capability metadata when decision-grade hours exist, otherwise
 `service_hours_unknown`; unknown hours never pass the filter and explicit point
 closures always override an open schedule.
+
+`buildSearchOutcome` keeps empty search, unavailable sort and partial Unknown
+data distinct. It returns localizable reason/warning codes, validated counts and
+either radius expansion or Nearest as a safe fallback; useful candidates remain
+results even when some price, opening, equipment or ETA fields are Unknown.

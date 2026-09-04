@@ -123,6 +123,28 @@ export type {
 } from "./geography.js";
 export { NonBlankStringSchema, UtcTimestampSchema, nullable } from "./primitives.js";
 export {
+  EMPTY_RESULT_REASONS,
+  SEARCH_FALLBACK_ACTIONS,
+  SEARCH_OUTCOME_STATES,
+  SEARCH_SORTS,
+  SEARCH_WARNING_CODES,
+  EmptyResultReasonSchema,
+  SearchFallbackActionSchema,
+  SearchOutcomeSchema,
+  SearchOutcomeStateSchema,
+  SearchSortSchema,
+  SearchWarningCodeSchema,
+  isSearchOutcome,
+} from "./search-outcome.js";
+export type {
+  EmptyResultReason,
+  SearchFallbackAction,
+  SearchOutcome,
+  SearchOutcomeState,
+  SearchSort,
+  SearchWarningCode,
+} from "./search-outcome.js";
+export {
   CONFIDENCE_LEVELS,
   ConfidenceSchema,
   FRESHNESS_LEVELS,
