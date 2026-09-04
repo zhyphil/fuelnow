@@ -32,6 +32,10 @@ const syncRunMigrationUrl = new URL(
   "../db/migrations/0007_sync_run_observability.sql",
   import.meta.url,
 );
+const syncRetryMigrationUrl = new URL(
+  "../db/migrations/0008_sync_retry_alerting.sql",
+  import.meta.url,
+);
 
 describe("initial PostgreSQL/PostGIS schema", () => {
   it("enables PostGIS and uses WGS84 geography points", async () => {
@@ -221,5 +225,37 @@ describe("initial PostgreSQL/PostGIS schema", () => {
     expect(migration).toContain("FUNCTION start_sync_run");
     expect(migration).toContain("FUNCTION finish_sync_run");
     expect(migration).toContain("AND status = 'running'");
+  });
+
+  it("stores bounded retry decisions and one parent for each retry", async () => {
+    const migration = await readFile(syncRetryMigrationUrl, "utf8");
+
+    expect(migration).toContain("CREATE TABLE sync_retry_decisions");
+    expect(migration).toContain("attempt_number BETWEEN 1 AND 20");
+    expect(migration).toContain("sync_runs_retry_of_run_uidx");
+    expect(migration).toContain("CREATE OR REPLACE FUNCTION start_sync_run_attempt");
+    expect(migration).toContain("FOR UPDATE OF decision SKIP LOCKED");
+    expect(migration).toContain("lifecycle_status <> 'withdrawn'");
+    expect(migration).toContain("has a pending retry");
+  });
+
+  it("atomically finishes a failure with its retry or terminal alert decision", async () => {
+    const migration = await readFile(syncRetryMigrationUrl, "utf8");
+
+    expect(migration).toContain("CREATE OR REPLACE FUNCTION finish_failed_sync_run");
+    expect(migration).toContain("retry_allowed :=");
+    expect(migration).toContain("sync_retry_exhausted");
+    expect(migration).toContain("sync_permanent_failure");
+    expect(migration).not.toContain("'errorMessage', p_error_message");
+  });
+
+  it("deduplicates stale-run alerts and tracks alert delivery attempts", async () => {
+    const migration = await readFile(syncRetryMigrationUrl, "utf8");
+
+    expect(migration).toContain("CREATE TABLE sync_alert_outbox");
+    expect(migration).toContain("dedupe_key text NOT NULL UNIQUE");
+    expect(migration).toContain("FUNCTION enqueue_stale_sync_run_alerts");
+    expect(migration).toContain("ON CONFLICT (dedupe_key) DO NOTHING");
+    expect(migration).toContain("FUNCTION complete_sync_alert_delivery");
   });
 });

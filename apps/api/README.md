@@ -39,3 +39,9 @@ until their dedicated source-integration tasks.
 `runMeasuredSourceImport` wraps that pipeline with a durable sync-run record.
 It records mode, timing, committed pages/records, failed pages and a bounded,
 credential-redacted error while preserving the original error for the worker.
+
+`runSourceImportWithRetry` adds validated, bounded whole-sync retries. It uses
+capped exponential backoff with jitter, retries only transient failures and
+stores retry ancestry and due times. Permanent failures, exhausted retries and
+stale runs create deduplicated rows in the channel-neutral alert outbox; an
+external monitoring destination is intentionally deferred to the release phase.

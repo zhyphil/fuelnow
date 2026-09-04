@@ -9,3 +9,8 @@ export type {
   EnvironmentProfile,
   LogLevel,
 } from "./environment.js";
+export { resolveSyncReliabilityConfig } from "./sync-reliability.js";
+export type {
+  SyncReliabilityConfig,
+  SyncReliabilityInput,
+} from "./sync-reliability.js";

@@ -4,6 +4,7 @@ import {
   APP_ENVIRONMENTS,
   isAppEnvironment,
   resolveEnvironmentProfile,
+  resolveSyncReliabilityConfig,
 } from "../src/index.js";
 
 describe("environment profiles", () => {
@@ -49,5 +50,60 @@ describe("environment profiles", () => {
     expect(APP_ENVIRONMENTS).toEqual(["development", "test", "production"]);
     expect(isAppEnvironment("test")).toBe(true);
     expect(isAppEnvironment("preview")).toBe(false);
+  });
+});
+
+describe("sync reliability configuration", () => {
+  it("uses bounded retry and stale-run defaults", () => {
+    expect(resolveSyncReliabilityConfig()).toEqual({
+      retryPolicy: {
+        maxAttempts: 3,
+        baseDelayMs: 1_000,
+        maxDelayMs: 60_000,
+        jitterRatio: 0.2,
+      },
+      staleAfterMs: 3_600_000,
+    });
+  });
+
+  it("parses explicit deployment values without reading process.env", () => {
+    expect(
+      resolveSyncReliabilityConfig({
+        maxAttempts: "5",
+        retryBaseDelayMs: "2500",
+        retryMaxDelayMs: "120000",
+        retryJitterRatio: "0.35",
+        staleAfterSeconds: "7200",
+      }),
+    ).toEqual({
+      retryPolicy: {
+        maxAttempts: 5,
+        baseDelayMs: 2_500,
+        maxDelayMs: 120_000,
+        jitterRatio: 0.35,
+      },
+      staleAfterMs: 7_200_000,
+    });
+  });
+
+  it("rejects a maximum delay below the base delay", () => {
+    expect(() =>
+      resolveSyncReliabilityConfig({
+        retryBaseDelayMs: "5000",
+        retryMaxDelayMs: "4999",
+      }),
+    ).toThrow("SOURCE_SYNC_RETRY_MAX_DELAY_MS must be an integer between 5000");
+  });
+
+  it("rejects unbounded attempts, jitter and stale thresholds", () => {
+    expect(() => resolveSyncReliabilityConfig({ maxAttempts: "21" })).toThrow(
+      "SOURCE_SYNC_MAX_ATTEMPTS",
+    );
+    expect(() => resolveSyncReliabilityConfig({ retryJitterRatio: "1.1" })).toThrow(
+      "SOURCE_SYNC_RETRY_JITTER_RATIO",
+    );
+    expect(() => resolveSyncReliabilityConfig({ staleAfterSeconds: "59" })).toThrow(
+      "SOURCE_SYNC_STALE_AFTER_SECONDS",
+    );
   });
 });

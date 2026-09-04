@@ -19,10 +19,11 @@ export class PostgresSyncRunReporter implements SyncRunReporter {
     sourceId,
     mode,
     startedAt,
+    attemptNumber,
   }: StartSyncRunRequest): Promise<string> {
     const result = await this.pool.query<StartedRunRow>(
-      "SELECT start_sync_run($1, $2, $3) AS run_id",
-      [sourceId, mode, startedAt],
+      "SELECT start_sync_run_attempt($1, $2, $3, $4) AS run_id",
+      [sourceId, mode, startedAt, attemptNumber],
     );
     const row = result.rows[0];
     if (row === undefined) {
@@ -40,7 +41,28 @@ export class PostgresSyncRunReporter implements SyncRunReporter {
     failedPages,
     errorCode,
     errorMessage,
+    failureDecision,
   }: FinishSyncRunRequest): Promise<void> {
+    if (status === "failed" && failureDecision !== undefined) {
+      await this.pool.query(
+        `SELECT failed_run_id
+         FROM finish_failed_sync_run($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
+        [
+          runId,
+          completedAt,
+          pagesProcessed,
+          recordsProcessed,
+          failedPages,
+          errorCode,
+          errorMessage,
+          failureDecision.classification,
+          failureDecision.maxAttempts,
+          failureDecision.nextAttemptAt,
+        ],
+      );
+      return;
+    }
+
     await this.pool.query(
       `SELECT id
        FROM finish_sync_run($1, $2, $3, $4, $5, $6, $7, $8)`,

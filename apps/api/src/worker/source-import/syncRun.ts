@@ -4,11 +4,24 @@ import type { IncrementalImportProgress, IncrementalImportResult } from "./types
 
 export type SyncRunMode = "full_snapshot" | "incremental";
 export type SyncRunTerminalStatus = "failed" | "succeeded";
+export type SyncFailureClassification = "cancelled" | "permanent" | "transient";
+
+export interface SyncFailureDecision {
+  classification: SyncFailureClassification;
+  maxAttempts: number;
+  nextAttemptAt: string | null;
+}
+
+export interface SyncFailureDecisionContext {
+  attemptNumber: number;
+  completedAt: string;
+}
 
 export interface StartSyncRunRequest {
   sourceId: string;
   mode: SyncRunMode;
   startedAt: string;
+  attemptNumber: number;
 }
 
 export interface FinishSyncRunRequest {
@@ -20,6 +33,7 @@ export interface FinishSyncRunRequest {
   failedPages: number;
   errorCode: string | null;
   errorMessage: string | null;
+  failureDecision?: SyncFailureDecision;
 }
 
 export interface SyncRunReporter {
@@ -34,6 +48,11 @@ export interface MeasuredSourceImportOptions extends Omit<
   mode: SyncRunMode;
   reporter: SyncRunReporter;
   clock?: () => Date;
+  attemptNumber?: number;
+  decideFailure?: (
+    error: unknown,
+    context: SyncFailureDecisionContext,
+  ) => SyncFailureDecision;
 }
 
 function safeError(error: unknown): { code: string; message: string } {
@@ -65,10 +84,21 @@ export async function runMeasuredSourceImport({
   mode,
   reporter,
   clock = () => new Date(),
+  attemptNumber = 1,
+  decideFailure,
   ...importOptions
 }: MeasuredSourceImportOptions): Promise<IncrementalImportResult> {
+  if (!Number.isSafeInteger(attemptNumber) || attemptNumber < 1 || attemptNumber > 20) {
+    throw new Error("attemptNumber must be an integer between 1 and 20");
+  }
+
   const startedAt = clock().toISOString();
-  const runId = await reporter.startRun({ sourceId, mode, startedAt });
+  const runId = await reporter.startRun({
+    sourceId,
+    mode,
+    startedAt,
+    attemptNumber,
+  });
   let progress: IncrementalImportProgress = {
     checkpoint: {
       cursor: null,
@@ -90,6 +120,10 @@ export async function runMeasuredSourceImport({
   } catch (error) {
     const completedAt = clock().toISOString();
     const safe = safeError(error);
+    const failureDecision = decideFailure?.(error, {
+      attemptNumber,
+      completedAt,
+    });
     try {
       await reporter.finishRun({
         runId,
@@ -100,6 +134,7 @@ export async function runMeasuredSourceImport({
         failedPages: 1,
         errorCode: safe.code,
         errorMessage: safe.message,
+        ...(failureDecision === undefined ? {} : { failureDecision }),
       });
     } catch (reportingError) {
       throw new AggregateError(

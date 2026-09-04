@@ -70,6 +70,7 @@ describe("measured source import", () => {
       sourceId: "fr-fuel",
       mode: "incremental",
       startedAt: "2026-09-04T00:00:00.000Z",
+      attemptNumber: 1,
     });
     expect(reporter.finishRun).toHaveBeenCalledWith({
       runId: "42",
@@ -184,6 +185,7 @@ describe("measured source import", () => {
       sourceId: "fr-fuel",
       mode: "incremental",
       startedAt: "2026-09-04T00:00:00Z",
+      attemptNumber: 1,
     });
     await reporter.finishRun({
       runId,
@@ -197,7 +199,15 @@ describe("measured source import", () => {
     });
 
     expect(runId).toBe("9007199254740993");
-    expect(pool.query.mock.calls[0]?.[0]).toContain("start_sync_run($1, $2, $3)");
+    expect(pool.query.mock.calls[0]?.[0]).toContain(
+      "start_sync_run_attempt($1, $2, $3, $4)",
+    );
+    expect(pool.query.mock.calls[0]?.[1]).toEqual([
+      "fr-fuel",
+      "incremental",
+      "2026-09-04T00:00:00Z",
+      1,
+    ]);
     expect(pool.query.mock.calls[1]?.[0]).toContain("finish_sync_run($1, $2, $3");
     expect(pool.query.mock.calls[1]?.[1]).toEqual([
       "9007199254740993",
