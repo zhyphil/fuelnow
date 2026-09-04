@@ -4,7 +4,7 @@
 > 需求来源：[france_spain_driver_decision_engine_project.md](./france_spain_driver_decision_engine_project.md)  
 > 当前状态：进行中  
 > 当前阶段：Phase 3 — 搜索、路线与决策引擎
-> 下一项任务：`P3-API-09` 编写 API 文档与示例
+> 下一项任务：`P3-API-10` 建立接口集成与性能测试
 > 最后更新：2026-09-04
 
 ## 使用方法
@@ -262,7 +262,7 @@ V1 的核心验收结果是：
 - [x] `P3-API-06` 为附近结果和详情页接入同一批量证据读取/响应契约，返回独立营业与服务状态、可空价格、按 country+service 选择的 source/许可/时间、请求时重算 freshness、非伪造 confidence 及四服务专属字段；Fuel Cheapest 仅在当前可比价格存在时启用，stale/expired/Unknown/会员价无低价优势，无合格价格明确降级，Charge price/live availability 保持政策性 Unknown；真实 Node/pg + 全新 PostgreSQL/PostGIS 四服务 fixture 查询通过（2026-09-04；509 tests；[API 服务证据](./docs/architecture/api-service-evidence.md)）
 - [x] `P3-API-07` 统一所有 API 错误为 requestId/code/message/retryable 契约，区分 schema、筛选组合、未知路由/站点与脱敏内部错误；附近搜索同时返回请求 capability、实际 appliedSort 与共享 SearchOutcome，精确表达空结果、Nearest 回退及价格/营业/设备/路线 Unknown 计数，避免把降级结果伪装成请求模式成功（2026-09-04；513 tests；[API 错误与结果](./docs/architecture/api-errors-and-outcomes.md)）
 - [x] `P3-API-08` 在既有 TypeBox 严格输入校验上增加显式 CORS 白名单、每客户端 60/min 默认限流（含未知路由）、16 KiB 默认 body 上限、Helmet/no-store 响应头与生产 HTTPS 门槛；只信任显式 IP/CIDR 代理，默认忽略伪造 Forwarded headers；关闭含精确坐标 URL 的内置日志并仅记录 route template，固定 Fastify 5 兼容插件版本，同时声明多实例发布前需共享 limiter store（2026-09-04；521 tests；[API 输入与安全边界](./docs/architecture/api-input-rate-security.md)）
-- [ ] `P3-API-09` 编写 API 文档与示例
+- [x] `P3-API-09` 从运行时 TypeBox schema 生成并提供 OpenAPI 3.0 契约，记录附近搜索、详情、筛选兼容性、能力降级、统一错误与安全限制；四份 JSON 响应示例由自动测试持续校验，防止文档和接口漂移（2026-09-04；523 tests；[API 文档](./docs/api/README.md)）
 - [ ] `P3-API-10` 建立接口集成与性能测试
 
 ## Phase 3 验收门槛
@@ -621,3 +621,4 @@ V1 的核心验收结果是：
 | 2026-09-04 | 接入 API 价格、状态与来源质量证据              | 附近和详情共用批量服务证据；返回价格/状态/source/freshness/confidence 与四服务字段，按请求时间淘汰过期 Fuel 价格并正式启用合格 Cheapest；真实 Node/pg 四服务 fixture 查询通过，完整质量门槛 509 项测试通过；见 `docs/architecture/api-service-evidence.md`     |
 | 2026-09-04 | 统一 API 错误与降级结果                        | 全部错误使用 requestId/code/message/retryable 且内部细节不外泄；附近响应区分请求 capability 与实际 outcome，返回空结果、回退和 Unknown 精确计数；完整质量门槛 513 项测试通过；见 `docs/architecture/api-errors-and-outcomes.md`                  |
 | 2026-09-04 | 建立 API 输入、限流与安全边界                  | 严格 schema 之外新增 CORS、单客户端/未知路由限流、body 上限、安全/no-store headers、生产 HTTPS 与显式可信代理；精确 origin 不进入请求日志；固定 Fastify 5 插件并记录多实例共享存储门槛；完整质量门槛 521 项测试通过；见 `docs/architecture/api-input-rate-security.md` |
+| 2026-09-04 | 发布 API 契约、示例与调用文档                  | 运行时公开 OpenAPI 3.0 契约并记录两条公共 API、筛选组合、能力/结果语义、错误与安全限制；四份提交的 JSON 示例均由真实 TypeBox schema 校验；完整质量门槛 523 项测试通过；见 `docs/api/README.md` |

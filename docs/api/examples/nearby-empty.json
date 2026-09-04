@@ -1,0 +1,47 @@
+{
+  "requestId": "example-request-id",
+  "country": "ES",
+  "service": "wash",
+  "fuelType": null,
+  "connectorType": null,
+  "minimumPowerKw": null,
+  "sort": "nearest",
+  "search": {
+    "requestedRadiusMetres": 10000,
+    "usedRadiusMetres": 50000,
+    "attemptedRadiiMetres": [10000, 20000, 40000, 50000],
+    "expanded": true,
+    "minimumCandidatesMet": false,
+    "stopReason": "maximum_radius_reached"
+  },
+  "ranking": {
+    "requestedSort": "nearest",
+    "appliedSort": "nearest",
+    "capability": {
+      "state": "enabled",
+      "reason": null
+    },
+    "degraded": false,
+    "reason": null
+  },
+  "outcome": {
+    "state": "empty",
+    "sort": "nearest",
+    "capability": {
+      "state": "enabled",
+      "reason": null
+    },
+    "candidateCount": 0,
+    "resultCount": 0,
+    "priceUnknownCount": 0,
+    "openingStatusUnknownCount": 0,
+    "holidayHoursUnknownCount": 0,
+    "equipmentStatusUnknownCount": 0,
+    "routeEtaUnavailableCount": 0,
+    "warnings": [],
+    "emptyReason": "no_service_points_in_radius",
+    "fallbackAction": "expand_radius"
+  },
+  "resultCount": 0,
+  "results": []
+}

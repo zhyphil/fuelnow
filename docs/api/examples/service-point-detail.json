@@ -1,0 +1,93 @@
+{
+  "requestId": "example-request-id",
+  "servicePoint": {
+    "id": "00000000-0000-4000-8000-000000000201",
+    "country": "ES",
+    "serviceTypes": ["air"],
+    "name": "Aire Madrid",
+    "brand": null,
+    "location": {
+      "latitude": 40.4168,
+      "longitude": -3.7038
+    },
+    "address": {
+      "street": "Calle de Ejemplo",
+      "houseNumber": "1",
+      "postalCode": "28001",
+      "locality": "Madrid",
+      "administrativeArea": "Comunidad de Madrid",
+      "countryCode": "ES",
+      "formatted": "Calle de Ejemplo 1, 28001 Madrid"
+    },
+    "timezone": "Europe/Madrid",
+    "opening": {
+      "hours": null,
+      "status": "open",
+      "evaluatedAt": "2026-09-04T07:00:00.000Z"
+    },
+    "temporaryClosure": false,
+    "lifecycle": {
+      "status": "active",
+      "changedAt": "2026-09-01T00:00:00.000Z",
+      "closureReason": null
+    },
+    "createdAt": "2026-09-01T00:00:00.000Z",
+    "updatedAt": "2026-09-04T07:05:00.000Z",
+    "services": [
+      {
+        "serviceType": "air",
+        "evidence": {
+          "status": {
+            "opening": {
+              "state": "open",
+              "evaluatedAt": "2026-09-04T07:00:00.000Z",
+              "basis": "service_schedule"
+            },
+            "availability": {
+              "state": "available",
+              "observedAt": "2026-09-04T07:00:00.000Z",
+              "availableUnits": null,
+              "totalUnits": null
+            }
+          },
+          "price": {
+            "amount": 1,
+            "currency": "EUR",
+            "unit": "use",
+            "taxIncluded": null,
+            "membershipRequired": null,
+            "observedAt": "2026-09-04T07:00:00.000Z",
+            "freshness": "verified",
+            "confidence": "low"
+          },
+          "source": {
+            "id": "es-air-community",
+            "name": "Community-maintained air source",
+            "url": "https://example.invalid/air",
+            "licenceName": "ODbL 1.0",
+            "licenceUrl": "https://example.invalid/licence",
+            "attributionText": "Community-maintained air source",
+            "observedAt": "2026-09-04T07:00:00.000Z",
+            "publishedAt": null,
+            "fetchedAt": "2026-09-04T07:05:00.000Z"
+          },
+          "freshness": "verified",
+          "confidence": {
+            "level": "low",
+            "score": null
+          },
+          "details": {
+            "fuel": null,
+            "charging": null,
+            "air": {
+              "workingStatus": "working",
+              "free": false,
+              "access": "public"
+            },
+            "wash": null
+          }
+        }
+      }
+    ]
+  }
+}

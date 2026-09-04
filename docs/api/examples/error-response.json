@@ -1,0 +1,6 @@
+{
+  "requestId": "example-request-id",
+  "code": "rate_limit_exceeded",
+  "message": "Rate limit exceeded",
+  "retryable": true
+}

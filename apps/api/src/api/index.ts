@@ -31,6 +31,11 @@ export type {
   NearbySortDegradationReason,
 } from "./nearby.js";
 export {
+  OPENAPI_DOCUMENT_PATH,
+  registerOpenApi,
+  registerOpenApiRoute,
+} from "./openapi.js";
+export {
   ServicePointDetailResponseSchema,
   ServicePointDetailSchema,
   ServicePointIdParamsSchema,

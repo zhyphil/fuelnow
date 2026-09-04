@@ -353,6 +353,11 @@ export function registerNearbyRoute(
     "/v1/nearby",
     {
       schema: {
+        operationId: "searchNearbyServicePoints",
+        summary: "Search nearby service points",
+        description:
+          "Returns capability-aware Fuel, Charge, Air or Wash results with bounded expansion, evidence quality and explicit decision fallback metadata.",
+        tags: ["Search"],
         querystring: NearbyQuerySchema,
         response: {
           200: NearbyResponseSchema,

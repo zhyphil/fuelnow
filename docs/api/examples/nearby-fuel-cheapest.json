@@ -1,0 +1,115 @@
+{
+  "requestId": "example-request-id",
+  "country": "FR",
+  "service": "fuel",
+  "fuelType": "diesel",
+  "connectorType": null,
+  "minimumPowerKw": null,
+  "sort": "cheapest",
+  "search": {
+    "requestedRadiusMetres": 10000,
+    "usedRadiusMetres": 10000,
+    "attemptedRadiiMetres": [10000],
+    "expanded": false,
+    "minimumCandidatesMet": false,
+    "stopReason": "maximum_radius_reached"
+  },
+  "ranking": {
+    "requestedSort": "cheapest",
+    "appliedSort": "cheapest",
+    "capability": {
+      "state": "enabled",
+      "reason": null
+    },
+    "degraded": false,
+    "reason": null
+  },
+  "outcome": {
+    "state": "results",
+    "sort": "cheapest",
+    "capability": {
+      "state": "enabled",
+      "reason": null
+    },
+    "candidateCount": 1,
+    "resultCount": 1,
+    "priceUnknownCount": 0,
+    "openingStatusUnknownCount": 0,
+    "holidayHoursUnknownCount": 0,
+    "equipmentStatusUnknownCount": 0,
+    "routeEtaUnavailableCount": 0,
+    "warnings": [],
+    "emptyReason": null,
+    "fallbackAction": null
+  },
+  "resultCount": 1,
+  "results": [
+    {
+      "id": "00000000-0000-4000-8000-000000000101",
+      "country": "FR",
+      "name": "Station Toulouse",
+      "brand": "Example",
+      "location": {
+        "latitude": 43.6047,
+        "longitude": 1.4442
+      },
+      "lifecycleStatus": "active",
+      "straightLineDistanceM": 850,
+      "evidence": {
+        "status": {
+          "opening": {
+            "state": "open",
+            "evaluatedAt": "2026-09-04T07:00:00.000Z",
+            "basis": "site_schedule"
+          },
+          "availability": {
+            "state": "available",
+            "observedAt": "2026-09-04T07:00:00.000Z",
+            "availableUnits": null,
+            "totalUnits": null
+          }
+        },
+        "price": {
+          "amount": 1.65,
+          "currency": "EUR",
+          "unit": "liter",
+          "taxIncluded": true,
+          "membershipRequired": false,
+          "observedAt": "2026-09-04T07:00:00.000Z",
+          "freshness": "recent",
+          "confidence": "high"
+        },
+        "source": {
+          "id": "fr-official-fuel",
+          "name": "French official fuel source",
+          "url": "https://example.invalid/fuel",
+          "licenceName": "Licence Ouverte 2.0",
+          "licenceUrl": "https://example.invalid/licence",
+          "attributionText": "French official fuel source",
+          "observedAt": "2026-09-04T07:00:00.000Z",
+          "publishedAt": null,
+          "fetchedAt": "2026-09-04T07:05:00.000Z"
+        },
+        "freshness": "recent",
+        "confidence": {
+          "level": "high",
+          "score": null
+        },
+        "details": {
+          "fuel": {
+            "availableFuelTypes": ["diesel", "sp95_e10"],
+            "requestedFuel": {
+              "fuelType": "diesel",
+              "available": true,
+              "outOfStock": false,
+              "unavailableReason": null
+            }
+          },
+          "charging": null,
+          "air": null,
+          "wash": null
+        }
+      }
+    }
+  ]
+}

@@ -2,6 +2,10 @@
 
 Backend application workspace for the independently runnable API and source-synchronization worker roles.
 
+The public HTTP contract, curl requests and schema-checked response examples are
+documented in [`docs/api/README.md`](../../docs/api/README.md). A running API also
+serves its generated OpenAPI 3.0 document at `GET /v1/openapi.json`.
+
 Planned boundaries:
 
 - `src/api/` — Fastify HTTP process and routes

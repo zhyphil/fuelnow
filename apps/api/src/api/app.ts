@@ -9,6 +9,7 @@ import type { ServicePointEvidencePort } from "../evidence/PostgresServicePointE
 import type { CandidateSearchPort } from "../search/expandingCandidateSearch.js";
 import { registerApiErrorHandling, registerApiNotFoundHandler } from "./errors.js";
 import { registerNearbyRoute } from "./nearby.js";
+import { registerOpenApi, registerOpenApiRoute } from "./openapi.js";
 import {
   DEFAULT_API_SECURITY_OPTIONS,
   registerApiSecurity,
@@ -45,8 +46,10 @@ export function createApiApp({
   });
   registerApiErrorHandling(app);
   registerApiSecurity(app, security);
+  registerOpenApi(app);
   void app.register(async (routes) => {
     registerApiNotFoundHandler(routes);
+    registerOpenApiRoute(routes);
     registerNearbyRoute(routes, candidateSearch, servicePointEvidence);
     registerServicePointDetailRoute(routes, servicePointDetails, servicePointEvidence);
   });

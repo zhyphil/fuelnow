@@ -139,6 +139,11 @@ export function registerServicePointDetailRoute(
     "/v1/service-points/:id",
     {
       schema: {
+        operationId: "getServicePoint",
+        summary: "Get a canonical service point",
+        description:
+          "Returns stable canonical detail and one evidence block for each declared service.",
+        tags: ["Service points"],
         params: ServicePointIdParamsSchema,
         response: {
           200: ServicePointDetailResponseSchema,
