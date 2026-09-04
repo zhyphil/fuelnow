@@ -12,6 +12,14 @@ const applyMigrationsUrl = new URL(
   "../db/migrations/apply-migrations.sh",
   import.meta.url,
 );
+const sourceIdempotencyMigrationUrl = new URL(
+  "../db/migrations/0003_source_record_idempotency.sql",
+  import.meta.url,
+);
+const sourceIdempotencyVerificationUrl = new URL(
+  "../db/migrations/verify-source-idempotency.sql",
+  import.meta.url,
+);
 
 describe("initial PostgreSQL/PostGIS schema", () => {
   it("enables PostGIS and uses WGS84 geography points", async () => {
@@ -94,5 +102,29 @@ describe("initial PostgreSQL/PostGIS schema", () => {
     expect(runner).toContain("SELECT 1 FROM schema_migrations WHERE version");
     expect(runner).toContain("Skipping already applied migration");
     expect(runner).toContain('--file "$migration"');
+  });
+
+  it("names a source record by provider and provider-native identifier", async () => {
+    const migration = await readFile(sourceIdempotencyMigrationUrl, "utf8");
+
+    expect(migration).toContain("source_records_source_identity_uidx");
+    expect(migration).toMatch(/ON source_records \(source_id, source_record_id\)/);
+  });
+
+  it("upserts source records without allowing older fetches to overwrite", async () => {
+    const migration = await readFile(sourceIdempotencyMigrationUrl, "utf8");
+
+    expect(migration).toContain("ON CONFLICT (source_id, source_record_id) DO UPDATE");
+    expect(migration).toContain("EXCLUDED.fetched_at > source_records.fetched_at");
+    expect(migration).toContain("SELECT existing.*");
+  });
+
+  it("verifies replay, update and stale-write behavior transactionally", async () => {
+    const verification = await readFile(sourceIdempotencyVerificationUrl, "utf8");
+
+    expect(verification).toContain("Identical replay changed the source record");
+    expect(verification).toContain("Newer source payload did not update in place");
+    expect(verification).toContain("Older source payload overwrote the current record");
+    expect(verification).toContain("ROLLBACK;");
   });
 });

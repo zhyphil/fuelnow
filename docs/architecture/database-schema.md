@@ -16,7 +16,7 @@ transaction, stops on the first error and can be safely executed more than once.
 | Area | Tables | Responsibility |
 | --- | --- | --- |
 | Migration state | `schema_migrations` | Records successfully applied SQL migrations |
-| Source registry and evidence | `data_sources`, `source_records`, `field_provenance` | Keeps provider licence/attribution, raw records, source timestamps and field-level evidence separate from canonical values |
+| Source registry and evidence | `data_sources`, `source_records`, `field_provenance` | Keeps provider licence/attribution, composite provider-native identity, raw records, source timestamps and field-level evidence separate from canonical values |
 | Canonical identity | `service_points`, `service_point_services` | Stores the merged service point, WGS84 location, structured address, timezone, opening state and advertised capabilities |
 | Fuel | `fuel_offers`, `fuel_prices` | Stores canonical fuel codes, stock semantics and historical EUR prices with units, freshness and confidence |
 | Charge | `charging_sites`, `charging_evses`, `charging_connectors`, `charging_tariff_components` | Preserves the service point → EVSE → connector hierarchy, EVSE availability and explicit tariff components |
@@ -31,6 +31,7 @@ transaction, stops on the first error and can be safely executed more than once.
 - All stored instants use `timestamptz`; site timezone remains a separate IANA value for local schedule evaluation.
 - Unknown values remain nullable. Database defaults do not invent prices, availability, closure, free service or operational state.
 - Source raw payloads use JSONB; canonical and commonly filtered fields remain relational and typed.
+- Raw source rows are unique by `(source_id, source_record_id)` and use a guarded upsert so repeated or out-of-order fetches cannot create duplicates or replace newer evidence.
 - Foreign keys and cascading rules prevent orphan service details while preserving source records when a canonical match is removed.
 
 ## Commands and verification
