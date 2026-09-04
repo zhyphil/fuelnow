@@ -4,7 +4,7 @@
 > 需求来源：[france_spain_driver_decision_engine_project.md](./france_spain_driver_decision_engine_project.md)  
 > 当前状态：进行中  
 > 当前阶段：Phase 3 — 搜索、路线与决策引擎
-> 下一项任务：`P3-BEST-05` 定义 Fuel 专属 Best 公式
+> 下一项任务：`P3-BEST-06` 将预计加油量、车辆油耗和绕路成本纳入 Fuel 计算
 > 最后更新：2026-09-04
 
 ## 使用方法
@@ -243,7 +243,7 @@ V1 的核心验收结果是：
 - [x] `P3-BEST-02` 定义 0–1 DistanceScore 与 TravelTimeScore：全量候选统一按最近直线距离/当前距离计分，真实路线候选按最快 ETA/当前 ETA 计分，未知 ETA 得 0 且不伪造，覆盖并列、零值、空集、异常输入与离群值稳定性（2026-09-04；362 tests；[距离与 ETA 评分说明](./docs/architecture/best-distance-travel-time-scores.md)）
 - [x] `P3-BEST-03` 定义 OpenScore 与 AvailabilityScore：Open=1、Closing soon=0.75、Opening soon=0.25，Closed/Unknown=0 且临时关闭强制覆盖；仅明确 Available 获得可用性正分，其他 canonical 状态均不推断可用，并保留解释 basis（2026-09-04；378 tests；[营业与可用性评分说明](./docs/architecture/best-open-availability-scores.md)）
 - [x] `P3-BEST-04` 定义 FreshnessScore 与 ReliabilityScore：Live/Verified/Recent=1、Stale=0.5、Unknown=0；复用既有 0–100 confidenceScore 归一化并强制 high/medium/low 区间一致，避免重复应用来源质量惩罚且不将分数表述为准确率（2026-09-04；388 tests；[数据质量评分说明](./docs/architecture/best-data-quality-scores.md)）
-- [ ] `P3-BEST-05` 定义 Fuel 专属 Best 公式
+- [x] `P3-BEST-05` 定义可版本化 `fuel-best-v1`：Price 30%、Distance 10%、TravelTime 20%、Open 15%、Availability 10%、Freshness 7.5%、Reliability 7.5%，输出逐项贡献；目标燃油未提供、明确不可用或站点关闭硬排除，其他 Unknown 保留但无对应正分，并固定稳定决胜顺序（2026-09-04；395 tests；[Fuel Best 公式](./docs/architecture/fuel-best-formula.md)）
 - [ ] `P3-BEST-06` 将预计加油量、车辆油耗和绕路成本纳入 Fuel 计算
 - [ ] `P3-BEST-07` 定义 EV 专属 Best/Time-to-Solution 公式
 - [ ] `P3-BEST-08` 将 ETA、兼容额定功率及符合门槛的 availability 纳入 EV 计算；等待时间、实际充电时长和价格仅在未来有决策级证据时启用
@@ -481,7 +481,7 @@ V1 的核心验收结果是：
 | 2026-09-04 | OSM Air/Wash 补充的生产获取方式与 ODbL 合并数据库义务未关闭                                                                           | 高     | Phase 2 使用区域 extract/自建/合规托管服务；保持来源分离；公开 Beta 前完成数据库分类、署名和提供义务审查                            | 开发可继续，发布受阻                      |
 | 2026-09-04 | 法国 PAN Charge 为 Beta 且存在重复 ID、坐标、功率和未来时间异常                                                                       | 高     | staging 全量校验、异常隔离、原子发布与 last-known-good；PAN dynamic 保持 shadow-only                                                | 开发可继续，需实现监控                    |
 | 2026-09-03 | 西班牙 EV 实时 availability/price 虽在 Reve 内覆盖高，但通用条款未授予商用复用，外部 API 还需审批密钥、限 5 次/小时且精确状态逐点读取 | 高     | 不依赖匿名 UI API；取得书面商用缓存/转换/展示授权、正式访问与生产配额，并完成 RIPREE 全量身份关联，在此之前不接入生产或承诺全国实时 | 已验证，生产接入受阻                      |
-| 2026-09-03 | Best 权重尚未定义                                                                                                                     | 中     | 先采用可解释规则，再根据导航行为校准                                                                                                | 待处理                                    |
+| 2026-09-03 | Best 初始权重尚未由真实导航行为校准                                                                                                   | 中     | Phase 3 使用已版本化的可解释规则和逐项贡献；Phase 6 根据导航行为校准时发布新公式版本并回归验证                                      | 初始规则已定义，待 Phase 6 校准           |
 | 2026-09-03 | 路线 API 会带来成本和限流                                                                                                             | 中     | Top N 分批计算，增加缓存、用量指标、预算告警和无 ETA 降级；Beta 前复核价格                                                          | 应对方案已定义，待实现                    |
 | 2026-09-03 | 法国 Fuel 门户的 typed datetime 偏移与原始 France-local 墙钟语义不一致                                                                | 高     | 从原始 `@maj/@debut` 按 `Europe/Paris` 解析，保留原值，隔离未来时间，并用夏/冬令时测试保护                                          | 已在 `FranceFuelAdapter` 缓解，待持续监控 |
 | 2026-09-03 | 当前开发机 Node.js 22 低于项目锁定的 Node.js 24 LTS                                                                                   | 中     | `.nvmrc` 和 `engines` 固定 Node 24；当前兼容性测试通过，CI/发布环境必须使用 Node 24                                                 | 发布环境待落实                            |
@@ -605,3 +605,4 @@ V1 的核心验收结果是：
 | 2026-09-04 | 定义 Best DistanceScore 与 TravelTimeScore     | 直线距离为全候选诚实降级分，真实路线 ETA 独立计分；未知 ETA 不伪造，零值、并列、空集、异常输入与离群值行为固定；完整质量门槛 362 项测试通过；见 `docs/architecture/best-distance-travel-time-scores.md`                                                      |
 | 2026-09-04 | 定义 Best OpenScore 与 AvailabilityScore       | 明确 Open/Closing soon/Opening soon 分值，Closed/Unknown 无正分且临时关闭覆盖；只有 Available 获得可用性正分，所有 canonical 状态均有稳定 basis；完整质量门槛 378 项测试通过；见 `docs/architecture/best-open-availability-scores.md`                        |
 | 2026-09-04 | 定义 Best FreshnessScore 与 ReliabilityScore   | Live/Verified/Recent 无惩罚、Stale 降权、Unknown 无正分；confidenceScore 归一化并校验标签区间，不重复应用来源质量调整；完整质量门槛 388 项测试通过；见 `docs/architecture/best-data-quality-scores.md`                                                       |
+| 2026-09-04 | 定义 Fuel 专属 Best 公式                       | 固定 `fuel-best-v1` 七维权重、逐项贡献与稳定决胜顺序；明确目标燃油、不可用与关闭硬排除，Unknown 保留但无虚假优势；完整质量门槛 395 项测试通过；见 `docs/architecture/fuel-best-formula.md`                                                                   |

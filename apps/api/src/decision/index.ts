@@ -58,3 +58,19 @@ export type {
   ReliabilityScoreInput,
   ReliabilityScoreResult,
 } from "./scoreDataQuality.js";
+export {
+  FUEL_BEST_FORMULA_VERSION,
+  FUEL_BEST_WEIGHTS,
+  rankFuelBest,
+} from "./rankFuelBest.js";
+export type {
+  ExcludedFuelBestCandidate,
+  FuelBestCandidateInput,
+  FuelBestComponentName,
+  FuelBestComponentScores,
+  FuelBestEligibility,
+  FuelBestResult,
+  FuelBestScoreBreakdown,
+  FuelBestScoreContribution,
+  RankedFuelBestCandidate,
+} from "./rankFuelBest.js";
