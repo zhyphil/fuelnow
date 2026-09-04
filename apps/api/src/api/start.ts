@@ -1,0 +1,36 @@
+import { Pool } from "pg";
+
+import { PostgresCandidateSearch } from "../search/PostgresCandidateSearch.js";
+import { createApiApp } from "./app.js";
+import { resolveApiRuntimeConfig } from "./config.js";
+
+async function startApi(): Promise<void> {
+  const config = resolveApiRuntimeConfig(process.env);
+  const pool = new Pool({
+    connectionString: config.databaseUrl,
+    max: config.databasePoolMax,
+    ssl: config.databaseSsl ? { rejectUnauthorized: true } : false,
+  });
+  const app = createApiApp({
+    candidateSearch: new PostgresCandidateSearch(pool),
+    logger:
+      config.logLevel === "silent"
+        ? false
+        : {
+            level: config.logLevel,
+            redact: [
+              "req.headers.authorization",
+              "req.headers.cookie",
+              "req.query.latitude",
+              "req.query.longitude",
+            ],
+          },
+  });
+  app.addHook("onClose", async () => pool.end());
+  await app.listen({ host: config.host, port: config.port });
+}
+
+void startApi().catch(() => {
+  process.stderr.write("Fuel Now API failed to start\n");
+  process.exitCode = 1;
+});

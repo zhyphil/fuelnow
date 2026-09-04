@@ -4,18 +4,25 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "dev": "node --env-file-if-exists=../../.env --import tsx --watch src/api/start.ts",
     "db:down": "docker compose --file ../../compose.yaml down",
     "db:migrate": "docker compose --file ../../compose.yaml exec -T db sh /migrations/apply-migrations.sh",
     "db:up": "docker compose --file ../../compose.yaml up --detach --wait db",
     "db:verify": "docker compose --file ../../compose.yaml exec -T db sh /migrations/verify-all.sh",
+    "start": "node --env-file-if-exists=../../.env --import tsx src/api/start.ts",
     "test": "vitest run",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@fastify/type-provider-typebox": "5.2.0",
+    "@fuel-now/config": "workspace:*",
     "@fuel-now/contracts": "workspace:*",
+    "@sinclair/typebox": "0.34.52",
+    "fastify": "5.12.1",
     "pg": "8.23.0"
   },
   "devDependencies": {
-    "@types/pg": "8.23.1"
+    "@types/pg": "8.23.1",
+    "tsx": "4.23.13"
   }
 }

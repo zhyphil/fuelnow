@@ -10,7 +10,16 @@ Planned boundaries:
 - `src/providers/` — approved external-provider clients
 - `test/` — application integration tests
 
-Provider credentials and ingestion logic stay server-side. This scaffold intentionally contains no runnable server until the API implementation task lands.
+Provider credentials and ingestion logic stay server-side. The Fastify API is
+runnable with `pnpm api:start` and reloads locally with `pnpm api:dev` after the
+root `.env` contains the API/database settings from `.env.example`.
+
+`GET /v1/nearby` accepts latitude, longitude and one canonical service. It starts
+at 10 km, expands up to 50 km when fewer than ten candidates exist and returns
+at most 50 basic canonical service points plus an honest expansion trace. The
+precise request origin is passed directly to PostGIS but is not included in the
+response, logs or persistent API state. Radius, country and sort controls are
+added by their dedicated follow-up tasks.
 
 ## Local database
 

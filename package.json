@@ -8,6 +8,8 @@
     "node": ">=24 <25"
   },
   "scripts": {
+    "api:dev": "pnpm --filter @fuel-now/api dev",
+    "api:start": "pnpm --filter @fuel-now/api start",
     "check": "pnpm format:check && pnpm lint && pnpm typecheck && pnpm test",
     "db:down": "pnpm --filter @fuel-now/api db:down",
     "db:migrate": "pnpm --filter @fuel-now/api db:migrate",

@@ -4,7 +4,7 @@
 > 需求来源：[france_spain_driver_decision_engine_project.md](./france_spain_driver_decision_engine_project.md)  
 > 当前状态：进行中  
 > 当前阶段：Phase 3 — 搜索、路线与决策引擎
-> 下一项任务：`P3-API-01` 实现附近服务搜索 API
+> 下一项任务：`P3-API-02` 实现服务点详情 API
 > 最后更新：2026-09-04
 
 ## 使用方法
@@ -254,7 +254,7 @@ V1 的核心验收结果是：
 
 ## 3.4 后端 API
 
-- [ ] `P3-API-01` 实现附近服务搜索 API
+- [x] `P3-API-01` 建立可运行 Fastify 应用与 `GET /v1/nearby`：经可注入 CandidateSearchPort 调用 PostGIS 候选搜索并按 10 km→50 km 有界扩圈，返回最多 50 个基础 canonical 服务点及完整扩圈元数据；TypeBox 拦截缺失/越界/未知参数，精确 origin 不回显、不持久化，生产入口启动前校验监听与数据库配置（2026-09-04；479 tests；[附近搜索 API](./docs/architecture/nearby-search-api.md)）
 - [ ] `P3-API-02` 实现服务点详情 API
 - [ ] `P3-API-03` 支持 country、service、radius 和 sort 参数
 - [ ] `P3-API-04` 支持燃油类型筛选
@@ -613,3 +613,4 @@ V1 的核心验收结果是：
 | 2026-09-04 | 建立 Best 字段级证据降权                       | Missing/Expired/Unknown 与 stale 关键证据无正分，普通 stale 减半，medium/low confidence 按最终可信分缩减；EV 与 Air/Wash 已接入并返回原因；完整质量门槛 444 项测试通过；见 `docs/architecture/best-evidence-quality-adjustment.md`                  |
 | 2026-09-04 | 建立 Best 推荐解释                             | 共享契约固定可本地化原因码与类型化指标；生成器稳定选择主要优势并保留价格/状态/ETA/TTS/数据质量限制，覆盖四类服务；完整质量门槛 460 项测试通过；见 `docs/architecture/best-recommendation-explanations.md`                                             |
 | 2026-09-04 | 完成全部排序边界矩阵                           | 为 Nearest、Cheapest、Open now 及三类 Best 公式补齐 13 项边界测试，并修复非法距离、关闭站低价、非法 freshness/status 与 TTS 溢出；完整质量门槛 473 项测试通过；见 `docs/testing/ranking-boundary-matrix.md`                                      |
+| 2026-09-04 | 实现附近服务搜索 API                           | 新增可运行 Fastify 服务和 `GET /v1/nearby`，以依赖注入连接 PostGIS 候选搜索、有界扩圈与基础 canonical 响应，并保护精确 origin；完整质量门槛 479 项测试通过；见 `docs/architecture/nearby-search-api.md`                                                   |
