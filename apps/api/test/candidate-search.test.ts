@@ -33,6 +33,7 @@ describe("PostgreSQL service-point candidate search", () => {
         latitude: 43.605,
         radiusMetres: 10_000,
         serviceType: "fuel",
+        country: "FR",
         limit: 25,
       }),
     ).resolves.toEqual([
@@ -54,9 +55,9 @@ describe("PostgreSQL service-point candidate search", () => {
     ]);
     expect(pool.query).toHaveBeenCalledWith(
       expect.stringContaining(
-        "FROM search_service_point_candidates($1, $2, $3, $4, $5)",
+        "FROM search_service_point_candidates($1, $2, $3, $4, $5, $6)",
       ),
-      [1.444, 43.605, 10_000, "fuel", 25],
+      [1.444, 43.605, 10_000, "fuel", 25, "FR"],
     );
   });
 
@@ -77,6 +78,7 @@ describe("PostgreSQL service-point candidate search", () => {
       5_000,
       "charging",
       200,
+      null,
     ]);
   });
 
@@ -100,6 +102,22 @@ describe("PostgreSQL service-point candidate search", () => {
         serviceType: "fuel",
       }),
     ).rejects.toThrow("latitude must be between -90 and 90");
+    expect(pool.query).not.toHaveBeenCalled();
+  });
+
+  it("rejects an unsupported country before querying PostgreSQL", async () => {
+    const pool = { query: vi.fn() };
+    const search = new PostgresCandidateSearch(pool as never);
+
+    await expect(
+      search.findCandidates({
+        longitude: 2,
+        latitude: 43,
+        radiusMetres: 1_000,
+        serviceType: "fuel",
+        country: "DE" as never,
+      }),
+    ).rejects.toThrow("country must be FR or ES");
     expect(pool.query).not.toHaveBeenCalled();
   });
 

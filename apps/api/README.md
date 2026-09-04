@@ -14,12 +14,13 @@ Provider credentials and ingestion logic stay server-side. The Fastify API is
 runnable with `pnpm api:start` and reloads locally with `pnpm api:dev` after the
 root `.env` contains the API/database settings from `.env.example`.
 
-`GET /v1/nearby` accepts latitude, longitude and one canonical service. It starts
-at 10 km, expands up to 50 km when fewer than ten candidates exist and returns
-at most 50 basic canonical service points plus an honest expansion trace. The
-precise request origin is passed directly to PostGIS but is not included in the
-response, logs or persistent API state. Radius, country and sort controls are
-added by their dedicated follow-up tasks.
+`GET /v1/nearby` accepts latitude, longitude, a canonical service and optional
+country, radius and sort controls. Without an explicit radius it starts at 10 km
+and expands up to 50 km when fewer than ten candidates exist; an explicit radius
+is a hard one-query boundary. The response returns at most 50 basic canonical
+points plus honest expansion and ranking metadata. The precise request origin is
+passed directly to PostGIS but is not included in the response, logs or
+persistent API state.
 
 `GET /v1/service-points/:id` resolves one canonical UUID and returns its stable
 location, address, opening and lifecycle detail. Invalid identifiers are rejected

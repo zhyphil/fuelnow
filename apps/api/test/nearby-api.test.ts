@@ -9,7 +9,10 @@ import { afterEach, describe, expect, it } from "vitest";
 import { createApiApp } from "../src/api/app.js";
 import { resolveApiRuntimeConfig } from "../src/api/config.js";
 
-function candidate(index: number): ServicePointCandidate {
+function candidate(
+  index: number,
+  overrides: Partial<ServicePointCandidate> = {},
+): ServicePointCandidate {
   return {
     id: `point-${index}`,
     country: index % 2 === 0 ? "FR" : "ES",
@@ -24,6 +27,7 @@ function candidate(index: number): ServicePointCandidate {
     serviceOpeningStatusEvaluatedAt: null,
     temporaryClosure: null,
     straightLineDistanceM: 100 + index,
+    ...overrides,
   };
 }
 
@@ -74,7 +78,9 @@ describe("GET /v1/nearby", () => {
 
     expect(response.statusCode).toBe(200);
     expect(payload).toMatchObject({
+      country: null,
       service: "fuel",
+      sort: "nearest",
       search: {
         requestedRadiusMetres: 10_000,
         usedRadiusMetres: 20_000,
@@ -82,6 +88,12 @@ describe("GET /v1/nearby", () => {
         expanded: true,
         minimumCandidatesMet: true,
         stopReason: "minimum_candidates_met",
+      },
+      ranking: {
+        requestedSort: "nearest",
+        appliedSort: "nearest",
+        degraded: false,
+        reason: null,
       },
       resultCount: 10,
     });
@@ -139,6 +151,109 @@ describe("GET /v1/nearby", () => {
     });
   });
 
+  it("applies country and explicit-radius bounds and stable Nearest ordering", async () => {
+    const search = new FakeCandidateSearch(() => [
+      candidate(0, { country: "ES", straightLineDistanceM: 300 }),
+      candidate(1, { country: "ES", straightLineDistanceM: 100 }),
+    ]);
+    const app = createApiApp({ candidateSearch: search, servicePointDetails });
+    apps.push(app);
+
+    const response = await app.inject({
+      method: "GET",
+      url: "/v1/nearby?latitude=41.38&longitude=2.17&country=ES&service=fuel&radius=25000&sort=nearest",
+    });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.json()).toMatchObject({
+      country: "ES",
+      service: "fuel",
+      sort: "nearest",
+      search: {
+        requestedRadiusMetres: 25_000,
+        usedRadiusMetres: 25_000,
+        attemptedRadiiMetres: [25_000],
+        expanded: false,
+      },
+    });
+    expect(response.json().results.map(({ id }: { id: string }) => id)).toEqual([
+      "point-1",
+      "point-0",
+    ]);
+    expect(search.requests).toEqual([
+      {
+        latitude: 41.38,
+        longitude: 2.17,
+        radiusMetres: 25_000,
+        serviceType: "fuel",
+        country: "ES",
+        limit: 50,
+      },
+    ]);
+  });
+
+  it("applies Open now when decision-grade schedule evidence exists", async () => {
+    const search = new FakeCandidateSearch(() => [
+      candidate(0, {
+        openingStatus: "open",
+        openingStatusEvaluatedAt: "2026-09-04T06:00:00.000Z",
+      }),
+      candidate(1),
+      candidate(2, {
+        openingStatus: "closed",
+        openingStatusEvaluatedAt: "2026-09-04T06:00:00.000Z",
+      }),
+    ]);
+    const app = createApiApp({ candidateSearch: search, servicePointDetails });
+    apps.push(app);
+
+    const response = await app.inject({
+      method: "GET",
+      url: "/v1/nearby?latitude=43.6&longitude=1.44&service=fuel&radius=10000&sort=open_now",
+    });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.json()).toMatchObject({
+      sort: "open_now",
+      ranking: {
+        requestedSort: "open_now",
+        appliedSort: "open_now",
+        degraded: false,
+        reason: null,
+      },
+      resultCount: 1,
+      results: [{ id: "point-0" }],
+    });
+  });
+
+  it("discloses Nearest degradation until Cheapest and Best evidence is connected", async () => {
+    for (const [sort, reason] of [
+      ["cheapest", "fuel_type_required"],
+      ["best", "decision_evidence_unavailable"],
+    ] as const) {
+      const search = new FakeCandidateSearch(() => [candidate(0)]);
+      const app = createApiApp({ candidateSearch: search, servicePointDetails });
+      apps.push(app);
+
+      const response = await app.inject({
+        method: "GET",
+        url: `/v1/nearby?latitude=43.6&longitude=1.44&service=fuel&radius=10000&sort=${sort}`,
+      });
+
+      expect(response.statusCode).toBe(200);
+      expect(response.json()).toMatchObject({
+        sort,
+        ranking: {
+          requestedSort: sort,
+          appliedSort: "nearest",
+          degraded: true,
+          reason,
+        },
+        resultCount: 1,
+      });
+    }
+  });
+
   it("rejects missing, out-of-range and unknown query values before search", async () => {
     const search = new FakeCandidateSearch(() => []);
     const app = createApiApp({ candidateSearch: search, servicePointDetails });
@@ -148,6 +263,10 @@ describe("GET /v1/nearby", () => {
       "/v1/nearby?longitude=1&service=fuel",
       "/v1/nearby?latitude=91&longitude=1&service=fuel",
       "/v1/nearby?latitude=43&longitude=1&service=garage",
+      "/v1/nearby?latitude=43&longitude=1&country=DE&service=fuel",
+      "/v1/nearby?latitude=43&longitude=1&service=fuel&radius=0",
+      "/v1/nearby?latitude=43&longitude=1&service=fuel&radius=50001",
+      "/v1/nearby?latitude=43&longitude=1&service=fuel&sort=random",
       "/v1/nearby?latitude=43&longitude=1&service=fuel&unexpected=true",
     ]) {
       const response = await app.inject({ method: "GET", url });

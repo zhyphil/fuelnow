@@ -12,23 +12,23 @@ route. The route uses the existing PostGIS candidate-search port through bounded
 radius expansion, so HTTP behavior is testable without a live database while
 the production entry point uses `PostgresCandidateSearch` and a PostgreSQL pool.
 
-## Initial request
+## Base request
 
 ```text
 GET /v1/nearby?latitude=43.6045&longitude=1.4440&service=fuel
 ```
 
-The initial route deliberately accepts only the coordinates and one canonical
-`fuel`, `charging`, `air` or `wash` service. It uses the approved defaults:
+The route requires coordinates and one canonical `fuel`, `charging`, `air` or
+`wash` service. It uses the approved defaults:
 
 - initial radius: 10 km;
 - maximum expanded radius: 50 km;
 - stop after at least 10 candidates; and
 - at most 50 returned candidates.
 
-Country, custom radius, sort, Fuel type and EV connector/power controls belong to
-the following checklist tasks and are not silently accepted yet. Unknown query
-keys fail validation instead of being discarded.
+Optional country, custom radius and sort controls were added by `P3-API-03`.
+Fuel type and EV connector/power controls belong to their following checklist
+tasks. Unknown query keys fail validation instead of being discarded.
 
 ## Response
 

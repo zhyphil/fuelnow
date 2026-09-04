@@ -7,7 +7,8 @@
 ## Outcome
 
 The backend now coarse-filters canonical service points by WGS84 longitude,
-latitude, radius and service type directly in PostgreSQL/PostGIS. The query
+latitude, radius, service type and an optional country directly in
+PostgreSQL/PostGIS. The query
 returns stable point identity, country, display fields, destination coordinates,
 lifecycle/opening context and exact straight-line distance in metres.
 
@@ -22,6 +23,8 @@ when two points have the same distance.
 - radius is an integer from 1 metre through 100 km;
 - candidate count defaults to 200 and is capped at 500;
 - the service point must explicitly declare the requested canonical service;
+- optional country is limited to `FR` or `ES`; omission preserves cross-border
+  candidates;
 - permanently closed points are excluded;
 - active, temporarily closed and unverified points remain coarse candidates so
   later capability/opening logic can apply honest warnings or exclusions;

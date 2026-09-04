@@ -12,6 +12,7 @@ export interface CandidateSearchRequest {
   latitude: number;
   radiusMetres: number;
   serviceType: ServiceType;
+  country?: CountryCode;
   limit?: number;
 }
 
@@ -91,12 +92,16 @@ export class PostgresCandidateSearch {
     latitude,
     radiusMetres,
     serviceType,
+    country,
     limit = 200,
   }: CandidateSearchRequest): Promise<ServicePointCandidate[]> {
     assertFiniteRange("longitude", longitude, -180, 180);
     assertFiniteRange("latitude", latitude, -90, 90);
     assertPositiveInteger("radiusMetres", radiusMetres, 100_000);
     assertPositiveInteger("limit", limit, 500);
+    if (country !== undefined && country !== "FR" && country !== "ES") {
+      throw new Error("country must be FR or ES");
+    }
 
     const result = await this.pool.query<CandidateRow>(
       `SELECT
@@ -113,8 +118,8 @@ export class PostgresCandidateSearch {
          service_opening_status_evaluated_at,
          temporary_closure,
          straight_line_distance_m
-       FROM search_service_point_candidates($1, $2, $3, $4, $5)`,
-      [longitude, latitude, radiusMetres, serviceType, limit],
+       FROM search_service_point_candidates($1, $2, $3, $4, $5, $6)`,
+      [longitude, latitude, radiusMetres, serviceType, limit, country ?? null],
     );
 
     return result.rows.map((row) => ({

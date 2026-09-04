@@ -12,7 +12,12 @@ export {
   NearbyServicePointSchema,
   registerNearbyRoute,
 } from "./nearby.js";
-export type { NearbyQuery, NearbyResponse, NearbyServicePoint } from "./nearby.js";
+export type {
+  NearbyQuery,
+  NearbyResponse,
+  NearbyServicePoint,
+  NearbySortDegradationReason,
+} from "./nearby.js";
 export {
   ServicePointDetailResponseSchema,
   ServicePointDetailSchema,

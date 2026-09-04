@@ -1,15 +1,20 @@
 import {
-  CountryCodeSchema,
   ServiceTypeSchema,
+  type SearchSort,
   type ServiceType,
 } from "@fuel-now/contracts";
 import { Type, type Static } from "@sinclair/typebox";
 import type { FastifyInstance } from "fastify";
 import type { TypeBoxTypeProvider } from "@fastify/type-provider-typebox";
 
+import { filterOpenNow } from "../decision/filterOpenNow.js";
+import { rankNearestCandidates } from "../routing/rankNearestCandidates.js";
+import type { CandidateWithRoute } from "../routing/routeTopCandidates.js";
+import type { ServicePointCandidate } from "../search/PostgresCandidateSearch.js";
 import {
   findCandidatesWithExpansion,
   type CandidateSearchPort,
+  type ExpandingCandidateSearchRequest,
 } from "../search/expandingCandidateSearch.js";
 
 export const NEARBY_DEFAULT_RADIUS_METRES = 10_000;
@@ -17,11 +22,30 @@ export const NEARBY_MAXIMUM_RADIUS_METRES = 50_000;
 export const NEARBY_MINIMUM_CANDIDATES = 10;
 export const NEARBY_RESULT_LIMIT = 50;
 
+const CountrySchema = Type.Union([Type.Literal("FR"), Type.Literal("ES")]);
+const SearchSortSchema = Type.Union([
+  Type.Literal("nearest"),
+  Type.Literal("cheapest"),
+  Type.Literal("open_now"),
+  Type.Literal("best"),
+]);
+const SortDegradationReasonSchema = Type.Union([
+  Type.Literal("fuel_type_required"),
+  Type.Literal("price_not_available_for_service"),
+  Type.Literal("decision_evidence_unavailable"),
+  Type.Literal("service_hours_unknown"),
+]);
+
 export const NearbyQuerySchema = Type.Object(
   {
     latitude: Type.Number({ minimum: -90, maximum: 90 }),
     longitude: Type.Number({ minimum: -180, maximum: 180 }),
+    country: Type.Optional(CountrySchema),
     service: ServiceTypeSchema,
+    radius: Type.Optional(
+      Type.Integer({ minimum: 1, maximum: NEARBY_MAXIMUM_RADIUS_METRES }),
+    ),
+    sort: Type.Optional(SearchSortSchema),
   },
   { additionalProperties: false },
 );
@@ -36,7 +60,7 @@ const LifecycleStatusSchema = Type.Union([
 export const NearbyServicePointSchema = Type.Object(
   {
     id: Type.String({ minLength: 1 }),
-    country: CountryCodeSchema,
+    country: CountrySchema,
     name: Type.Union([Type.String({ minLength: 1 }), Type.Null()]),
     brand: Type.Union([Type.String({ minLength: 1 }), Type.Null()]),
     location: Type.Object(
@@ -55,7 +79,9 @@ export const NearbyServicePointSchema = Type.Object(
 export const NearbyResponseSchema = Type.Object(
   {
     requestId: Type.String({ minLength: 1 }),
+    country: Type.Union([CountrySchema, Type.Null()]),
     service: ServiceTypeSchema,
+    sort: SearchSortSchema,
     search: Type.Object(
       {
         requestedRadiusMetres: Type.Integer({ minimum: 1 }),
@@ -72,6 +98,15 @@ export const NearbyResponseSchema = Type.Object(
       },
       { additionalProperties: false },
     ),
+    ranking: Type.Object(
+      {
+        requestedSort: SearchSortSchema,
+        appliedSort: SearchSortSchema,
+        degraded: Type.Boolean(),
+        reason: Type.Union([SortDegradationReasonSchema, Type.Null()]),
+      },
+      { additionalProperties: false },
+    ),
     resultCount: Type.Integer({ minimum: 0 }),
     results: Type.Array(NearbyServicePointSchema, { maxItems: NEARBY_RESULT_LIMIT }),
   },
@@ -82,23 +117,93 @@ export type NearbyQuery = Static<typeof NearbyQuerySchema>;
 export type NearbyServicePoint = Static<typeof NearbyServicePointSchema>;
 export type NearbyResponse = Static<typeof NearbyResponseSchema>;
 
-function searchRequest(query: NearbyQuery): {
-  latitude: number;
-  longitude: number;
-  radiusMetres: number;
-  maximumRadiusMetres: number;
-  minimumCandidates: number;
-  limit: number;
-  serviceType: ServiceType;
-} {
+function searchRequest(query: NearbyQuery): ExpandingCandidateSearchRequest {
+  const radiusMetres = query.radius ?? NEARBY_DEFAULT_RADIUS_METRES;
   return {
     latitude: query.latitude,
     longitude: query.longitude,
-    radiusMetres: NEARBY_DEFAULT_RADIUS_METRES,
-    maximumRadiusMetres: NEARBY_MAXIMUM_RADIUS_METRES,
+    radiusMetres,
+    maximumRadiusMetres:
+      query.radius === undefined ? NEARBY_MAXIMUM_RADIUS_METRES : radiusMetres,
     minimumCandidates: NEARBY_MINIMUM_CANDIDATES,
     limit: NEARBY_RESULT_LIMIT,
     serviceType: query.service,
+    ...(query.country === undefined ? {} : { country: query.country }),
+  };
+}
+
+export type NearbySortDegradationReason = Static<typeof SortDegradationReasonSchema>;
+
+interface NearbySortResult {
+  candidates: ServicePointCandidate[];
+  requestedSort: SearchSort;
+  appliedSort: SearchSort;
+  degraded: boolean;
+  reason: NearbySortDegradationReason | null;
+}
+
+function withoutRoutes(candidates: ServicePointCandidate[]): CandidateWithRoute[] {
+  return candidates.map((candidate) => ({
+    ...candidate,
+    routeStatus: "not_requested",
+    route: null,
+    routeUnavailableReason: null,
+  }));
+}
+
+function nearest(candidates: ServicePointCandidate[]): ServicePointCandidate[] {
+  return rankNearestCandidates(withoutRoutes(candidates));
+}
+
+function sortCandidates(
+  candidates: ServicePointCandidate[],
+  serviceType: ServiceType,
+  requestedSort: SearchSort,
+): NearbySortResult {
+  if (requestedSort === "nearest") {
+    return {
+      candidates: nearest(candidates),
+      requestedSort,
+      appliedSort: "nearest",
+      degraded: false,
+      reason: null,
+    };
+  }
+
+  if (requestedSort === "open_now") {
+    const result = filterOpenNow({
+      serviceType,
+      candidates: withoutRoutes(nearest(candidates)),
+    });
+    if (result.capability.state !== "unavailable") {
+      return {
+        candidates: result.candidates,
+        requestedSort,
+        appliedSort: "open_now",
+        degraded: false,
+        reason: null,
+      };
+    }
+    return {
+      candidates: nearest(candidates),
+      requestedSort,
+      appliedSort: "nearest",
+      degraded: true,
+      reason: "service_hours_unknown",
+    };
+  }
+
+  return {
+    candidates: nearest(candidates),
+    requestedSort,
+    appliedSort: "nearest",
+    degraded: true,
+    reason:
+      requestedSort === "cheapest"
+        ? serviceType === "fuel"
+          ? "fuel_type_required"
+          : "price_not_available_for_service"
+        : "decision_evidence_unavailable",
   };
 }
 
@@ -119,7 +224,9 @@ export function registerNearbyRoute(
         candidateSearch,
         searchRequest(request.query),
       );
-      const results: NearbyServicePoint[] = result.candidates.map((candidate) => ({
+      const sort = request.query.sort ?? "nearest";
+      const sorted = sortCandidates(result.candidates, request.query.service, sort);
+      const results: NearbyServicePoint[] = sorted.candidates.map((candidate) => ({
         id: candidate.id,
         country: candidate.country,
         name: candidate.name,
@@ -133,7 +240,9 @@ export function registerNearbyRoute(
       }));
       return {
         requestId: request.id,
+        country: request.query.country ?? null,
         service: request.query.service,
+        sort,
         search: {
           requestedRadiusMetres: result.requestedRadiusMetres,
           usedRadiusMetres: result.usedRadiusMetres,
@@ -141,6 +250,12 @@ export function registerNearbyRoute(
           expanded: result.expanded,
           minimumCandidatesMet: result.minimumCandidatesMet,
           stopReason: result.stopReason,
+        },
+        ranking: {
+          requestedSort: sorted.requestedSort,
+          appliedSort: sorted.appliedSort,
+          degraded: sorted.degraded,
+          reason: sorted.reason,
         },
         resultCount: results.length,
         results,

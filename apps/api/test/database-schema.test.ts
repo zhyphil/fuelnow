@@ -56,6 +56,14 @@ const serviceOpeningVerificationUrl = new URL(
   "../db/migrations/verify-service-opening-evidence.sql",
   import.meta.url,
 );
+const candidateControlsMigrationUrl = new URL(
+  "../db/migrations/0013_candidate_search_controls.sql",
+  import.meta.url,
+);
+const candidateControlsVerificationUrl = new URL(
+  "../db/migrations/verify-candidate-search-controls.sql",
+  import.meta.url,
+);
 
 describe("initial PostgreSQL/PostGIS schema", () => {
   it("enables PostGIS and uses WGS84 geography points", async () => {
@@ -355,6 +363,18 @@ describe("initial PostgreSQL/PostGIS schema", () => {
     expect(verification).toContain(
       "Known service opening status without a timestamp was accepted",
     );
+    expect(verification).toContain("ROLLBACK;");
+  });
+
+  it("adds and transactionally verifies the optional candidate country filter", async () => {
+    const migration = await readFile(candidateControlsMigrationUrl, "utf8");
+    const verification = await readFile(candidateControlsVerificationUrl, "utf8");
+
+    expect(migration).toContain("p_country text DEFAULT NULL");
+    expect(migration).toContain("p_country IS NULL OR point.country = p_country");
+    expect(migration).toContain("p_country NOT IN ('FR', 'ES')");
+    expect(verification).toContain("france_count <> 1");
+    expect(verification).toContain("Unsupported country was accepted");
     expect(verification).toContain("ROLLBACK;");
   });
 
