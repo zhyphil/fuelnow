@@ -25,8 +25,11 @@ export {
   filterFuelCandidatesOpenNow,
 } from "./fuel/filterFuelCandidatesOpenNow.js";
 export type {
+  CalendarDayType,
   EvaluatedFuelOpeningCandidate,
+  FuelOpenNowFilterOptions,
   FuelOpenNowFilterResult,
+  OpeningEvaluationOptions,
 } from "./fuel/filterFuelCandidatesOpenNow.js";
 export { deriveFuelDecisionState } from "./fuel/deriveFuelDecisionState.js";
 export type {

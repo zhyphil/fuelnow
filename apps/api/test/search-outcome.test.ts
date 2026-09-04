@@ -19,6 +19,7 @@ describe("buildSearchOutcome", () => {
       resultCount: 0,
       priceUnknownCount: 0,
       openingStatusUnknownCount: 0,
+      holidayHoursUnknownCount: 0,
       equipmentStatusUnknownCount: 0,
       routeEtaUnavailableCount: 0,
       warnings: [],
@@ -36,6 +37,7 @@ describe("buildSearchOutcome", () => {
         resultCount: 4,
         priceUnknownCount: 3,
         openingStatusUnknownCount: 2,
+        holidayHoursUnknownCount: 1,
         equipmentStatusUnknownCount: 4,
         routeEtaUnavailableCount: 1,
       }),
@@ -44,6 +46,7 @@ describe("buildSearchOutcome", () => {
       warnings: [
         "price_unknown",
         "opening_status_unknown",
+        "holiday_hours_unknown",
         "equipment_status_unknown",
         "route_eta_unavailable",
       ],

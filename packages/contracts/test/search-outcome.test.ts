@@ -17,6 +17,7 @@ const resultsOutcome: SearchOutcome = {
   resultCount: 3,
   priceUnknownCount: 2,
   openingStatusUnknownCount: 1,
+  holidayHoursUnknownCount: 0,
   equipmentStatusUnknownCount: 0,
   routeEtaUnavailableCount: 0,
   warnings: ["price_unknown", "opening_status_unknown"],
@@ -31,6 +32,7 @@ describe("search outcome contract", () => {
     expect(SEARCH_WARNING_CODES).toEqual([
       "price_unknown",
       "opening_status_unknown",
+      "holiday_hours_unknown",
       "equipment_status_unknown",
       "route_eta_unavailable",
     ]);
@@ -49,6 +51,7 @@ describe("search outcome contract", () => {
       resultCount: 0,
       priceUnknownCount: 0,
       openingStatusUnknownCount: 0,
+      holidayHoursUnknownCount: 0,
       warnings: [],
       emptyReason: "no_service_points_in_radius",
       fallbackAction: "expand_radius",

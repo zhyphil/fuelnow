@@ -13,6 +13,7 @@ export interface SearchOutcomeInput {
   resultCount: number;
   priceUnknownCount?: number;
   openingStatusUnknownCount?: number;
+  holidayHoursUnknownCount?: number;
   equipmentStatusUnknownCount?: number;
   routeEtaUnavailableCount?: number;
 }
@@ -75,6 +76,11 @@ export function buildSearchOutcome(input: SearchOutcomeInput): SearchOutcome {
     input.equipmentStatusUnknownCount ?? 0,
     candidateCount,
   );
+  const holidayHoursUnknownCount = checkedCount(
+    "holidayHoursUnknownCount",
+    input.holidayHoursUnknownCount ?? 0,
+    candidateCount,
+  );
   const routeEtaUnavailableCount = checkedCount(
     "routeEtaUnavailableCount",
     input.routeEtaUnavailableCount ?? 0,
@@ -88,6 +94,7 @@ export function buildSearchOutcome(input: SearchOutcomeInput): SearchOutcome {
   const warningCounts: ReadonlyArray<readonly [SearchWarningCode, number]> = [
     ["price_unknown", priceUnknownCount],
     ["opening_status_unknown", openingStatusUnknownCount],
+    ["holiday_hours_unknown", holidayHoursUnknownCount],
     ["equipment_status_unknown", equipmentStatusUnknownCount],
     ["route_eta_unavailable", routeEtaUnavailableCount],
   ];
@@ -104,6 +111,7 @@ export function buildSearchOutcome(input: SearchOutcomeInput): SearchOutcome {
     resultCount,
     priceUnknownCount,
     openingStatusUnknownCount,
+    holidayHoursUnknownCount,
     equipmentStatusUnknownCount,
     routeEtaUnavailableCount,
     warnings,

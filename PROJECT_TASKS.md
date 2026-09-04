@@ -4,7 +4,7 @@
 > 需求来源：[france_spain_driver_decision_engine_project.md](./france_spain_driver_decision_engine_project.md)  
 > 当前状态：进行中  
 > 当前阶段：Phase 3 — 搜索、路线与决策引擎
-> 下一项任务：`P3-OPEN-04` 处理节假日未知和临时关闭状态
+> 下一项任务：`P3-OPEN-05` 对无法解析的营业时间降级为 Unknown
 > 最后更新：2026-09-04
 
 ## 使用方法
@@ -234,7 +234,7 @@ V1 的核心验收结果是：
 - [x] `P3-OPEN-01` 将法国 `horaires` 内嵌 JSON/`HH.mm`/关闭标记与西班牙 `Horario` 文本/西语星期/范围统一到同一 country-aware 解析入口；两国 Adapter 移除重复解析代码，保留来源字段、partial warning、法国自助 Fuel 标记与西班牙未证明日期 Unknown 边界（2026-09-04；322 tests；[解析器说明](./docs/architecture/source-opening-hours-parser.md)）
 - [x] `P3-OPEN-02` 固化两国 24/7、跨午夜、分段营业及开门含/关门不含边界：仅法国 `00.00–00.00` 与西班牙 `24H` 可声明全天，24/7 标记必须由 7 个完整日期支撑；跨日延续至次日本地关门时刻，分段区间去重稳定排序，非零点同开同关降级而不误判全天（2026-09-04；329 tests；[高级营业时间说明](./docs/architecture/advanced-opening-hours.md)）
 - [x] `P3-OPEN-03` 所有排班按服务点 IANA 时区求值：法国固定 `Europe/Paris`、西班牙固定 `Europe/Madrid`，覆盖冬/夏 UTC 偏移、UTC 跨日本地星期、春季跳时与秋季重复小时；国家与时区不匹配、未知或不支持时即使有 24/7 自助标记也降级 Unknown（2026-09-04；334 tests；[时区说明](./docs/architecture/opening-hours-timezones.md)）
-- [ ] `P3-OPEN-04` 处理节假日未知和临时关闭状态
+- [x] `P3-OPEN-04` 增加 regular/public holiday/unknown 日历上下文与 `holiday_hours_unknown` 共享提示/计数：普通周排班在节假日或日历未知时不宣称营业，并单独统计 holiday Unknown；明确临时关闭优先于排班、站点 24/7 和无人 Fuel 24/7，后者可在无关闭证据时作为更强全天证据（2026-09-04；339 tests；[节假日与临时关闭说明](./docs/architecture/holiday-and-temporary-closure.md)）
 - [ ] `P3-OPEN-05` 对无法解析的营业时间降级为 Unknown
 
 ## 3.3 Best 排名
@@ -599,3 +599,4 @@ V1 的核心验收结果是：
 | 2026-09-04 | 统一法国/西班牙营业时间解析入口 | 法国 JSON `HH.mm` 与西班牙文本星期/范围统一输出 NormalizedOpeningHours，两国 Adapter 删除重复逻辑并保留 partial/Unknown 语义；完整质量门槛 322 项测试通过；见 `docs/architecture/source-opening-hours-parser.md` |
 | 2026-09-04 | 固化 24/7、跨午夜与分段营业语义 | 两国排班统一使用开门含/关门不含边界，跨日延续、分段空档、区间去重排序与同开同关异常均有确定行为；完整质量门槛 329 项测试通过；见 `docs/architecture/advanced-opening-hours.md` |
 | 2026-09-04 | 固化营业时间时区与 DST 行为 | 按站点国家匹配 Paris/Madrid IANA 时区，覆盖冬夏偏移、本地跨日、春季跳时和秋季重复小时；错误时区降级 Unknown；完整质量门槛 334 项测试通过；见 `docs/architecture/opening-hours-timezones.md` |
+| 2026-09-04 | 处理节假日 Unknown 与临时关闭 | 周排班在 public holiday/日历未知时不冒充营业并输出专属 warning；临时关闭覆盖全部排班与 24/7 证据；完整质量门槛 339 项测试通过；见 `docs/architecture/holiday-and-temporary-closure.md` |

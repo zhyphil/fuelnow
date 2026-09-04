@@ -16,6 +16,16 @@ const COUNTRY_TIMEZONES = {
 type SupportedOpeningTimezone =
   (typeof COUNTRY_TIMEZONES)[keyof typeof COUNTRY_TIMEZONES];
 
+export type CalendarDayType = "public_holiday" | "regular" | "unknown";
+
+export interface OpeningEvaluationOptions {
+  calendarDayType?: CalendarDayType;
+}
+
+export interface FuelOpenNowFilterOptions {
+  calendarDayTypeByCountry?: Partial<Record<"FR" | "ES", CalendarDayType>>;
+}
+
 export interface EvaluatedFuelOpeningCandidate<
   TCandidate extends FuelDistanceCandidate = FuelDistanceCandidate,
 > {
@@ -30,6 +40,7 @@ export interface FuelOpenNowFilterResult<
   openCandidates: EvaluatedFuelOpeningCandidate<TCandidate>[];
   closedCandidates: EvaluatedFuelOpeningCandidate<TCandidate>[];
   unknownCandidates: EvaluatedFuelOpeningCandidate<TCandidate>[];
+  holidayUnknownCandidates: EvaluatedFuelOpeningCandidate<TCandidate>[];
 }
 
 function minutesFromTime(value: string): number | null {
@@ -93,11 +104,15 @@ export function evaluateOpeningStatusAt(
   openingHours: NormalizedOpeningHours | null,
   timezone: SupportedOpeningTimezone,
   instant: DateTime,
+  { calendarDayType = "regular" }: OpeningEvaluationOptions = {},
 ): Extract<OpeningStatus, "open" | "closed" | "unknown"> {
   if (openingHours === null) {
     return "unknown";
   }
   if (!Object.values(COUNTRY_TIMEZONES).includes(timezone)) {
+    return "unknown";
+  }
+  if (calendarDayType !== "regular") {
     return "unknown";
   }
   if (openingHours.siteSchedule24Seven) {
@@ -147,6 +162,7 @@ export function evaluateOpeningStatusAt(
 export function filterFuelCandidatesOpenNow<TCandidate extends FuelDistanceCandidate>(
   candidates: readonly TCandidate[],
   evaluatedAt: string,
+  options: FuelOpenNowFilterOptions = {},
 ): FuelOpenNowFilterResult<TCandidate> {
   const instant = DateTime.fromISO(evaluatedAt, { setZone: true });
   const evaluatedAtUtc = instant.toUTC().toISO({ suppressMilliseconds: true });
@@ -159,20 +175,32 @@ export function filterFuelCandidatesOpenNow<TCandidate extends FuelDistanceCandi
     openCandidates: [],
     closedCandidates: [],
     unknownCandidates: [],
+    holidayUnknownCandidates: [],
   };
   for (const candidate of candidates) {
+    const calendarDayType =
+      options.calendarDayTypeByCountry?.[candidate.servicePoint.country] ?? "regular";
     const hasExpectedTimezone =
       candidate.servicePoint.timezone ===
       COUNTRY_TIMEZONES[candidate.servicePoint.country];
-    const openingStatus = !hasExpectedTimezone
-      ? "unknown"
-      : candidate.servicePoint.unattendedFuelPayment24Seven === true
-        ? "open"
-        : evaluateOpeningStatusAt(
-            candidate.servicePoint.openingHours,
-            candidate.servicePoint.timezone,
-            instant,
-          );
+    const holidayHoursUnknown =
+      hasExpectedTimezone &&
+      candidate.servicePoint.temporaryClosure !== true &&
+      candidate.servicePoint.unattendedFuelPayment24Seven !== true &&
+      calendarDayType !== "regular";
+    const openingStatus =
+      candidate.servicePoint.temporaryClosure === true
+        ? "closed"
+        : !hasExpectedTimezone
+          ? "unknown"
+          : candidate.servicePoint.unattendedFuelPayment24Seven === true
+            ? "open"
+            : evaluateOpeningStatusAt(
+                candidate.servicePoint.openingHours,
+                candidate.servicePoint.timezone,
+                instant,
+                { calendarDayType },
+              );
     const evaluated = { candidate, openingStatus };
     if (openingStatus === "open") {
       result.openCandidates.push(evaluated);
@@ -180,6 +208,7 @@ export function filterFuelCandidatesOpenNow<TCandidate extends FuelDistanceCandi
       result.closedCandidates.push(evaluated);
     } else {
       result.unknownCandidates.push(evaluated);
+      if (holidayHoursUnknown) result.holidayUnknownCandidates.push(evaluated);
     }
   }
   return result;

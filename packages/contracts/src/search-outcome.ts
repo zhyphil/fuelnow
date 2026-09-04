@@ -16,6 +16,7 @@ export const EMPTY_RESULT_REASONS = [
 export const SEARCH_WARNING_CODES = [
   "price_unknown",
   "opening_status_unknown",
+  "holiday_hours_unknown",
   "equipment_status_unknown",
   "route_eta_unavailable",
 ] as const;
@@ -51,6 +52,7 @@ export const SearchOutcomeSchema = Type.Object(
     resultCount: Type.Integer({ minimum: 0 }),
     priceUnknownCount: Type.Integer({ minimum: 0 }),
     openingStatusUnknownCount: Type.Integer({ minimum: 0 }),
+    holidayHoursUnknownCount: Type.Integer({ minimum: 0 }),
     equipmentStatusUnknownCount: Type.Integer({ minimum: 0 }),
     routeEtaUnavailableCount: Type.Integer({ minimum: 0 }),
     warnings: Type.Array(SearchWarningCodeSchema, {
@@ -77,6 +79,7 @@ export function isSearchOutcome(value: unknown): value is SearchOutcome {
     value.resultCount,
     value.priceUnknownCount,
     value.openingStatusUnknownCount,
+    value.holidayHoursUnknownCount,
     value.equipmentStatusUnknownCount,
     value.routeEtaUnavailableCount,
   ].every((count) => count <= value.candidateCount);
@@ -114,6 +117,7 @@ export function isSearchOutcome(value: unknown): value is SearchOutcome {
   const warningCounts: ReadonlyArray<readonly [SearchWarningCode, number]> = [
     ["price_unknown", value.priceUnknownCount],
     ["opening_status_unknown", value.openingStatusUnknownCount],
+    ["holiday_hours_unknown", value.holidayHoursUnknownCount],
     ["equipment_status_unknown", value.equipmentStatusUnknownCount],
     ["route_eta_unavailable", value.routeEtaUnavailableCount],
   ];
