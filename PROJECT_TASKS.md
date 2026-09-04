@@ -4,7 +4,7 @@
 > 需求来源：[france_spain_driver_decision_engine_project.md](./france_spain_driver_decision_engine_project.md)  
 > 当前状态：进行中  
 > 当前阶段：Phase 3 — 搜索、路线与决策引擎
-> 下一项任务：`P3-BEST-06` 将预计加油量、车辆油耗和绕路成本纳入 Fuel 计算
+> 下一项任务：`P3-BEST-07` 定义 EV 专属 Best/Time-to-Solution 公式
 > 最后更新：2026-09-04
 
 ## 使用方法
@@ -244,7 +244,7 @@ V1 的核心验收结果是：
 - [x] `P3-BEST-03` 定义 OpenScore 与 AvailabilityScore：Open=1、Closing soon=0.75、Opening soon=0.25，Closed/Unknown=0 且临时关闭强制覆盖；仅明确 Available 获得可用性正分，其他 canonical 状态均不推断可用，并保留解释 basis（2026-09-04；378 tests；[营业与可用性评分说明](./docs/architecture/best-open-availability-scores.md)）
 - [x] `P3-BEST-04` 定义 FreshnessScore 与 ReliabilityScore：Live/Verified/Recent=1、Stale=0.5、Unknown=0；复用既有 0–100 confidenceScore 归一化并强制 high/medium/low 区间一致，避免重复应用来源质量惩罚且不将分数表述为准确率（2026-09-04；388 tests；[数据质量评分说明](./docs/architecture/best-data-quality-scores.md)）
 - [x] `P3-BEST-05` 定义可版本化 `fuel-best-v1`：Price 30%、Distance 10%、TravelTime 20%、Open 15%、Availability 10%、Freshness 7.5%、Reliability 7.5%，输出逐项贡献；目标燃油未提供、明确不可用或站点关闭硬排除，其他 Unknown 保留但无对应正分，并固定稳定决胜顺序（2026-09-04；395 tests；[Fuel Best 公式](./docs/architecture/fuel-best-formula.md)）
-- [ ] `P3-BEST-06` 将预计加油量、车辆油耗和绕路成本纳入 Fuel 计算
+- [x] `P3-BEST-06` 将预计购买量、同单位车辆百公里消耗、总额外绕路距离与统一参考燃油价组合为 PurchaseCost + DetourCost，并将完整总成本接入 Fuel PriceScore；不猜默认油耗/加油量，缺失项逐一返回 Unknown，覆盖零绕路与 CNG/LNG kilogram 单位（2026-09-04；403 tests；[Fuel 购买与绕路成本模型](./docs/architecture/fuel-trip-cost-model.md)）
 - [ ] `P3-BEST-07` 定义 EV 专属 Best/Time-to-Solution 公式
 - [ ] `P3-BEST-08` 将 ETA、兼容额定功率及符合门槛的 availability 纳入 EV 计算；等待时间、实际充电时长和价格仅在未来有决策级证据时启用
 - [ ] `P3-BEST-09` 定义 Air 和 Wash 的 Best 降级规则
@@ -606,3 +606,4 @@ V1 的核心验收结果是：
 | 2026-09-04 | 定义 Best OpenScore 与 AvailabilityScore       | 明确 Open/Closing soon/Opening soon 分值，Closed/Unknown 无正分且临时关闭覆盖；只有 Available 获得可用性正分，所有 canonical 状态均有稳定 basis；完整质量门槛 378 项测试通过；见 `docs/architecture/best-open-availability-scores.md`                        |
 | 2026-09-04 | 定义 Best FreshnessScore 与 ReliabilityScore   | Live/Verified/Recent 无惩罚、Stale 降权、Unknown 无正分；confidenceScore 归一化并校验标签区间，不重复应用来源质量调整；完整质量门槛 388 项测试通过；见 `docs/architecture/best-data-quality-scores.md`                                                       |
 | 2026-09-04 | 定义 Fuel 专属 Best 公式                       | 固定 `fuel-best-v1` 七维权重、逐项贡献与稳定决胜顺序；明确目标燃油、不可用与关闭硬排除，Unknown 保留但无虚假优势；完整质量门槛 395 项测试通过；见 `docs/architecture/fuel-best-formula.md`                                                                   |
+| 2026-09-04 | 纳入 Fuel 购买量、油耗与绕路成本               | 以购买成本+总额外绕路燃料成本替代纯单价比较；不猜默认用户数据，完整列出缺失项并支持 litre/kilogram，复现“便宜 €0.03/L 但多绕 15 km 不划算”；完整质量门槛 403 项测试通过；见 `docs/architecture/fuel-trip-cost-model.md`                                      |

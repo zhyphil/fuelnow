@@ -74,3 +74,13 @@ export type {
   FuelBestScoreContribution,
   RankedFuelBestCandidate,
 } from "./rankFuelBest.js";
+export { estimateFuelTripCost, scoreFuelTripCosts } from "./estimateFuelTripCost.js";
+export type {
+  FuelQuantityUnit,
+  FuelTripCostCandidate,
+  FuelTripCostEstimate,
+  FuelTripCostMissingInput,
+  FuelTripCostProfile,
+  FuelTripCostScoreResult,
+  ScoredFuelTripCostCandidate,
+} from "./estimateFuelTripCost.js";
