@@ -13,3 +13,5 @@ Service-specific fields are added by the remaining Phase 2 model tasks. Source, 
 `ChargingServicePointSchema` preserves the ServicePoint → EVSE → connector hierarchy. Its semantic predicate verifies EVSE capacity, dynamic status timestamps, identifier uniqueness and availability summary counts.
 
 `AirServicePointSchema` keeps equipment presence, operation, access, free/paid state and price independent. Its semantic predicate requires positive source evidence and rejects unverifiable or contradictory known states.
+
+`WashServicePointSchema` keeps equipment condition, normalized types, programs and starting price separate. Its semantic predicate validates source evidence, type consistency and minimum-price summaries.

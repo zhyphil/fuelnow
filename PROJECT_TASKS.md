@@ -4,7 +4,7 @@
 > 需求来源：[france_spain_driver_decision_engine_project.md](./france_spain_driver_decision_engine_project.md)  
 > 当前状态：进行中  
 > 当前阶段：Phase 2 — 项目骨架与统一数据层
-> 下一项任务：`P2-MOD-05` 定义 Wash 专属字段
+> 下一项任务：`P2-MOD-06` 定义 source、freshness 和 confidence 模型
 > 最后更新：2026-09-04
 
 ## 使用方法
@@ -185,7 +185,7 @@ V1 的核心验收结果是：
 - [x] `P2-MOD-02` 建立 Fuel point/offer/price/discount TypeBox 契约及派生类型，区分未知价格与零价、availability/缺货/原因/观测时间，并以语义校验保证 Fuel capability、燃油唯一性及 liter/kilogram 单位一致（2026-09-04；7 项新测试；[Fuel 契约说明](./docs/architecture/fuel-contract.md)）
 - [x] `P2-MOD-03` 建立 ServicePoint → EVSE → connector → tariff 的 TypeBox 契约，支持静态未知与逐 EVSE 动态状态，以语义校验固定 EVSE 容量、动态观测时间、ID 唯一性和 availability 汇总一致性（2026-09-04；8 项新测试；[EV 契约说明](./docs/architecture/ev-contract.md)）
 - [x] `P2-MOD-04` 建立 Air presence/working/free/price/access/verification/location/source evidence 契约，以语义校验要求 Air capability 与正向来源证据、已知设备状态时间，并拒绝 free/price 冲突（2026-09-04；6 项新测试；[Air 契约说明](./docs/architecture/air-contract.md)）
-- [ ] `P2-MOD-05` 定义 Wash 专属字段
+- [x] `P2-MOD-05` 建立 Wash presence/working/type/starting price/program/vacuum/interior/verification/source evidence 契约，以语义校验禁止 unknown 与已知类型混用、要求 program 类型声明并保持 starting price 为最低已知套餐价（2026-09-04；7 项新测试；[Wash 契约说明](./docs/architecture/wash-contract.md)）
 - [ ] `P2-MOD-06` 定义 source、freshness 和 confidence 模型
 - [ ] `P2-MOD-07` 统一国家、币种、坐标和地址格式
 - [ ] `P2-MOD-08` 统一燃料、充电接口和服务类型枚举
@@ -571,3 +571,4 @@ V1 的核心验收结果是：
 | 2026-09-04 | 建立 Fuel 专属契约 | 定义 Fuel offer/price/discount 字段，以运行时 Schema 和语义校验区分未知/零价、库存状态并固定燃油唯一性与计价单位；见 `docs/architecture/fuel-contract.md` |
 | 2026-09-04 | 建立 EV 专属契约 | 固化 ServicePoint → EVSE → connector → tariff 三级设备语义，校验真实容量、动态状态时间与汇总数量，避免以 connector 数冒充可充电车位；见 `docs/architecture/ev-contract.md` |
 | 2026-09-04 | 建立 Air 专属契约 | 分离设备存在、工作状态、免费/付费、价格、访问与验证时间，要求正向来源证据并拒绝价格语义冲突；见 `docs/architecture/air-contract.md` |
+| 2026-09-04 | 建立 Wash 专属契约 | 分离设备状态、洗车类型、套餐与起价，校验正向来源、类型一致性和最低已知套餐价；见 `docs/architecture/wash-contract.md` |

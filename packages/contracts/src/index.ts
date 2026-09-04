@@ -70,6 +70,25 @@ export {
   StructuredAddressSchema,
   UtcTimestampSchema,
 } from "./service-point.js";
+export {
+  WASH_TYPES,
+  WASH_WORKING_STATUSES,
+  WashCapabilitySchema,
+  WashPriceSchema,
+  WashProgramSchema,
+  WashServicePointSchema,
+  WashTypeSchema,
+  WashWorkingStatusSchema,
+  isWashServicePoint,
+} from "./wash.js";
+export type {
+  WashCapability,
+  WashPrice,
+  WashProgram,
+  WashServicePoint,
+  WashType,
+  WashWorkingStatus,
+} from "./wash.js";
 export type {
   CountryCode,
   ServicePoint,
