@@ -4,7 +4,7 @@
 > 需求来源：[france_spain_driver_decision_engine_project.md](./france_spain_driver_decision_engine_project.md)  
 > 当前状态：进行中  
 > 当前阶段：Phase 2 — 项目骨架与统一数据层
-> 下一项任务：`P2-DB-02` 建立地理位置和常用筛选索引
+> 下一项任务：`P2-DB-03` 保存来源原始 ID，保证同步幂等
 > 最后更新：2026-09-04
 
 ## 使用方法
@@ -194,7 +194,7 @@ V1 的核心验收结果是：
 ## 2.3 数据库与同步
 
 - [x] `P2-DB-01` 建立 PostgreSQL 18/PostGIS 3.6 SQL-first 数据库结构，覆盖 canonical 站点、四类服务、来源证据与同步记录；锁定本地镜像，提供可重复迁移和结构检查命令，并在真实 PostgreSQL 18.6/PostGIS 3.6 上连续执行两次迁移通过（2026-09-04；17 tables；164 tests；[数据库结构说明](./docs/architecture/database-schema.md)）
-- [ ] `P2-DB-02` 建立地理位置和常用筛选索引
+- [x] `P2-DB-02` 建立 1 个 PostGIS GiST 位置索引和 8 个国家/服务/状态/Fuel/EV 常用筛选索引，迁移执行器按编号顺序发现并跳过已记录版本；真实 PostgreSQL 验证索引 ready/valid，`EXPLAIN` 确认半径、服务类型和最新 Fuel 价格查询分别使用目标索引（2026-09-04；167 tests；[索引说明](./docs/architecture/database-indexes.md)）
 - [ ] `P2-DB-03` 保存来源原始 ID，保证同步幂等
 - [ ] `P2-DB-04` 建立原始数据导入与增量更新任务
 - [ ] `P2-DB-05` 建立不同来源的站点去重与合并规则
@@ -577,3 +577,4 @@ V1 的核心验收结果是：
 | 2026-09-04 | 统一 canonical 枚举 | service/fuel/EV connector 代码、Schema 与类型集中为唯一语言无关来源，明确未知与来源标签映射规则；见 `docs/architecture/canonical-enums.md` |
 | 2026-09-04 | 统一营业、可用性与未知语义 | ServicePoint 增加规范化排班、评估状态与临时关闭优先级，统一 availability/unknown reason，禁止将未知折叠为负值或零值；见 `docs/architecture/opening-availability-contract.md` |
 | 2026-09-04 | 建立 PostgreSQL/PostGIS 数据库结构 | 在真实 PostgreSQL 18.6/PostGIS 3.6 上连续两次成功执行事务迁移，验证 17 张基础表、迁移记录和 WGS84 geography 字段；完整质量门槛 164 项测试通过；见 `docs/architecture/database-schema.md` |
+| 2026-09-04 | 建立地理位置和常用筛选索引 | 创建 9 个空间/常用筛选索引；数据库确认均 ready/valid，执行计划实际使用 GiST、service type 与 latest Fuel price 索引；完整质量门槛 167 项测试通过；见 `docs/architecture/database-indexes.md` |

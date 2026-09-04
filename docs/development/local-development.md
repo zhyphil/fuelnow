@@ -62,7 +62,7 @@ pnpm db:migrate
 pnpm db:verify
 ```
 
-The initial migration is non-destructive and repeatable. The database data lives in the named `fuel-now_postgres_data` Docker volume, so `pnpm db:down` does not erase it. Production and release-test environments must use externally managed credentials, TLS and a dedicated migration role; the Compose credentials are never valid outside local development.
+Numbered migrations are discovered in filename order and versions already recorded in `schema_migrations` are skipped. The database data lives in the named `fuel-now_postgres_data` Docker volume, so `pnpm db:down` does not erase it. Production and release-test environments must use externally managed credentials, TLS and a dedicated migration role; the Compose credentials are never valid outside local development.
 
 The current official PostgreSQL 18/PostGIS image publishes an amd64 build, so Apple Silicon machines run this local service through Docker emulation. This affects startup time, not the production architecture. The pinned digest prevents an unnoticed image change; updating it is an explicit, reviewed maintenance task.
 

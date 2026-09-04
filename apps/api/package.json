@@ -5,9 +5,9 @@
   "type": "module",
   "scripts": {
     "db:down": "docker compose --file ../../compose.yaml down",
-    "db:migrate": "docker compose --file ../../compose.yaml exec -T db psql --username fuel_now --dbname fuel_now --file /migrations/0001_initial.sql",
+    "db:migrate": "docker compose --file ../../compose.yaml exec -T db sh /migrations/apply-migrations.sh",
     "db:up": "docker compose --file ../../compose.yaml up --detach --wait db",
-    "db:verify": "docker compose --file ../../compose.yaml exec -T db psql --username fuel_now --dbname fuel_now --file /migrations/verify-schema.sql",
+    "db:verify": "docker compose --file ../../compose.yaml exec -T db sh /migrations/verify-all.sh",
     "test": "vitest run",
     "typecheck": "tsc --noEmit"
   }

@@ -44,8 +44,10 @@ pnpm db:verify
 ```
 
 `verify-schema.sql` fails if PostGIS, any required table, the migration ledger
-entry or the WGS84 geography column is missing. Applying the migration a second
-time and repeating verification is the task's idempotence smoke test.
+entry or the WGS84 geography column is missing. The shell runner applies every
+numbered migration in filename order, and the verification runner executes every
+`verify-*.sql` check. Applying the migrations a second time and repeating
+verification is the task's idempotence smoke test.
 
 The completed smoke test ran both passes against PostgreSQL 18.6 with PostGIS
 3.6. The second pass inserted no duplicate migration record, and the full

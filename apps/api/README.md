@@ -24,7 +24,8 @@ pnpm db:verify
 pnpm db:down
 ```
 
-`db:up` waits for the database health check. `db:migrate` can be executed again
-without deleting data, and `db:verify` checks the PostGIS extension, required
-tables, migration ledger and WGS84 geography column. `db:down` stops the local
+`db:up` waits for the database health check. `db:migrate` applies all numbered
+SQL migrations in order and can be executed again without deleting data.
+`db:verify` checks the PostGIS extension, required tables, migration ledger,
+WGS84 geography column and required query indexes. `db:down` stops the local
 service but intentionally preserves its named Docker volume.
