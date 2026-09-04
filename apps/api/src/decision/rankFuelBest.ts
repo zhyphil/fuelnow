@@ -42,16 +42,16 @@ export type FuelBestScoreBreakdown = Record<
   FuelBestScoreContribution
 >;
 
-export interface RankedFuelBestCandidate<
+export type RankedFuelBestCandidate<
   TCandidate extends FuelBestCandidateInput = FuelBestCandidateInput,
-> extends FuelBestCandidateInput {
+> = TCandidate & {
   rank: number;
   rankingMode: "best";
   formulaVersion: typeof FUEL_BEST_FORMULA_VERSION;
   bestScore: number;
   scoreBreakdown: FuelBestScoreBreakdown;
   candidate: TCandidate;
-}
+};
 
 export interface ExcludedFuelBestCandidate<
   TCandidate extends FuelBestCandidateInput = FuelBestCandidateInput,

@@ -54,9 +54,9 @@ export interface EvBestScoreContribution {
 
 export type EvBestScoreBreakdown = Record<EvBestComponentName, EvBestScoreContribution>;
 
-export interface RankedEvBestCandidate<
+export type RankedEvBestCandidate<
   TCandidate extends EvBestCandidateInput = EvBestCandidateInput,
-> extends EvBestCandidateInput {
+> = TCandidate & {
   candidate: TCandidate;
   rank: number;
   rankingMode: "best";
@@ -64,7 +64,7 @@ export interface RankedEvBestCandidate<
   bestScore: number;
   scoreBreakdown: EvBestScoreBreakdown;
   timeToSolutionAssessment: EvTimeToSolutionAssessment;
-}
+};
 
 export interface ExcludedEvBestCandidate<
   TCandidate extends EvBestCandidateInput = EvBestCandidateInput,

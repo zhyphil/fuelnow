@@ -104,3 +104,14 @@ export type {
   ExcludedEvBestCandidate,
   RankedEvBestCandidate,
 } from "./rankEvBest.js";
+export { rankEvBestFromEvidence } from "./rankEvBestFromEvidence.js";
+export type {
+  CompatiblePowerScoreBasis,
+  EvAvailabilityScoreReason,
+  EvBestEvidenceCandidate,
+  EvBestEvidenceRequest,
+  EvBestEvidenceResult,
+  EvBestEvseEvidence,
+  EvDynamicAvailabilityEvidence,
+  PreparedEvBestCandidate,
+} from "./rankEvBestFromEvidence.js";

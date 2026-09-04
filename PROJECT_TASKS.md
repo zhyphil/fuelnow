@@ -4,7 +4,7 @@
 > 需求来源：[france_spain_driver_decision_engine_project.md](./france_spain_driver_decision_engine_project.md)  
 > 当前状态：进行中  
 > 当前阶段：Phase 3 — 搜索、路线与决策引擎
-> 下一项任务：`P3-BEST-08` 将 ETA、兼容额定功率及符合门槛的 availability 纳入 EV 计算；等待时间、实际充电时长和价格仅在未来有决策级证据时启用
+> 下一项任务：`P3-BEST-09` 定义 Air 和 Wash 的 Best 降级规则
 > 最后更新：2026-09-04
 
 ## 使用方法
@@ -246,7 +246,7 @@ V1 的核心验收结果是：
 - [x] `P3-BEST-05` 定义可版本化 `fuel-best-v1`：Price 30%、Distance 10%、TravelTime 20%、Open 15%、Availability 10%、Freshness 7.5%、Reliability 7.5%，输出逐项贡献；目标燃油未提供、明确不可用或站点关闭硬排除，其他 Unknown 保留但无对应正分，并固定稳定决胜顺序（2026-09-04；395 tests；[Fuel Best 公式](./docs/architecture/fuel-best-formula.md)）
 - [x] `P3-BEST-06` 将预计购买量、同单位车辆百公里消耗、总额外绕路距离与统一参考燃油价组合为 PurchaseCost + DetourCost，并将完整总成本接入 Fuel PriceScore；不猜默认油耗/加油量，缺失项逐一返回 Unknown，覆盖零绕路与 CNG/LNG kilogram 单位（2026-09-04；403 tests；[Fuel 购买与绕路成本模型](./docs/architecture/fuel-trip-cost-model.md)）
 - [x] `P3-BEST-07` 定义 price-free `ev-best-v1`：Distance 15%、TravelTime 25%、兼容额定功率 25%、Open 15%、Availability 10%、Freshness 5%、Reliability 5%，输出逐项贡献；完整 Time-to-Solution 必须同时具备 Driving ETA、Queue Wait、Charging Duration，否则明确 incomplete 且总时长为 null（2026-09-04；411 tests；[EV Best 与 Time-to-Solution 公式](./docs/architecture/ev-best-time-to-solution-formula.md)）
-- [ ] `P3-BEST-08` 将 ETA、兼容额定功率及符合门槛的 availability 纳入 EV 计算；等待时间、实际充电时长和价格仅在未来有决策级证据时启用
+- [x] `P3-BEST-08` 将真实 ETA、精确 connector 兼容及相对兼容额定功率接入 `ev-best-v1`；法国 availability 仅在 QualiCharge 来源、身份、同步/观测新鲜度、冲突隔离与 connector live 状态全部合格时得正分，西班牙保持 Unknown；等待时间、实际充电时长和价格继续为 null/不启用（2026-09-04；421 tests；[EV Best 证据门槛](./docs/architecture/ev-best-evidence-gates.md)）
 - [ ] `P3-BEST-09` 定义 Air 和 Wash 的 Best 降级规则
 - [ ] `P3-BEST-10` 对缺失、过期和低可信数据降权
 - [ ] `P3-BEST-11` 为推荐生成用户可理解的解释
@@ -608,3 +608,4 @@ V1 的核心验收结果是：
 | 2026-09-04 | 定义 Fuel 专属 Best 公式                       | 固定 `fuel-best-v1` 七维权重、逐项贡献与稳定决胜顺序；明确目标燃油、不可用与关闭硬排除，Unknown 保留但无虚假优势；完整质量门槛 395 项测试通过；见 `docs/architecture/fuel-best-formula.md`                                                                   |
 | 2026-09-04 | 纳入 Fuel 购买量、油耗与绕路成本               | 以购买成本+总额外绕路燃料成本替代纯单价比较；不猜默认用户数据，完整列出缺失项并支持 litre/kilogram，复现“便宜 €0.03/L 但多绕 15 km 不划算”；完整质量门槛 403 项测试通过；见 `docs/architecture/fuel-trip-cost-model.md`                                      |
 | 2026-09-04 | 定义 EV Best 与 Time-to-Solution 公式          | 固定无价格 `ev-best-v1` 七维代理权重；完整 TTS 仅在 ETA、等待、实际充电时长齐全时求和，缺项保持 null 并列出原因；完整质量门槛 411 项测试通过；见 `docs/architecture/ev-best-time-to-solution-formula.md`                                                     |
+| 2026-09-04 | 接入 EV Best 决策级证据门槛                    | 接入真实 ETA、精确 connector 兼容与相对兼容额定功率；仅法国合格 QualiCharge 动态证据可获得 availability 正分，西班牙和缺失/风险证据诚实保持 Unknown；完整质量门槛 421 项测试通过；见 `docs/architecture/ev-best-evidence-gates.md`                    |
