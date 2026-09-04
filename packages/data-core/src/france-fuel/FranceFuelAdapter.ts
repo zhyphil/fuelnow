@@ -7,13 +7,11 @@ import type {
   Freshness,
   FuelType,
   NormalizedFuel,
-  NormalizedOpeningHours,
   NormalizedServicePoint,
-  OpeningDay,
-  OpeningInterval,
   ServiceType,
   SourceAdapter,
 } from "../domain.js";
+import { parseSourceOpeningHours } from "../opening/parseSourceOpeningHours.js";
 import { resolveSourceUpdatedAt } from "../source/resolveSourceUpdatedAt.js";
 
 const SOURCE_ID = "fr-fuel-realtime-v2" as const;
@@ -256,167 +254,6 @@ function classifyFuelFreshness(
     return "stale";
   }
   return "unknown";
-}
-
-function normalizeTime(value: unknown): string | null {
-  const text = asString(value);
-  if (text === null || !/^\d{2}\.\d{2}$/.test(text)) {
-    return null;
-  }
-
-  const [hourText, minuteText] = text.split(".");
-  const hour = Number(hourText);
-  const minute = Number(minuteText);
-  if (hourText === undefined || minuteText === undefined) {
-    return null;
-  }
-  if (hour < 0 || hour > 23 || minute < 0 || minute > 59) {
-    return null;
-  }
-
-  return `${hourText}:${minuteText}`;
-}
-
-function parseOpeningIntervals(
-  value: unknown,
-  issues: AdapterIssue[],
-): OpeningInterval[] {
-  const candidates = Array.isArray(value) ? value : isRecord(value) ? [value] : [];
-  const intervals: OpeningInterval[] = [];
-
-  for (const candidate of candidates) {
-    if (!isRecord(candidate)) {
-      addIssue(
-        issues,
-        "invalid_opening_interval",
-        "warning",
-        "horaires",
-        "Opening interval must be an object",
-      );
-      continue;
-    }
-
-    const opensAt = normalizeTime(candidate["@ouverture"]);
-    const closesAt = normalizeTime(candidate["@fermeture"]);
-    if (opensAt === null || closesAt === null) {
-      addIssue(
-        issues,
-        "invalid_opening_time",
-        "warning",
-        "horaires",
-        "Opening interval contains an invalid HH.mm time",
-      );
-      continue;
-    }
-
-    intervals.push({
-      opensAt,
-      closesAt,
-      spansFullDay: opensAt === "00:00" && closesAt === "00:00",
-    });
-  }
-
-  return intervals;
-}
-
-function parseOpeningHours(
-  value: unknown,
-  unattendedFuelPayment24Seven: boolean,
-  issues: AdapterIssue[],
-): NormalizedOpeningHours | null {
-  if (value === null || value === undefined || value === "") {
-    return null;
-  }
-  if (typeof value !== "string") {
-    addIssue(
-      issues,
-      "invalid_opening_hours_type",
-      "warning",
-      "horaires",
-      "horaires must be a JSON-encoded string",
-    );
-    return null;
-  }
-
-  let decoded: unknown;
-  try {
-    decoded = JSON.parse(value) as unknown;
-  } catch {
-    addIssue(
-      issues,
-      "invalid_opening_hours_json",
-      "warning",
-      "horaires",
-      "horaires could not be decoded",
-    );
-    return null;
-  }
-
-  if (!isRecord(decoded) || !Array.isArray(decoded.jour)) {
-    addIssue(
-      issues,
-      "invalid_opening_hours_shape",
-      "warning",
-      "horaires",
-      "horaires must contain a jour array",
-    );
-    return null;
-  }
-
-  const issueCountBeforeDays = issues.length;
-  const days: OpeningDay[] = [];
-  for (const valueForDay of decoded.jour) {
-    if (!isRecord(valueForDay)) {
-      addIssue(
-        issues,
-        "invalid_opening_day",
-        "warning",
-        "horaires",
-        "Opening day must be an object",
-      );
-      continue;
-    }
-
-    const dayNumber = Number(valueForDay["@id"]);
-    if (!Number.isInteger(dayNumber) || dayNumber < 1 || dayNumber > 7) {
-      addIssue(
-        issues,
-        "invalid_opening_day_id",
-        "warning",
-        "horaires",
-        "Opening day ID must be between 1 and 7",
-      );
-      continue;
-    }
-
-    const closed = valueForDay["@ferme"] === "1";
-    const intervals = closed ? [] : parseOpeningIntervals(valueForDay.horaire, issues);
-    days.push({
-      day: dayNumber as OpeningDay["day"],
-      status: closed ? "closed" : intervals.length > 0 ? "open" : "unknown",
-      intervals,
-    });
-  }
-
-  days.sort((left, right) => left.day - right.day);
-  const siteSchedule24Seven =
-    days.length === 7 &&
-    days.every(
-      (day) =>
-        day.status === "open" &&
-        day.intervals.some((interval) => interval.spansFullDay),
-    );
-
-  return {
-    parseStatus:
-      issues.length === issueCountBeforeDays && days.length === 7
-        ? "parsed"
-        : "partial",
-    days,
-    siteSchedule24Seven,
-    unattendedFuelPayment24Seven,
-    raw: value,
-  };
 }
 
 function findRawPrice(
@@ -705,11 +542,13 @@ export class FranceFuelAdapter implements SourceAdapter<AdapterContext> {
         service === "Lavage automatique" || service === "Lavage manuel",
     );
     const unattendedFuelPayment24Seven = input.horaires_automate_24_24 === "Oui";
-    const openingHours = parseOpeningHours(
-      input.horaires,
+    const openingHoursResult = parseSourceOpeningHours({
+      country: "FR",
+      raw: input.horaires,
       unattendedFuelPayment24Seven,
-      issues,
-    );
+    });
+    issues.push(...openingHoursResult.issues);
+    const { openingHours } = openingHoursResult;
 
     const serviceTypes: ServiceType[] = [];
     if (fuels.length > 0) {

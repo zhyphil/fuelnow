@@ -8,12 +8,10 @@ import type {
   Freshness,
   FuelType,
   NormalizedFuel,
-  NormalizedOpeningHours,
   NormalizedServicePoint,
-  OpeningDay,
-  OpeningInterval,
   SourceAdapter,
 } from "../domain.js";
+import { parseSourceOpeningHours } from "../opening/parseSourceOpeningHours.js";
 import { resolveSourceUpdatedAt } from "../source/resolveSourceUpdatedAt.js";
 
 const SOURCE_ID = "es-miteco-fuel-prices";
@@ -127,9 +125,6 @@ const KNOWN_EXACT_BRANDS = new Set([
   "SHELL",
   "VALCARCE",
 ]);
-
-const DAY_TOKENS = ["L", "M", "X", "J", "V", "S", "D"] as const;
-type DayToken = (typeof DAY_TOKENS)[number];
 
 export interface SpainFuelSupplement {
   dataTakenAt: string | null;
@@ -313,136 +308,6 @@ function parseLocalizedPrice(
     return null;
   }
   return parsed;
-}
-
-function normalizeTime(hour: string, minute: string): string {
-  return `${hour.padStart(2, "0")}:${minute}`;
-}
-
-function expandDaySpec(value: string): OpeningDay["day"][] | null {
-  const [startText, endText] = value.split("-");
-  if (startText === undefined || !DAY_TOKENS.includes(startText as DayToken)) {
-    return null;
-  }
-  if (endText === undefined) {
-    return [(DAY_TOKENS.indexOf(startText as DayToken) + 1) as OpeningDay["day"]];
-  }
-  if (!DAY_TOKENS.includes(endText as DayToken)) {
-    return null;
-  }
-
-  const start = DAY_TOKENS.indexOf(startText as DayToken);
-  const end = DAY_TOKENS.indexOf(endText as DayToken);
-  const indexes =
-    start <= end
-      ? Array.from({ length: end - start + 1 }, (_, offset) => start + offset)
-      : [
-          ...Array.from({ length: DAY_TOKENS.length - start }, (_, offset) =>
-            Number(start + offset),
-          ),
-          ...Array.from({ length: end + 1 }, (_, offset) => offset),
-        ];
-  return indexes.map((index) => (index + 1) as OpeningDay["day"]);
-}
-
-function parseOpeningIntervals(value: string): OpeningInterval[] | null {
-  if (value === "24H") {
-    return [{ opensAt: "00:00", closesAt: "00:00", spansFullDay: true }];
-  }
-
-  const intervals: OpeningInterval[] = [];
-  for (const segment of value.split(/\s+y\s+/)) {
-    const match = segment.match(
-      /^([01]?\d|2[0-3]):([0-5]\d)\s*-\s*([01]?\d|2[0-3]):([0-5]\d)$/,
-    );
-    if (match === null) {
-      return null;
-    }
-    const [, openHour, openMinute, closeHour, closeMinute] = match;
-    if (
-      openHour === undefined ||
-      openMinute === undefined ||
-      closeHour === undefined ||
-      closeMinute === undefined
-    ) {
-      return null;
-    }
-    intervals.push({
-      opensAt: normalizeTime(openHour, openMinute),
-      closesAt: normalizeTime(closeHour, closeMinute),
-      spansFullDay: false,
-    });
-  }
-  return intervals;
-}
-
-function parseOpeningHours(
-  value: unknown,
-  issues: AdapterIssue[],
-): NormalizedOpeningHours | null {
-  const raw = asString(value);
-  if (raw === null) {
-    return null;
-  }
-
-  const intervalsByDay = new Map<OpeningDay["day"], OpeningInterval[]>();
-  let partial = false;
-  for (const clause of raw.split(";").map((item) => item.trim())) {
-    const match = clause.match(/^([LMXJVSD](?:-[LMXJVSD])?):\s*(.+)$/);
-    if (match === null) {
-      partial = true;
-      continue;
-    }
-    const [, daySpec, intervalText] = match;
-    if (daySpec === undefined || intervalText === undefined) {
-      partial = true;
-      continue;
-    }
-    const days = expandDaySpec(daySpec);
-    const intervals = parseOpeningIntervals(intervalText);
-    if (days === null || intervals === null) {
-      partial = true;
-      continue;
-    }
-    for (const day of days) {
-      intervalsByDay.set(day, [...(intervalsByDay.get(day) ?? []), ...intervals]);
-    }
-  }
-
-  if (partial) {
-    addIssue(
-      issues,
-      "partial_opening_hours",
-      "warning",
-      "Horario",
-      "Opening hours contain an unsupported clause",
-    );
-  }
-
-  const days = DAY_TOKENS.map((_, index): OpeningDay => {
-    const day = (index + 1) as OpeningDay["day"];
-    const intervals = intervalsByDay.get(day) ?? [];
-    return {
-      day,
-      status: intervals.length > 0 ? "open" : partial ? "unknown" : "closed",
-      intervals,
-    };
-  });
-  const siteSchedule24Seven =
-    !partial &&
-    days.every(
-      (day) =>
-        day.status === "open" &&
-        day.intervals.some((interval) => interval.spansFullDay),
-    );
-
-  return {
-    parseStatus: partial ? "partial" : "parsed",
-    days,
-    siteSchedule24Seven,
-    unattendedFuelPayment24Seven: null,
-    raw,
-  };
 }
 
 function normalizeFuel(
@@ -807,7 +672,12 @@ export class SpainFuelAdapter implements SourceAdapter<SpainFuelAdapterContext> 
       );
     }
 
-    const openingHours = parseOpeningHours(input.Horario, issues);
+    const openingHoursResult = parseSourceOpeningHours({
+      country: "ES",
+      raw: input.Horario,
+    });
+    issues.push(...openingHoursResult.issues);
+    const { openingHours } = openingHoursResult;
     const rawName = asString(input["Rótulo"]);
     const brand = rawName !== null && KNOWN_EXACT_BRANDS.has(rawName) ? rawName : null;
     if (rawName === null) {

@@ -52,6 +52,11 @@ export { sortFuelCandidatesByCheapest } from "./fuel/sortFuelCandidatesByCheapes
 export { sortFuelCandidatesByNearest } from "./fuel/sortFuelCandidatesByNearest.js";
 export { assertValidGeoPoint, haversineDistanceMeters } from "./geo/haversine.js";
 export type { GeoPoint } from "./geo/haversine.js";
+export { parseSourceOpeningHours } from "./opening/parseSourceOpeningHours.js";
+export type {
+  SourceOpeningHoursParseRequest,
+  SourceOpeningHoursParseResult,
+} from "./opening/parseSourceOpeningHours.js";
 export {
   deriveFuelAvailability,
   deriveServicePointLifecycle,
