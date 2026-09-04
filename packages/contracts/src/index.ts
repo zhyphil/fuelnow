@@ -1,4 +1,30 @@
 export {
+  CHARGING_CONFIDENCE_LEVELS,
+  CHARGING_FRESHNESS_LEVELS,
+  CHARGING_PRICE_UNITS,
+  ChargingCapabilitySchema,
+  ChargingPriceSchema,
+  ChargingServicePointSchema,
+  ChargingTariffComponentSchema,
+  EV_CONNECTOR_TYPES,
+  EVSE_STATUSES,
+  EvConnectorSchema,
+  EvConnectorTypeSchema,
+  EvseSchema,
+  EvseStatusSchema,
+  isChargingServicePoint,
+} from "./ev.js";
+export type {
+  ChargingCapability,
+  ChargingPrice,
+  ChargingServicePoint,
+  ChargingTariffComponent,
+  EvConnector,
+  EvConnectorType,
+  Evse,
+  EvseStatus,
+} from "./ev.js";
+export {
   FUEL_CONFIDENCE_LEVELS,
   FUEL_FRESHNESS_LEVELS,
   FUEL_TYPES,

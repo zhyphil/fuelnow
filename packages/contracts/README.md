@@ -9,3 +9,5 @@ This package owns transport contracts, capability/reason enums and schema versio
 Service-specific fields are added by the remaining Phase 2 model tasks. Source, freshness, opening/availability and detailed enum semantics stay out of this first base contract until their dedicated tasks are implemented and tested.
 
 `FuelServicePointSchema` adds normalized Fuel offers and `isFuelServicePoint` enforces cross-field capability, uniqueness and unit rules that are not represented by the JSON Schema alone.
+
+`ChargingServicePointSchema` preserves the ServicePoint → EVSE → connector hierarchy. Its semantic predicate verifies EVSE capacity, dynamic status timestamps, identifier uniqueness and availability summary counts.
