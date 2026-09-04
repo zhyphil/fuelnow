@@ -115,3 +115,27 @@ export type {
   EvDynamicAvailabilityEvidence,
   PreparedEvBestCandidate,
 } from "./rankEvBestFromEvidence.js";
+export {
+  LIMITED_SERVICE_BEST_BASE_WEIGHTS,
+  LIMITED_SERVICE_BEST_FORMULA_VERSION,
+  rankLimitedServiceBest,
+} from "./rankLimitedServiceBest.js";
+export type {
+  AirLimitedServiceBestCandidate,
+  ExcludedLimitedServiceBestCandidate,
+  LimitedServiceBestAppliedWeights,
+  LimitedServiceBestBaseWeights,
+  LimitedServiceBestCandidate,
+  LimitedServiceBestComponentName,
+  LimitedServiceBestComponentScore,
+  LimitedServiceBestDegradationMode,
+  LimitedServiceBestDegradationReason,
+  LimitedServiceBestEligibility,
+  LimitedServiceBestRequest,
+  LimitedServiceBestResult,
+  LimitedServiceBestScoreBreakdown,
+  LimitedServiceType,
+  RankedLimitedServiceBestCandidate,
+  ServiceOpeningEvidenceScope,
+  WashLimitedServiceBestCandidate,
+} from "./rankLimitedServiceBest.js";
