@@ -15,6 +15,7 @@ The route now accepts the complete base search controls:
 | `longitude` | yes | WGS84, -180 through 180 |
 | `country` | no | `FR` or `ES`; omitted keeps cross-border search |
 | `service` | yes | `fuel`, `charging`, `air` or `wash` |
+| `fuelType` | no | canonical Fuel type; valid only with `service=fuel` |
 | `radius` | no | integer metres, 1 through 50,000 |
 | `sort` | no | `nearest`, `cheapest`, `open_now` or `best`; defaults to `nearest` |
 
@@ -34,8 +35,9 @@ the public API pipeline. `open_now` uses site schedule evidence for Fuel and
 service-scoped schedule evidence for Charge, Air and Wash. If every relevant
 schedule is Unknown, the response safely falls back to Nearest.
 
-`cheapest` and `best` are accepted base sort values, but their remaining request
-filters and evidence are deliberately added by the following API tasks. Until
+`cheapest` and `best` are accepted base sort values. Fuel filtering was added by
+`P3-API-04`; the remaining EV filters and response evidence are deliberately
+added by the following API tasks. Until
 then the response's `ranking` object reports `appliedSort: nearest`,
 `degraded: true` and a stable reason. It never labels distance ordering as a
 successful price or Best ranking.

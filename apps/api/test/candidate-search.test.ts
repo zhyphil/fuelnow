@@ -34,6 +34,7 @@ describe("PostgreSQL service-point candidate search", () => {
         radiusMetres: 10_000,
         serviceType: "fuel",
         country: "FR",
+        fuelType: "diesel",
         limit: 25,
       }),
     ).resolves.toEqual([
@@ -55,9 +56,9 @@ describe("PostgreSQL service-point candidate search", () => {
     ]);
     expect(pool.query).toHaveBeenCalledWith(
       expect.stringContaining(
-        "FROM search_service_point_candidates($1, $2, $3, $4, $5, $6)",
+        "FROM search_service_point_candidates($1, $2, $3, $4, $5, $6, $7)",
       ),
-      [1.444, 43.605, 10_000, "fuel", 25, "FR"],
+      [1.444, 43.605, 10_000, "fuel", 25, "FR", "diesel"],
     );
   });
 
@@ -78,6 +79,7 @@ describe("PostgreSQL service-point candidate search", () => {
       5_000,
       "charging",
       200,
+      null,
       null,
     ]);
   });
@@ -118,6 +120,29 @@ describe("PostgreSQL service-point candidate search", () => {
         country: "DE" as never,
       }),
     ).rejects.toThrow("country must be FR or ES");
+    expect(pool.query).not.toHaveBeenCalled();
+  });
+
+  it("rejects invalid and non-Fuel fuel filters before querying PostgreSQL", async () => {
+    const pool = { query: vi.fn() };
+    const search = new PostgresCandidateSearch(pool as never);
+    const base = {
+      longitude: 2,
+      latitude: 43,
+      radiusMetres: 1_000,
+      serviceType: "fuel" as const,
+    };
+
+    await expect(
+      search.findCandidates({ ...base, fuelType: "hydrogen" as never }),
+    ).rejects.toThrow("canonical Fuel type");
+    await expect(
+      search.findCandidates({
+        ...base,
+        serviceType: "charging",
+        fuelType: "diesel",
+      }),
+    ).rejects.toThrow("fuelType requires fuel service");
     expect(pool.query).not.toHaveBeenCalled();
   });
 

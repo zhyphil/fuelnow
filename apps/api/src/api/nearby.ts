@@ -1,5 +1,7 @@
 import {
+  FuelTypeSchema,
   ServiceTypeSchema,
+  type FuelType,
   type SearchSort,
   type ServiceType,
 } from "@fuel-now/contracts";
@@ -42,6 +44,7 @@ export const NearbyQuerySchema = Type.Object(
     longitude: Type.Number({ minimum: -180, maximum: 180 }),
     country: Type.Optional(CountrySchema),
     service: ServiceTypeSchema,
+    fuelType: Type.Optional(FuelTypeSchema),
     radius: Type.Optional(
       Type.Integer({ minimum: 1, maximum: NEARBY_MAXIMUM_RADIUS_METRES }),
     ),
@@ -81,6 +84,7 @@ export const NearbyResponseSchema = Type.Object(
     requestId: Type.String({ minLength: 1 }),
     country: Type.Union([CountrySchema, Type.Null()]),
     service: ServiceTypeSchema,
+    fuelType: Type.Union([FuelTypeSchema, Type.Null()]),
     sort: SearchSortSchema,
     search: Type.Object(
       {
@@ -129,7 +133,18 @@ function searchRequest(query: NearbyQuery): ExpandingCandidateSearchRequest {
     limit: NEARBY_RESULT_LIMIT,
     serviceType: query.service,
     ...(query.country === undefined ? {} : { country: query.country }),
+    ...(query.fuelType === undefined ? {} : { fuelType: query.fuelType }),
   };
+}
+
+function assertCompatibleFilters(query: NearbyQuery): void {
+  if (query.fuelType !== undefined && query.service !== "fuel") {
+    const error = new Error("fuelType is only valid for fuel service") as Error & {
+      statusCode: number;
+    };
+    error.statusCode = 400;
+    throw error;
+  }
 }
 
 export type NearbySortDegradationReason = Static<typeof SortDegradationReasonSchema>;
@@ -158,6 +173,7 @@ function nearest(candidates: ServicePointCandidate[]): ServicePointCandidate[] {
 function sortCandidates(
   candidates: ServicePointCandidate[],
   serviceType: ServiceType,
+  fuelType: FuelType | undefined,
   requestedSort: SearchSort,
 ): NearbySortResult {
   if (requestedSort === "nearest") {
@@ -201,7 +217,9 @@ function sortCandidates(
     reason:
       requestedSort === "cheapest"
         ? serviceType === "fuel"
-          ? "fuel_type_required"
+          ? fuelType === undefined
+            ? "fuel_type_required"
+            : "decision_evidence_unavailable"
           : "price_not_available_for_service"
         : "decision_evidence_unavailable",
   };
@@ -220,12 +238,18 @@ export function registerNearbyRoute(
       },
     },
     async (request): Promise<NearbyResponse> => {
+      assertCompatibleFilters(request.query);
       const result = await findCandidatesWithExpansion(
         candidateSearch,
         searchRequest(request.query),
       );
       const sort = request.query.sort ?? "nearest";
-      const sorted = sortCandidates(result.candidates, request.query.service, sort);
+      const sorted = sortCandidates(
+        result.candidates,
+        request.query.service,
+        request.query.fuelType,
+        sort,
+      );
       const results: NearbyServicePoint[] = sorted.candidates.map((candidate) => ({
         id: candidate.id,
         country: candidate.country,
@@ -242,6 +266,7 @@ export function registerNearbyRoute(
         requestId: request.id,
         country: request.query.country ?? null,
         service: request.query.service,
+        fuelType: request.query.fuelType ?? null,
         sort,
         search: {
           requestedRadiusMetres: result.requestedRadiusMetres,

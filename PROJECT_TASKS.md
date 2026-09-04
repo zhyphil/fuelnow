@@ -4,7 +4,7 @@
 > 需求来源：[france_spain_driver_decision_engine_project.md](./france_spain_driver_decision_engine_project.md)  
 > 当前状态：进行中  
 > 当前阶段：Phase 3 — 搜索、路线与决策引擎
-> 下一项任务：`P3-API-04` 支持燃油类型筛选
+> 下一项任务：`P3-API-05` 支持 EV connector 和最低功率筛选
 > 最后更新：2026-09-04
 
 ## 使用方法
@@ -257,7 +257,7 @@ V1 的核心验收结果是：
 - [x] `P3-API-01` 建立可运行 Fastify 应用与 `GET /v1/nearby`：经可注入 CandidateSearchPort 调用 PostGIS 候选搜索并按 10 km→50 km 有界扩圈，返回最多 50 个基础 canonical 服务点及完整扩圈元数据；TypeBox 拦截缺失/越界/未知参数，精确 origin 不回显、不持久化，生产入口启动前校验监听与数据库配置（2026-09-04；479 tests；[附近搜索 API](./docs/architecture/nearby-search-api.md)）
 - [x] `P3-API-02` 实现 `GET /v1/service-points/:id`：通过可注入 ServicePointDetailPort 与参数化 PostgreSQL 主键查询返回 canonical 身份、服务类型、坐标/结构化地址、时区、营业和生命周期详情；非法 UUID 在数据访问前返回 400，未知 UUID 返回带 requestId 和稳定代码的 404，数据库映射拒绝损坏字段；价格、设备状态与来源质量保留给 P3-API-06（2026-09-04；485 tests；[服务点详情 API](./docs/architecture/service-point-detail-api.md)）
 - [x] `P3-API-03` 为 `GET /v1/nearby` 建立完整基础控制：country 可选且省略时保留跨境搜索，service 必填，radius 为 1–50,000 m 的显式硬边界且不越界扩圈，sort 支持 nearest/cheapest/open_now/best 并默认 Nearest；Nearest 稳定排序、Open now 使用正确范围的营业证据，尚待 Fuel/EV 筛选与完整证据的 Cheapest/Best 明确降级到 Nearest 并返回原因；迁移 0013 在 PostGIS 内参数化过滤国家（2026-09-04；490 tests；[附近搜索控制](./docs/architecture/nearby-search-controls.md)）
-- [ ] `P3-API-04` 支持燃油类型筛选
+- [x] `P3-API-04` 为 `GET /v1/nearby` 增加可选 canonical fuelType：仅允许与 Fuel 服务组合并在数据访问前拒绝未知枚举/跨服务参数，PostGIS 参数化 EXISTS 只保留明确匹配的 fuel_offer；临时缺货与 Unknown 仍作为可解释候选，permanent_non_offering 不满足筛选；响应回显目标油品，Cheapest 在 P3-API-06 接入可比价格前明确以 decision_evidence_unavailable 降级（2026-09-04；494 tests；[Fuel 类型过滤](./docs/architecture/nearby-fuel-filter.md)）
 - [ ] `P3-API-05` 支持 EV connector 和最低功率筛选
 - [ ] `P3-API-06` 返回价格、状态、source、freshness 和 confidence
 - [ ] `P3-API-07` 建立统一错误格式与降级结果
@@ -616,3 +616,4 @@ V1 的核心验收结果是：
 | 2026-09-04 | 实现附近服务搜索 API                           | 新增可运行 Fastify 服务和 `GET /v1/nearby`，以依赖注入连接 PostGIS 候选搜索、有界扩圈与基础 canonical 响应，并保护精确 origin；完整质量门槛 479 项测试通过；见 `docs/architecture/nearby-search-api.md`                                                   |
 | 2026-09-04 | 实现服务点详情 API                             | 新增 `GET /v1/service-points/:id` 与 PostgreSQL 详情读取器，返回 canonical 位置、地址、营业和生命周期；UUID 校验、稳定 404 与损坏数据库字段拒绝均有测试；完整质量门槛 485 项测试通过；见 `docs/architecture/service-point-detail-api.md`               |
 | 2026-09-04 | 支持附近搜索基础控制                          | 新增可选 country、显式 radius 硬边界和四种 sort 参数；执行 Nearest/Open now，并在后续证据接入前明确降级 Cheapest/Best；全新 PostGIS 迁移与验证通过，完整质量门槛 490 项测试通过；见 `docs/architecture/nearby-search-controls.md`                   |
+| 2026-09-04 | 支持附近 Fuel 类型过滤                        | 新增 canonical fuelType 请求与响应字段，PostGIS 仅匹配真实 offer、排除永久不提供并保留临时缺货；无效枚举和跨服务组合在查询前拒绝；全新 PostGIS 验证通过，完整质量门槛 494 项测试通过；见 `docs/architecture/nearby-fuel-filter.md`                       |

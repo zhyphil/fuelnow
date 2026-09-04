@@ -64,6 +64,14 @@ const candidateControlsVerificationUrl = new URL(
   "../db/migrations/verify-candidate-search-controls.sql",
   import.meta.url,
 );
+const candidateFuelFilterMigrationUrl = new URL(
+  "../db/migrations/0014_candidate_fuel_filter.sql",
+  import.meta.url,
+);
+const candidateFuelFilterVerificationUrl = new URL(
+  "../db/migrations/verify-candidate-fuel-filter.sql",
+  import.meta.url,
+);
 
 describe("initial PostgreSQL/PostGIS schema", () => {
   it("enables PostGIS and uses WGS84 geography points", async () => {
@@ -375,6 +383,20 @@ describe("initial PostgreSQL/PostGIS schema", () => {
     expect(migration).toContain("p_country NOT IN ('FR', 'ES')");
     expect(verification).toContain("france_count <> 1");
     expect(verification).toContain("Unsupported country was accepted");
+    expect(verification).toContain("ROLLBACK;");
+  });
+
+  it("adds and transactionally verifies canonical Fuel offer filtering", async () => {
+    const migration = await readFile(candidateFuelFilterMigrationUrl, "utf8");
+    const verification = await readFile(candidateFuelFilterVerificationUrl, "utf8");
+
+    expect(migration).toContain("p_fuel_type text DEFAULT NULL");
+    expect(migration).toContain("FROM fuel_offers AS offer");
+    expect(migration).toContain(
+      "offer.unavailable_reason IS DISTINCT FROM 'permanent_non_offering'",
+    );
+    expect(migration).toContain("p_service_type <> 'fuel'");
+    expect(verification).toContain("diesel_count <> 1");
     expect(verification).toContain("ROLLBACK;");
   });
 

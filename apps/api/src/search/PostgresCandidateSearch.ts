@@ -1,4 +1,9 @@
-import type { CountryCode, ServiceType } from "@fuel-now/contracts";
+import {
+  FUEL_TYPES,
+  type CountryCode,
+  type FuelType,
+  type ServiceType,
+} from "@fuel-now/contracts";
 import type { Pool, QueryResultRow } from "pg";
 
 export type ServicePointLifecycleStatus =
@@ -13,6 +18,7 @@ export interface CandidateSearchRequest {
   radiusMetres: number;
   serviceType: ServiceType;
   country?: CountryCode;
+  fuelType?: FuelType;
   limit?: number;
 }
 
@@ -93,6 +99,7 @@ export class PostgresCandidateSearch {
     radiusMetres,
     serviceType,
     country,
+    fuelType,
     limit = 200,
   }: CandidateSearchRequest): Promise<ServicePointCandidate[]> {
     assertFiniteRange("longitude", longitude, -180, 180);
@@ -101,6 +108,12 @@ export class PostgresCandidateSearch {
     assertPositiveInteger("limit", limit, 500);
     if (country !== undefined && country !== "FR" && country !== "ES") {
       throw new Error("country must be FR or ES");
+    }
+    if (fuelType !== undefined && !FUEL_TYPES.includes(fuelType)) {
+      throw new Error("fuelType must be a canonical Fuel type");
+    }
+    if (fuelType !== undefined && serviceType !== "fuel") {
+      throw new Error("fuelType requires fuel service");
     }
 
     const result = await this.pool.query<CandidateRow>(
@@ -118,8 +131,16 @@ export class PostgresCandidateSearch {
          service_opening_status_evaluated_at,
          temporary_closure,
          straight_line_distance_m
-       FROM search_service_point_candidates($1, $2, $3, $4, $5, $6)`,
-      [longitude, latitude, radiusMetres, serviceType, limit, country ?? null],
+       FROM search_service_point_candidates($1, $2, $3, $4, $5, $6, $7)`,
+      [
+        longitude,
+        latitude,
+        radiusMetres,
+        serviceType,
+        limit,
+        country ?? null,
+        fuelType ?? null,
+      ],
     );
 
     return result.rows.map((row) => ({

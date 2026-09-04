@@ -25,6 +25,9 @@ when two points have the same distance.
 - the service point must explicitly declare the requested canonical service;
 - optional country is limited to `FR` or `ES`; omission preserves cross-border
   candidates;
+- optional Fuel type requires the Fuel service and an explicit matching offer;
+  offers marked as permanently not provided are excluded while temporary
+  shortages remain explainable candidates;
 - permanently closed points are excluded;
 - active, temporarily closed and unverified points remain coarse candidates so
   later capability/opening logic can apply honest warnings or exclusions;

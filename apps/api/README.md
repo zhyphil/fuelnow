@@ -22,6 +22,11 @@ points plus honest expansion and ranking metadata. The precise request origin is
 passed directly to PostGIS but is not included in the response, logs or
 persistent API state.
 
+Fuel searches may also include one canonical `fuelType`. The PostGIS query keeps
+only stations with a matching offer while preserving temporarily unavailable
+offers for honest status display; offers marked as permanently not provided do
+not satisfy the filter. Fuel filters are rejected for other service types.
+
 `GET /v1/service-points/:id` resolves one canonical UUID and returns its stable
 location, address, opening and lifecycle detail. Invalid identifiers are rejected
 before data access, while an unknown canonical point returns a traceable 404.

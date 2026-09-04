@@ -80,6 +80,7 @@ describe("GET /v1/nearby", () => {
     expect(payload).toMatchObject({
       country: null,
       service: "fuel",
+      fuelType: null,
       sort: "nearest",
       search: {
         requestedRadiusMetres: 10_000,
@@ -252,6 +253,54 @@ describe("GET /v1/nearby", () => {
         resultCount: 1,
       });
     }
+  });
+
+  it("passes a canonical Fuel filter to candidate search and echoes it", async () => {
+    const search = new FakeCandidateSearch(() => [candidate(0)]);
+    const app = createApiApp({ candidateSearch: search, servicePointDetails });
+    apps.push(app);
+
+    const response = await app.inject({
+      method: "GET",
+      url: "/v1/nearby?latitude=43.6&longitude=1.44&service=fuel&fuelType=diesel&radius=10000&sort=cheapest",
+    });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.json()).toMatchObject({
+      service: "fuel",
+      fuelType: "diesel",
+      ranking: {
+        requestedSort: "cheapest",
+        appliedSort: "nearest",
+        degraded: true,
+        reason: "decision_evidence_unavailable",
+      },
+    });
+    expect(search.requests).toEqual([
+      {
+        latitude: 43.6,
+        longitude: 1.44,
+        radiusMetres: 10_000,
+        serviceType: "fuel",
+        fuelType: "diesel",
+        limit: 50,
+      },
+    ]);
+  });
+
+  it("rejects unsupported and cross-service Fuel filters before search", async () => {
+    const search = new FakeCandidateSearch(() => []);
+    const app = createApiApp({ candidateSearch: search, servicePointDetails });
+    apps.push(app);
+
+    for (const url of [
+      "/v1/nearby?latitude=43&longitude=1&service=fuel&fuelType=hydrogen",
+      "/v1/nearby?latitude=43&longitude=1&service=charging&fuelType=diesel",
+    ]) {
+      const response = await app.inject({ method: "GET", url });
+      expect(response.statusCode).toBe(400);
+    }
+    expect(search.requests).toEqual([]);
   });
 
   it("rejects missing, out-of-range and unknown query values before search", async () => {
