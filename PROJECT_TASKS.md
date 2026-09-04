@@ -4,7 +4,7 @@
 > 需求来源：[france_spain_driver_decision_engine_project.md](./france_spain_driver_decision_engine_project.md)  
 > 当前状态：进行中  
 > 当前阶段：Phase 3 — 搜索、路线与决策引擎
-> 下一项任务：`P3-BEST-11` 为推荐生成用户可理解的解释
+> 下一项任务：`P3-BEST-12` 为所有排序规则编写边界测试
 > 最后更新：2026-09-04
 
 ## 使用方法
@@ -249,7 +249,7 @@ V1 的核心验收结果是：
 - [x] `P3-BEST-08` 将真实 ETA、精确 connector 兼容及相对兼容额定功率接入 `ev-best-v1`；法国 availability 仅在 QualiCharge 来源、身份、同步/观测新鲜度、冲突隔离与 connector live 状态全部合格时得正分，西班牙保持 Unknown；等待时间、实际充电时长和价格继续为 null/不启用（2026-09-04；421 tests；[EV Best 证据门槛](./docs/architecture/ev-best-evidence-gates.md)）
 - [x] `P3-BEST-09` 定义 `limited-service-best-v1`：Air 仅使用 Distance、服务专属 Open、明确 public Access 与来源 Reliability，Wash 仅使用 Distance、服务专属 Open 与 Reliability；不可用因子在整个结果集统一重分权重，单个候选 Unknown 得零且不因缺失获益，若只剩 Distance 则明确 `nearest_equivalent`；价格、实时设备可用性及 Wash 类型不参与并返回降级原因（2026-09-04；430 tests；[Air/Wash Best 降级规则](./docs/architecture/air-wash-best-degradation.md)）
 - [x] `P3-BEST-10` 建立字段级 Best 证据质量策略：Missing、Expired、freshness/confidence Unknown 均无正分，stale Price/Availability 无决策优势，普通 stale 因子减半，medium/low confidence 再按最终 0–100 分数缩减；EV Power/Open/Availability 与 Air/Wash 服务营业/访问已接入，并输出稳定 disposition/reason 供解释层复用（2026-09-04；444 tests；[Best 证据质量降权](./docs/architecture/best-evidence-quality-adjustment.md)）
-- [ ] `P3-BEST-11` 为推荐生成用户可理解的解释
+- [x] `P3-BEST-11` 建立共享 RecommendationReason 契约与 Best 解释生成器：按加权贡献稳定选择最多 3 个正向理由，成本/价格/距离/ETA/可用 EVSE 数/兼容额定功率/可信分均携带类型匹配的具体数值，同时去重返回能力缺失、Nearest 降级、TTS incomplete、stale/expired/low-confidence 等限制；原因码不含硬编码语言，可由 FR/ES/EN 客户端直接本地化（2026-09-04；460 tests；[Best 推荐解释](./docs/architecture/best-recommendation-explanations.md)）
 - [ ] `P3-BEST-12` 为所有排序规则编写边界测试
 
 ## 3.4 后端 API
@@ -611,3 +611,4 @@ V1 的核心验收结果是：
 | 2026-09-04 | 接入 EV Best 决策级证据门槛                    | 接入真实 ETA、精确 connector 兼容与相对兼容额定功率；仅法国合格 QualiCharge 动态证据可获得 availability 正分，西班牙和缺失/风险证据诚实保持 Unknown；完整质量门槛 421 项测试通过；见 `docs/architecture/ev-best-evidence-gates.md`                    |
 | 2026-09-04 | 定义 Air/Wash Best 降级规则                    | 仅让距离、服务专属营业、Air public access 与来源可信度等可用证据参与；结果集级重分权重防止 Unknown 获益，只剩距离时明确与 Nearest 回退一致；完整质量门槛 430 项测试通过；见 `docs/architecture/air-wash-best-degradation.md`                       |
 | 2026-09-04 | 建立 Best 字段级证据降权                       | Missing/Expired/Unknown 与 stale 关键证据无正分，普通 stale 减半，medium/low confidence 按最终可信分缩减；EV 与 Air/Wash 已接入并返回原因；完整质量门槛 444 项测试通过；见 `docs/architecture/best-evidence-quality-adjustment.md`                  |
+| 2026-09-04 | 建立 Best 推荐解释                             | 共享契约固定可本地化原因码与类型化指标；生成器稳定选择主要优势并保留价格/状态/ETA/TTS/数据质量限制，覆盖四类服务；完整质量门槛 460 项测试通过；见 `docs/architecture/best-recommendation-explanations.md`                                             |

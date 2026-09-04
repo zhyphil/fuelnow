@@ -9,6 +9,14 @@ export type {
   BestEvidenceScoreResult,
   BestEvidenceState,
 } from "./adjustBestEvidenceScore.js";
+export { buildBestRecommendationReasons } from "./buildBestRecommendationReasons.js";
+export type {
+  BestExplanationComponentName,
+  BestExplanationLimitation,
+  BestExplanationMetrics,
+  BestExplanationScoreContribution,
+  BestRecommendationExplanationInput,
+} from "./buildBestRecommendationReasons.js";
 export { filterOpenNow } from "./filterOpenNow.js";
 export type {
   OpenNowRequest,

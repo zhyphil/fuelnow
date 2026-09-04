@@ -105,6 +105,26 @@ export {
   isAvailabilityAssessment,
   isNormalizedOpeningHours,
 } from "./opening.js";
+export {
+  RECOMMENDATION_METRICS,
+  RECOMMENDATION_REASON_CODES,
+  RECOMMENDATION_REASON_KINDS,
+  RecommendationMetricNameSchema,
+  RecommendationMetricSchema,
+  RecommendationReasonCodeSchema,
+  RecommendationReasonKindSchema,
+  RecommendationReasonSchema,
+  RecommendationReasonsSchema,
+  isRecommendationReason,
+  isRecommendationReasons,
+} from "./recommendation.js";
+export type {
+  RecommendationMetric,
+  RecommendationMetricName,
+  RecommendationReason,
+  RecommendationReasonCode,
+  RecommendationReasonKind,
+} from "./recommendation.js";
 export type {
   AvailabilityAssessment,
   AvailabilityState,
