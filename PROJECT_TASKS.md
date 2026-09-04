@@ -3,8 +3,8 @@
 > 项目：France + Spain Driver Decision Engine  
 > 需求来源：[france_spain_driver_decision_engine_project.md](./france_spain_driver_decision_engine_project.md)  
 > 当前状态：进行中  
-> 当前阶段：Phase 2 — 项目骨架与统一数据层
-> 下一项任务：`P2-DB-10` 准备可重复使用的测试数据集
+> 当前阶段：Phase 3 — 搜索、路线与决策引擎
+> 下一项任务：`P3-SEA-01` 根据经纬度和半径粗筛候选点
 > 最后更新：2026-09-04
 
 ## 使用方法
@@ -202,13 +202,13 @@ V1 的核心验收结果是：
 - [x] `P2-DB-07` 为每次 full/incremental 同步记录开始/完成时间、毫秒耗时、已提交页/记录数、失败页及限长脱敏错误；同一来源只允许一个 running run，终态不可重复完成，worker 失败后保留原错误供重试（2026-09-04；208 tests；[同步可观测性说明](./docs/architecture/sync-run-observability.md)）
 - [x] `P2-DB-08` 建立可配置且有界的同步失败策略：临时错误采用带 jitter 的指数退避，永久/取消错误不重试，耗尽或永久失败写入去重告警 outbox；数据库原子记录失败决定、重试父子链与 due time，阻止提前/重复领取，并检测 stale run、追踪告警投递（2026-09-04；221 tests；[重试与告警说明](./docs/architecture/sync-retry-alerting.md)）
 - [x] `P2-DB-09` 建立按国家+服务作用域的 PostgreSQL 查询缓存：只存 SHA-256 key、应用与数据库共同限制 TTL≤1 小时，以 generation token 防止计算/失效竞态；来源页仅在真实变化时于同一事务推进已登记 scope，旧代际立即不可读且可批量清理（2026-09-04；229 tests；[缓存失效说明](./docs/architecture/query-cache-invalidation.md)）
-- [ ] `P2-DB-10` 准备可重复使用的测试数据集
+- [x] `P2-DB-10` 建立全合成、固定时钟与保留 ID 的可重复 PostgreSQL fixture，覆盖 FR/ES、Fuel/Charge/Air/Wash、关闭/缺货/Unknown、EVSE availability、新旧价格和跨境场景；标准数据库验证连续加载两次、核对精确行数与语义后完整回滚（2026-09-04；233 tests；[fixture 说明](./docs/testing/database-integration-fixture.md)）
 
 ## Phase 2 验收门槛
 
-- [ ] 两国 Adapter 可通过统一接口执行
-- [ ] 数据能重复同步且不会制造重复记录
-- [ ] 数据库可按位置、服务类型和状态高效查询
+- [x] 两国 Adapter 可通过统一接口执行
+- [x] 数据能重复同步且不会制造重复记录
+- [x] 数据库可按位置、服务类型和状态高效查询
 - [x] 同步失败可被发现、重试和追踪
 
 ---
@@ -585,3 +585,5 @@ V1 的核心验收结果是：
 | 2026-09-04 | 记录同步时间、数量、错误与耗时 | 每次同步持久化模式、起止、耗时、已提交页/记录、失败页和脱敏错误，同源并发与重复终结受数据库阻止；完整质量门槛 208 项测试通过；见 `docs/architecture/sync-run-observability.md` |
 | 2026-09-04 | 建立同步失败重试与告警 | 临时错误按有界指数退避重试，永久/耗尽失败与 stale run 写入去重告警 outbox，数据库原子记录 retry chain、due time 和投递结果；完整质量门槛 221 项测试通过；见 `docs/architecture/sync-retry-alerting.md` |
 | 2026-09-04 | 建立查询缓存与失效规则 | 以国家+服务 generation 保证来源变化后旧缓存不可读，拒绝竞态产生的过时代际写入，只持久化哈希 key 并限制 TTL；完整质量门槛 229 项测试通过；见 `docs/architecture/query-cache-invalidation.md` |
+| 2026-09-04 | 建立可重复数据库测试数据集 | 全合成固定 fixture 覆盖两国四服务及关闭、缺货、Unknown、EVSE、新旧价格和跨境场景；空库连续加载两次精确一致并回滚；完整质量门槛 233 项测试通过；见 `docs/testing/database-integration-fixture.md` |
+| 2026-09-04 | 完成 Phase 2 工程与统一数据层 | 工程基础、统一契约、PostGIS、幂等导入、生命周期、同步审计、重试告警、缓存和 fixture 全部完成；四项 Phase 2 验收门槛通过，进入 Phase 3 |

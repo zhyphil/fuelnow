@@ -51,3 +51,8 @@ service. Writes carry a cache generation; source pages that actually change data
 advance the mapped scope generation in the same transaction, making older
 entries unreadable without relying on best-effort deletion. Service defaults are
 bounded by a one-hour database TTL ceiling.
+
+`db/fixtures/base.sql` provides deterministic synthetic France/Spain data for
+integration tests across all four service types. `db:verify` loads it twice,
+asserts exact scenarios and row counts, then rolls back; it never contacts a live
+provider or persists fixture rows in the development database.

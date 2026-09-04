@@ -17,3 +17,8 @@ for verification in /migrations/verify-*.sql; do
     --dbname fuel_now \
     --file "$verification"
 done
+
+psql \
+  --username fuel_now \
+  --dbname fuel_now \
+  --file /fixtures/verify-base.sql

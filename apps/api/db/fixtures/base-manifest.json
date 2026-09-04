@@ -1,0 +1,43 @@
+{
+  "fixtureVersion": 1,
+  "synthetic": true,
+  "referenceTime": "2026-01-15T12:00:00.000Z",
+  "sourcePrefix": "__fixture__",
+  "sourceIds": [
+    "__fixture__fr_fuel",
+    "__fixture__es_fuel",
+    "__fixture__fr_charge",
+    "__fixture__es_charge",
+    "__fixture__osm"
+  ],
+  "servicePointIds": [
+    "00000000-0000-4000-8000-000000000101",
+    "00000000-0000-4000-8000-000000000102",
+    "00000000-0000-4000-8000-000000000103",
+    "00000000-0000-4000-8000-000000000201",
+    "00000000-0000-4000-8000-000000000202",
+    "00000000-0000-4000-8000-000000000203"
+  ],
+  "expectedRows": {
+    "dataSources": 5,
+    "servicePoints": 6,
+    "servicePointServices": 9,
+    "sourceRecords": 6,
+    "fuelOffers": 7,
+    "fuelPrices": 6,
+    "chargingSites": 1,
+    "chargingEvses": 2,
+    "chargingConnectors": 2,
+    "airServices": 1,
+    "washServices": 2,
+    "washServiceTypes": 2
+  },
+  "scenarios": [
+    "fr_open_multiservice",
+    "fr_temporary_closure_and_stockout",
+    "es_unknown_fuel_availability",
+    "es_known_evse_availability",
+    "fr_es_cross_border_fuel",
+    "recent_and_stale_prices"
+  ]
+}
