@@ -88,6 +88,17 @@ describe("rankCheapest", () => {
     );
   });
 
+  it("returns an explicit unavailable result for an empty Fuel set", () => {
+    expect(
+      rankCheapest({ serviceType: "fuel", fuelType: "diesel", candidates: [] }),
+    ).toEqual({
+      capability: { state: "unavailable", reason: "no_eligible_fuel_price" },
+      requestedFuelType: "diesel",
+      eligibleCandidateCount: 0,
+      candidates: [],
+    });
+  });
+
   it("ranks eligible current prices before distance", () => {
     const result = rankCheapest({
       serviceType: "fuel",
@@ -131,6 +142,23 @@ describe("rankCheapest", () => {
       result.candidates.map(({ cheapestEligibility }) => cheapestEligibility),
     ).toEqual(["eligible", "price_stale", "membership_required"]);
     expect(result.candidates[1]?.cheapestRankingBasis).toBe("straight_line_distance");
+  });
+
+  it("never lets an explicitly closed station win with a low price", () => {
+    const closed = candidate("closed", 1, [offer("diesel", { amount: 1 })]);
+    closed.lifecycleStatus = "temporarily_closed";
+    closed.temporaryClosure = true;
+    const result = rankCheapest({
+      serviceType: "fuel",
+      fuelType: "diesel",
+      candidates: [closed, candidate("open", 1_000, [offer("diesel", { amount: 2 })])],
+    });
+
+    expect(result.candidates.map(({ id }) => id)).toEqual(["open", "closed"]);
+    expect(result.candidates[1]).toMatchObject({
+      cheapestEligibility: "station_closed",
+      selectedFuelPrice: null,
+    });
   });
 
   it("keeps unavailable and missing requested fuel behind decision prices", () => {
@@ -226,5 +254,26 @@ describe("rankCheapest", () => {
         candidates: [candidate("invalid", Number.NaN, [offer("diesel")])],
       }),
     ).toThrow("distance must be finite");
+  });
+
+  it("rejects zero, non-finite and unknown-freshness prices", () => {
+    for (const amount of [0, -1, Number.NaN, Number.POSITIVE_INFINITY]) {
+      expect(() =>
+        rankCheapest({
+          serviceType: "fuel",
+          fuelType: "diesel",
+          candidates: [candidate("invalid", 1, [offer("diesel", { amount })])],
+        }),
+      ).toThrow("price must be positive and finite");
+    }
+    const invalidFreshness = offer("diesel");
+    invalidFreshness.price!.freshness = "ancient" as Freshness;
+    expect(() =>
+      rankCheapest({
+        serviceType: "fuel",
+        fuelType: "diesel",
+        candidates: [candidate("invalid-freshness", 1, [invalidFreshness])],
+      }),
+    ).toThrow("Unsupported diesel price freshness");
   });
 });

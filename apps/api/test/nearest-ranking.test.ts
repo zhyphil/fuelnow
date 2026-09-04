@@ -44,6 +44,10 @@ function candidate(
 }
 
 describe("rankNearestCandidates", () => {
+  it("returns an empty result for an empty candidate set", () => {
+    expect(rankNearestCandidates([])).toEqual([]);
+  });
+
   it("prefers real driving ETA over straight-line proximity", () => {
     const closest = candidate("closest", 100, { etaSeconds: 600, roadDistanceM: 900 });
     const fastest = candidate("fastest", 500, { etaSeconds: 120, roadDistanceM: 700 });
@@ -105,6 +109,38 @@ describe("rankNearestCandidates", () => {
     invalid.routeStatus = "unreachable";
     expect(() => rankNearestCandidates([invalid])).toThrow(
       "non-calculated route status",
+    );
+  });
+
+  it("rejects duplicate identities and invalid straight-line distances", () => {
+    const duplicate = candidate("same", 1, null);
+    expect(() => rankNearestCandidates([duplicate, duplicate])).toThrow(
+      "Duplicate candidate id",
+    );
+    for (const distance of [-1, Number.NaN, Number.POSITIVE_INFINITY]) {
+      expect(() =>
+        rankNearestCandidates([candidate("invalid", distance, null)]),
+      ).toThrow("Straight-line distance must be finite and non-negative");
+    }
+  });
+
+  it("rejects mismatched, negative and non-finite calculated routes", () => {
+    const mismatch = candidate("mismatch", 1, {
+      etaSeconds: 1,
+      roadDistanceM: 1,
+    });
+    mismatch.route!.destinationId = "another";
+    expect(() => rankNearestCandidates([mismatch])).toThrow("must match its candidate");
+
+    const badEta = candidate("eta", 1, { etaSeconds: -1, roadDistanceM: 1 });
+    expect(() => rankNearestCandidates([badEta])).toThrow("ETA must be");
+
+    const badRoad = candidate("road", 1, {
+      etaSeconds: 1,
+      roadDistanceM: Number.POSITIVE_INFINITY,
+    });
+    expect(() => rankNearestCandidates([badRoad])).toThrow(
+      "road distance must be non-negative",
     );
   });
 });

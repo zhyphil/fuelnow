@@ -32,6 +32,31 @@ function candidate(
 }
 
 describe("rankFuelBest", () => {
+  it("handles empty and normalized endpoint-only result sets", () => {
+    expect(rankFuelBest([])).toMatchObject({
+      eligibleCandidateCount: 0,
+      excludedCandidateCount: 0,
+      candidates: [],
+      excludedCandidates: [],
+    });
+    const result = rankFuelBest([
+      candidate("zero", {
+        price: 0,
+        distance: 0,
+        travelTime: 0,
+        open: 0,
+        availability: 0,
+        freshness: 0,
+        reliability: 0,
+      }),
+      candidate("one"),
+    ]);
+    expect(result.candidates.map(({ id, bestScore }) => [id, bestScore])).toEqual([
+      ["one", 1],
+      ["zero", 0],
+    ]);
+  });
+
   it("uses weights that sum to one and returns an auditable breakdown", () => {
     expect(
       Object.values(FUEL_BEST_WEIGHTS).reduce((sum, weight) => sum + weight, 0),

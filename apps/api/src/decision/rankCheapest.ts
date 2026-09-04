@@ -1,5 +1,6 @@
 import {
   FUEL_TYPES,
+  FRESHNESS_LEVELS,
   type DecisionCapability,
   type FuelOffer,
   type FuelPrice,
@@ -15,7 +16,8 @@ export type CheapestEligibility =
   | "fuel_unavailable"
   | "membership_required"
   | "price_stale"
-  | "price_unknown";
+  | "price_unknown"
+  | "station_closed";
 
 export interface CheapestCandidate extends CandidateWithRoute {
   fuelOffers?: readonly FuelOffer[];
@@ -63,6 +65,18 @@ function assessFuelCandidate(
   ) {
     throw new Error("Cheapest candidate distance must be finite and non-negative");
   }
+  if (
+    candidate.temporaryClosure === true ||
+    candidate.lifecycleStatus === "temporarily_closed" ||
+    candidate.lifecycleStatus === "permanently_closed"
+  ) {
+    return {
+      candidate,
+      eligibility: "station_closed",
+      selectedFuelPrice: null,
+      tier: 2,
+    };
+  }
   const offers = candidate.fuelOffers ?? [];
   const offerTypes = offers.map(({ fuelType: offeredType }) => offeredType);
   if (new Set(offerTypes).size !== offerTypes.length) {
@@ -100,6 +114,9 @@ function assessFuelCandidate(
   }
   if (!Number.isFinite(price.amount) || price.amount <= 0) {
     throw new Error(`${fuelType} price must be positive and finite`);
+  }
+  if (!FRESHNESS_LEVELS.includes(price.freshness)) {
+    throw new Error(`Unsupported ${fuelType} price freshness`);
   }
   if (price.membershipRequired === true) {
     return {

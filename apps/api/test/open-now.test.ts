@@ -50,6 +50,17 @@ function candidate(id: string, options: CandidateOptions = {}): CandidateWithRou
 }
 
 describe("filterOpenNow", () => {
+  it("returns an honest unavailable capability for an empty set", () => {
+    expect(filterOpenNow({ serviceType: "fuel", candidates: [] })).toEqual({
+      capability: { state: "unavailable", reason: "service_hours_unknown" },
+      statusBasis: "site_schedule",
+      eligibleEvidenceCandidateCount: 0,
+      closedCandidateCount: 0,
+      unknownCandidateCount: 0,
+      candidates: [],
+    });
+  });
+
   it("uses site schedule evidence for Fuel and ignores service schedule fields", () => {
     const result = filterOpenNow({
       serviceType: "fuel",
@@ -197,5 +208,18 @@ describe("filterOpenNow", () => {
         ],
       }),
     ).toThrow("invalid opening-status timestamp");
+  });
+
+  it("rejects unsupported opening status values", () => {
+    expect(() =>
+      filterOpenNow({
+        serviceType: "fuel",
+        candidates: [
+          candidate("invalid", {
+            openingStatus: "maybe" as CandidateOpeningStatus,
+          }),
+        ],
+      }),
+    ).toThrow("unsupported opening status");
   });
 });

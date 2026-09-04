@@ -1,4 +1,8 @@
-import type { DecisionCapability, ServiceType } from "@fuel-now/contracts";
+import {
+  OPENING_STATUSES,
+  type DecisionCapability,
+  type ServiceType,
+} from "@fuel-now/contracts";
 
 import type { CandidateWithRoute } from "../routing/routeTopCandidates.js";
 import type { CandidateOpeningStatus } from "../search/PostgresCandidateSearch.js";
@@ -51,6 +55,9 @@ function validatedEvidence(
   candidate: CandidateWithRoute,
   evidence: OpeningEvidence,
 ): OpeningEvidence {
+  if (!OPENING_STATUSES.includes(evidence.status)) {
+    throw new Error(`Candidate ${candidate.id} has an unsupported opening status`);
+  }
   if (
     evidence.evaluatedAt !== null &&
     !Number.isFinite(Date.parse(evidence.evaluatedAt))

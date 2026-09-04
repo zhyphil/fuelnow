@@ -39,6 +39,26 @@ function candidate(
 }
 
 describe("EV Best ranking and Time-to-Solution", () => {
+  it("handles empty results and all-missing solution components", () => {
+    expect(rankEvBest([])).toMatchObject({
+      eligibleCandidateCount: 0,
+      excludedCandidateCount: 0,
+      candidates: [],
+      excludedCandidates: [],
+    });
+    expect(
+      estimateEvTimeToSolution({
+        drivingEtaSeconds: null,
+        expectedWaitSeconds: null,
+        expectedChargingSeconds: null,
+      }),
+    ).toEqual({
+      status: "incomplete",
+      timeToSolutionSeconds: null,
+      missingComponents: ["driving_eta", "queue_wait", "charging_duration"],
+    });
+  });
+
   it("uses a price-free V1 weight set and returns an auditable breakdown", () => {
     expect(
       Object.values(EV_BEST_WEIGHTS).reduce((sum, weight) => sum + weight, 0),
@@ -149,6 +169,16 @@ describe("EV Best ranking and Time-to-Solution", () => {
     expect(() => rankEvBest([candidate("invalid", { compatiblePower: 1.1 })])).toThrow(
       "compatiblePower score must be between 0 and 1",
     );
+  });
+
+  it("rejects an unsafe complete Time-to-Solution sum", () => {
+    expect(() =>
+      estimateEvTimeToSolution({
+        drivingEtaSeconds: Number.MAX_SAFE_INTEGER,
+        expectedWaitSeconds: 1,
+        expectedChargingSeconds: 0,
+      }),
+    ).toThrow("total must be a non-negative safe integer");
   });
 
   it("rejects duplicate identities and invalid eligibility", () => {

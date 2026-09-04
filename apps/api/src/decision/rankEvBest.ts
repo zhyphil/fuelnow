@@ -115,14 +115,19 @@ export function estimateEvTimeToSolution({
   if (expectedWaitSeconds === null) missingComponents.push("queue_wait");
   if (expectedChargingSeconds === null) missingComponents.push("charging_duration");
 
+  const completeTotal =
+    drivingEtaSeconds === null ||
+    expectedWaitSeconds === null ||
+    expectedChargingSeconds === null
+      ? null
+      : drivingEtaSeconds + expectedWaitSeconds + expectedChargingSeconds;
+  if (completeTotal !== null && !Number.isSafeInteger(completeTotal)) {
+    throw new RangeError("Time-to-Solution total must be a non-negative safe integer");
+  }
+
   return {
     status: missingComponents.length === 0 ? "complete" : "incomplete",
-    timeToSolutionSeconds:
-      drivingEtaSeconds === null ||
-      expectedWaitSeconds === null ||
-      expectedChargingSeconds === null
-        ? null
-        : drivingEtaSeconds + expectedWaitSeconds + expectedChargingSeconds,
+    timeToSolutionSeconds: completeTotal,
     missingComponents,
   };
 }

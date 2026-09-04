@@ -65,6 +65,25 @@ function wash(
 }
 
 describe("rankLimitedServiceBest", () => {
+  it("handles empty Air and Wash result sets without inventing evidence", () => {
+    for (const serviceType of ["air", "wash"] as const) {
+      const result = rankLimitedServiceBest({ serviceType, candidates: [] });
+      expect(result).toMatchObject({
+        serviceType,
+        degradationMode: "nearest_equivalent",
+        appliedWeights: {
+          distance: 1,
+          open: 0,
+          access: 0,
+          reliability: 0,
+        },
+        eligibleCandidateCount: 0,
+        excludedCandidateCount: 0,
+        candidates: [],
+      });
+    }
+  });
+
   it("uses distance alone and exactly matches the Nearest fallback order", () => {
     const input = [
       air("far", { distance: 2_000 }),
@@ -294,6 +313,17 @@ describe("rankLimitedServiceBest", () => {
         candidates: [air("confidence", { confidence: "high" })],
       }),
     ).toThrow("must be present together");
+  });
+
+  it("rejects negative and non-finite distances", () => {
+    for (const distance of [-1, Number.NaN, Number.POSITIVE_INFINITY]) {
+      expect(() =>
+        rankLimitedServiceBest({
+          serviceType: "air",
+          candidates: [air("invalid", { distance })],
+        }),
+      ).toThrow("Straight-line distance must be finite and non-negative");
+    }
   });
 
   it("does not mutate input candidates", () => {

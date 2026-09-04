@@ -59,6 +59,12 @@ export function rankNearestCandidates(
       throw new Error(`Duplicate candidate id: ${candidate.id}`);
     }
     ids.add(candidate.id);
+    if (
+      !Number.isFinite(candidate.straightLineDistanceM) ||
+      candidate.straightLineDistanceM < 0
+    ) {
+      throw new RangeError("Straight-line distance must be finite and non-negative");
+    }
     usableRoute(candidate);
   }
 
