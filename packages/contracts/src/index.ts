@@ -1,5 +1,16 @@
-/**
- * Runtime request/response schemas and shared static types are added here by
- * the Phase 2 model tasks. Keep this package independent of application code.
- */
-export {};
+export {
+  COUNTRY_CODES,
+  CountryCodeSchema,
+  nullable,
+  SERVICE_TYPES,
+  ServicePointSchema,
+  ServiceTypeSchema,
+  StructuredAddressSchema,
+  UtcTimestampSchema,
+} from "./service-point.js";
+export type {
+  CountryCode,
+  ServicePoint,
+  ServiceType,
+  StructuredAddress,
+} from "./service-point.js";
