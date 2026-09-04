@@ -33,3 +33,16 @@ export type {
   TravelTimeScoreCandidate,
   TravelTimeScoreResult,
 } from "./scoreDistanceAndTravelTime.js";
+export {
+  AVAILABILITY_SCORE_BY_STATE,
+  OPEN_SCORE_BY_STATUS,
+  scoreAvailabilityState,
+  scoreOpeningState,
+} from "./scoreOperationalState.js";
+export type {
+  AvailabilityScoreBasis,
+  AvailabilityScoreResult,
+  OpenScoreBasis,
+  OpenScoreInput,
+  OpenScoreResult,
+} from "./scoreOperationalState.js";
