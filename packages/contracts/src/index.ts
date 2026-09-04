@@ -21,10 +21,8 @@ export {
   ChargingPriceSchema,
   ChargingServicePointSchema,
   ChargingTariffComponentSchema,
-  EV_CONNECTOR_TYPES,
   EVSE_STATUSES,
   EvConnectorSchema,
-  EvConnectorTypeSchema,
   EvseSchema,
   EvseStatusSchema,
   isChargingServicePoint,
@@ -35,17 +33,14 @@ export type {
   ChargingServicePoint,
   ChargingTariffComponent,
   EvConnector,
-  EvConnectorType,
   Evse,
   EvseStatus,
 } from "./ev.js";
 export {
-  FUEL_TYPES,
   FuelDiscountProgramSchema,
   FuelOfferSchema,
   FuelPriceSchema,
   FuelServicePointSchema,
-  FuelTypeSchema,
   isFuelServicePoint,
 } from "./fuel.js";
 export type {
@@ -53,17 +48,23 @@ export type {
   FuelOffer,
   FuelPrice,
   FuelServicePoint,
-  FuelType,
 } from "./fuel.js";
 export {
-  SERVICE_TYPES,
   ServicePointSchema,
-  ServiceTypeSchema,
   hasValidServicePointLocation,
   hasValidServicePointProvenance,
   isServicePoint,
 } from "./service-point.js";
 export type { ServicePointLocation } from "./service-point.js";
+export {
+  EV_CONNECTOR_TYPES,
+  FUEL_TYPES,
+  SERVICE_TYPES,
+  EvConnectorTypeSchema,
+  FuelTypeSchema,
+  ServiceTypeSchema,
+} from "./enums.js";
+export type { EvConnectorType, FuelType, ServiceType } from "./enums.js";
 export {
   COUNTRY_CODES,
   COUNTRY_TIMEZONES,
@@ -122,4 +123,4 @@ export type {
   WashType,
   WashWorkingStatus,
 } from "./wash.js";
-export type { ServicePoint, ServiceType } from "./service-point.js";
+export type { ServicePoint } from "./service-point.js";

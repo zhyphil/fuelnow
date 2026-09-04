@@ -12,6 +12,7 @@ import {
   type CountryCode,
   type StructuredAddress,
 } from "./geography.js";
+import { SERVICE_TYPES, ServiceTypeSchema } from "./enums.js";
 import { NonBlankStringSchema, UtcTimestampSchema } from "./primitives.js";
 import {
   FieldProvenanceSchema,
@@ -19,13 +20,6 @@ import {
   isFieldProvenance,
   isSourceSummary,
 } from "./source.js";
-
-export const SERVICE_TYPES = ["fuel", "charging", "air", "wash"] as const;
-
-export const ServiceTypeSchema = Type.Union(
-  SERVICE_TYPES.map((serviceType) => Type.Literal(serviceType)),
-  { $id: "ServiceType" },
-);
 
 const NullableTextSchema = Type.Union([NonBlankStringSchema, Type.Null()]);
 
@@ -58,7 +52,6 @@ export const ServicePointSchema = Type.Object(
   },
 );
 
-export type ServiceType = Static<typeof ServiceTypeSchema>;
 export type ServicePoint = Static<typeof ServicePointSchema>;
 
 export interface ServicePointLocation {

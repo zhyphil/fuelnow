@@ -1,6 +1,7 @@
 import { Type, type Static } from "@sinclair/typebox";
 import { Value } from "@sinclair/typebox/value";
 
+import { FuelTypeSchema, type FuelType } from "./enums.js";
 import { CurrencyCodeSchema } from "./geography.js";
 import { NonBlankStringSchema, UtcTimestampSchema } from "./primitives.js";
 import {
@@ -9,23 +10,6 @@ import {
   hasValidServicePointProvenance,
 } from "./service-point.js";
 import { ConfidenceSchema, FreshnessSchema } from "./source.js";
-
-export const FUEL_TYPES = [
-  "sp95",
-  "sp95_e10",
-  "sp98",
-  "e85",
-  "diesel",
-  "premium_diesel",
-  "lpg",
-  "cng",
-  "lng",
-] as const;
-
-export const FuelTypeSchema = Type.Union(
-  FUEL_TYPES.map((fuelType) => Type.Literal(fuelType)),
-  { $id: "FuelType" },
-);
 
 export const FuelPriceSchema = Type.Object(
   {
@@ -82,7 +66,6 @@ export const FuelServicePointSchema = Type.Object(
   { $id: "FuelServicePoint.v1", additionalProperties: false },
 );
 
-export type FuelType = Static<typeof FuelTypeSchema>;
 export type FuelPrice = Static<typeof FuelPriceSchema>;
 export type FuelOffer = Static<typeof FuelOfferSchema>;
 export type FuelDiscountProgram = Static<typeof FuelDiscountProgramSchema>;

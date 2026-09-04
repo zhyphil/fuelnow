@@ -1,6 +1,7 @@
 import { Type, type Static } from "@sinclair/typebox";
 import { Value } from "@sinclair/typebox/value";
 
+import { EvConnectorTypeSchema } from "./enums.js";
 import { CurrencyCodeSchema } from "./geography.js";
 import { NonBlankStringSchema, UtcTimestampSchema } from "./primitives.js";
 import {
@@ -9,16 +10,6 @@ import {
   hasValidServicePointProvenance,
 } from "./service-point.js";
 import { ConfidenceSchema, FreshnessSchema } from "./source.js";
-
-export const EV_CONNECTOR_TYPES = [
-  "ccs_combo_2",
-  "type_2",
-  "type_2_attached",
-  "chademo",
-  "domestic_socket",
-  "tesla_eu",
-  "unknown",
-] as const;
 
 export const EVSE_STATUSES = [
   "available",
@@ -29,11 +20,6 @@ export const EVSE_STATUSES = [
 ] as const;
 
 export const CHARGING_PRICE_UNITS = ["kwh", "minute", "session"] as const;
-export const EvConnectorTypeSchema = Type.Union(
-  EV_CONNECTOR_TYPES.map((connectorType) => Type.Literal(connectorType)),
-  { $id: "EvConnectorType" },
-);
-
 export const EvseStatusSchema = Type.Union(
   EVSE_STATUSES.map((status) => Type.Literal(status)),
   { $id: "EvseStatus" },
@@ -115,7 +101,6 @@ export const ChargingServicePointSchema = Type.Object(
   { $id: "ChargingServicePoint.v1", additionalProperties: false },
 );
 
-export type EvConnectorType = Static<typeof EvConnectorTypeSchema>;
 export type EvseStatus = Static<typeof EvseStatusSchema>;
 export type ChargingPrice = Static<typeof ChargingPriceSchema>;
 export type ChargingTariffComponent = Static<typeof ChargingTariffComponentSchema>;

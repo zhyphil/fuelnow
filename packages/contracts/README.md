@@ -19,3 +19,5 @@ Service-specific fields are added by the remaining Phase 2 model tasks. Source, 
 Every point includes `SourceSummarySchema`; optional `FieldProvenanceSchema` entries retain origins for merged/conflicting fields. All service prices share one freshness/confidence vocabulary and semantic score bands.
 
 Country, EUR currency, WGS84 coordinates and structured address schemas live in `geography.ts`. Service-level semantic predicates also verify address-country and country-timezone consistency.
+
+Canonical service, fuel and connector codes live only in `enums.ts`. They are language-neutral; provider labels are mapped at adapter boundaries and localized labels stay in clients.
