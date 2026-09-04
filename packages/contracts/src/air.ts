@@ -2,6 +2,7 @@ import { Type, type Static } from "@sinclair/typebox";
 import { Value } from "@sinclair/typebox/value";
 
 import { CurrencyCodeSchema } from "./geography.js";
+import { hasValidServicePointOpening } from "./opening.js";
 import { NonBlankStringSchema, UtcTimestampSchema } from "./primitives.js";
 import {
   ServicePointSchema,
@@ -77,6 +78,7 @@ export function isAirServicePoint(value: unknown): value is AirServicePoint {
   if (
     !Value.Check(AirServicePointSchema, value) ||
     !hasValidServicePointLocation(value) ||
+    !hasValidServicePointOpening(value) ||
     !hasValidServicePointProvenance(value)
   ) {
     return false;

@@ -34,6 +34,6 @@ This task does not prematurely encode service-specific structures. The checklist
 - source/freshness/confidence: implemented by `P2-MOD-06` as a required `sourceSummary` plus optional field-level provenance;
 - consolidated geography/address primitives: `P2-MOD-07`;
 - fuel/connector/service enums: `P2-MOD-08`;
-- opening, availability and unknown-value semantics: `P2-MOD-09`.
+- opening, availability and unknown-value semantics: implemented by `P2-MOD-09` as required schedule/status/closure fields plus shared availability assessments.
 
 The final composite model must preserve this base identity and must continue to distinguish canonical lifecycle timestamps from source observation/fetch timestamps.

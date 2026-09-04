@@ -3,6 +3,7 @@ import { Value } from "@sinclair/typebox/value";
 
 import { EvConnectorTypeSchema } from "./enums.js";
 import { CurrencyCodeSchema } from "./geography.js";
+import { hasValidServicePointOpening } from "./opening.js";
 import { NonBlankStringSchema, UtcTimestampSchema } from "./primitives.js";
 import {
   ServicePointSchema,
@@ -118,6 +119,7 @@ export function isChargingServicePoint(value: unknown): value is ChargingService
   if (
     !Value.Check(ChargingServicePointSchema, value) ||
     !hasValidServicePointLocation(value) ||
+    !hasValidServicePointOpening(value) ||
     !hasValidServicePointProvenance(value)
   ) {
     return false;
@@ -138,6 +140,18 @@ export function isChargingServicePoint(value: unknown): value is ChargingService
 
   for (const evse of charging.evses) {
     if (evse.status !== "unknown" && evse.sourceObservedAt === null) {
+      return false;
+    }
+
+    const activeStatus =
+      evse.status === "available" ||
+      evse.status === "occupied" ||
+      evse.status === "reserved";
+    if (activeStatus && evse.operational === false) {
+      return false;
+    }
+
+    if (evse.status === "out_of_service" && evse.operational === true) {
       return false;
     }
 

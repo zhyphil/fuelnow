@@ -4,7 +4,7 @@
 > 需求来源：[france_spain_driver_decision_engine_project.md](./france_spain_driver_decision_engine_project.md)  
 > 当前状态：进行中  
 > 当前阶段：Phase 2 — 项目骨架与统一数据层
-> 下一项任务：`P2-MOD-09` 定义营业状态、availability 和未知值语义
+> 下一项任务：`P2-DB-01` 建立 PostgreSQL/PostGIS 数据库结构
 > 最后更新：2026-09-04
 
 ## 使用方法
@@ -189,7 +189,7 @@ V1 的核心验收结果是：
 - [x] `P2-MOD-06` 将四类服务统一为 Live/Verified/Recent/Stale/Unknown freshness 与 high/medium/low confidence/0–100 分数，要求每个 ServicePoint 携带来源/许可/独立 observed-published-fetched-computed 时间及可选字段级 provenance，并用语义校验禁止时间冒充、依据错配与分数错档（2026-09-04；8 项新测试；[来源质量契约](./docs/architecture/source-quality-contract.md)）
 - [x] `P2-MOD-07` 将 FR/ES、EUR、WGS84 经纬度与结构化可空地址提取为四类服务共享 Schema，校验有限范围、地址非空信息、禁止 null/undefined 字面量、地址国家与站点国家一致及已知时区匹配（2026-09-04；7 项新测试；[地域与币种契约](./docs/architecture/geography-currency-contract.md)）
 - [x] `P2-MOD-08` 将 service/fuel/EV connector 的不可变语言无关代码表、TypeBox Schema 与派生类型集中为唯一来源，适配器保留原标签且未知 connector 不得满足筛选、不得按功率猜类型（2026-09-04；5 项新测试；[枚举说明](./docs/architecture/canonical-enums.md)）
-- [ ] `P2-MOD-09` 定义营业状态、availability 和未知值语义
+- [x] `P2-MOD-09` 建立规范化七日营业排班、当前状态/评估时间/临时关闭优先级和共享 availability assessment/unknown reason 契约，规定未知不等于 false/closed/unavailable/free/zero，并收紧 Fuel 库存与 EVSE operational 跨字段一致性（2026-09-04；10 项新测试；[营业与可用性契约](./docs/architecture/opening-availability-contract.md)）
 
 ## 2.3 数据库与同步
 
@@ -575,3 +575,4 @@ V1 的核心验收结果是：
 | 2026-09-04 | 统一来源、新鲜度与可信度契约 | 每个 ServicePoint 强制来源/许可摘要，统一五档 freshness、三档 confidence/分数及字段级 provenance，校验独立证据时间与更新依据；见 `docs/architecture/source-quality-contract.md` |
 | 2026-09-04 | 统一地域与币种契约 | 四类服务共享 FR/ES、EUR、WGS84 坐标和结构化地址 Schema，并校验地址国家、时区及空值格式一致性；见 `docs/architecture/geography-currency-contract.md` |
 | 2026-09-04 | 统一 canonical 枚举 | service/fuel/EV connector 代码、Schema 与类型集中为唯一语言无关来源，明确未知与来源标签映射规则；见 `docs/architecture/canonical-enums.md` |
+| 2026-09-04 | 统一营业、可用性与未知语义 | ServicePoint 增加规范化排班、评估状态与临时关闭优先级，统一 availability/unknown reason，禁止将未知折叠为负值或零值；见 `docs/architecture/opening-availability-contract.md` |

@@ -18,6 +18,10 @@ const validFuelPoint: FuelServicePoint = {
   longitude: -3.699,
   address: null,
   timezone: "Europe/Madrid",
+  openingHours: null,
+  openingStatus: "unknown",
+  openingStatusEvaluatedAt: null,
+  temporaryClosure: null,
   sourceSummary: spainSourceSummary,
   createdAt: "2026-09-03T20:52:20Z",
   updatedAt: "2026-09-03T20:52:20Z",
@@ -80,6 +84,22 @@ describe("FuelServicePoint contract", () => {
       isFuelServicePoint({
         ...validFuelPoint,
         fuels: [validFuelPoint.fuels[0], validFuelPoint.fuels[0]],
+      }),
+    ).toBe(false);
+  });
+
+  it("rejects contradictory available and out-of-stock facts", () => {
+    expect(
+      isFuelServicePoint({
+        ...validFuelPoint,
+        fuels: [
+          {
+            ...validFuelPoint.fuels[0],
+            available: true,
+            outOfStock: true,
+            unavailableReason: "temporary_shortage",
+          },
+        ],
       }),
     ).toBe(false);
   });

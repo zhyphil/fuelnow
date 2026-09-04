@@ -9,6 +9,7 @@ import {
   hasValidServicePointLocation,
   hasValidServicePointProvenance,
 } from "./service-point.js";
+import { hasValidServicePointOpening } from "./opening.js";
 import { ConfidenceSchema, FreshnessSchema } from "./source.js";
 
 export const FuelPriceSchema = Type.Object(
@@ -77,6 +78,7 @@ export function isFuelServicePoint(value: unknown): value is FuelServicePoint {
   if (
     !Value.Check(FuelServicePointSchema, value) ||
     !hasValidServicePointLocation(value) ||
+    !hasValidServicePointOpening(value) ||
     !hasValidServicePointProvenance(value)
   ) {
     return false;
@@ -91,7 +93,17 @@ export function isFuelServicePoint(value: unknown): value is FuelServicePoint {
     return false;
   }
 
-  return value.fuels.every(({ fuelType, price }) => {
+  return value.fuels.every((fuel) => {
+    const { fuelType, price } = fuel;
+    if (
+      (fuel.available === true &&
+        (fuel.outOfStock !== false || fuel.unavailableReason !== null)) ||
+      (fuel.outOfStock === true &&
+        (fuel.available !== false || fuel.unavailableReason === null))
+    ) {
+      return false;
+    }
+
     if (price === null) {
       return true;
     }

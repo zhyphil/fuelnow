@@ -78,6 +78,31 @@ export {
   isCoordinates,
   isStructuredAddress,
 } from "./geography.js";
+export {
+  AVAILABILITY_STATES,
+  AvailabilityAssessmentSchema,
+  AvailabilityStateSchema,
+  NormalizedOpeningHoursSchema,
+  OPENING_STATUSES,
+  OpeningDaySchema,
+  OpeningIntervalSchema,
+  OpeningStatusSchema,
+  UNKNOWN_REASONS,
+  UnknownReasonSchema,
+  hasValidServicePointOpening,
+  isAvailabilityAssessment,
+  isNormalizedOpeningHours,
+} from "./opening.js";
+export type {
+  AvailabilityAssessment,
+  AvailabilityState,
+  NormalizedOpeningHours,
+  OpeningDay,
+  OpeningInterval,
+  OpeningStatus,
+  ServicePointOpening,
+  UnknownReason,
+} from "./opening.js";
 export type {
   Coordinates,
   CountryCode,
@@ -123,4 +148,4 @@ export type {
   WashType,
   WashWorkingStatus,
 } from "./wash.js";
-export type { ServicePoint } from "./service-point.js";
+export type { ServicePoint, ServicePointState } from "./service-point.js";

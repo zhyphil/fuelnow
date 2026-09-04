@@ -13,6 +13,13 @@ import {
   type StructuredAddress,
 } from "./geography.js";
 import { SERVICE_TYPES, ServiceTypeSchema } from "./enums.js";
+import {
+  NormalizedOpeningHoursSchema,
+  OpeningStatusSchema,
+  hasValidServicePointOpening,
+  type NormalizedOpeningHours,
+  type OpeningStatus,
+} from "./opening.js";
 import { NonBlankStringSchema, UtcTimestampSchema } from "./primitives.js";
 import {
   FieldProvenanceSchema,
@@ -41,6 +48,10 @@ export const ServicePointSchema = Type.Object(
       Type.String({ minLength: 1, maxLength: 100, pattern: ".+/.+" }),
       Type.Null(),
     ]),
+    openingHours: Type.Union([NormalizedOpeningHoursSchema, Type.Null()]),
+    openingStatus: OpeningStatusSchema,
+    openingStatusEvaluatedAt: Type.Union([UtcTimestampSchema, Type.Null()]),
+    temporaryClosure: Type.Union([Type.Boolean(), Type.Null()]),
     sourceSummary: SourceSummarySchema,
     fieldProvenance: Type.Optional(Type.Array(FieldProvenanceSchema, { minItems: 1 })),
     createdAt: UtcTimestampSchema,
@@ -60,6 +71,13 @@ export interface ServicePointLocation {
   longitude: number;
   address: StructuredAddress | null;
   timezone: string | null;
+}
+
+export interface ServicePointState {
+  openingHours: NormalizedOpeningHours | null;
+  openingStatus: OpeningStatus;
+  openingStatusEvaluatedAt: string | null;
+  temporaryClosure: boolean | null;
 }
 
 export function hasValidServicePointLocation(value: ServicePointLocation): boolean {
@@ -94,5 +112,9 @@ export function isServicePoint(value: unknown): value is ServicePoint {
     return false;
   }
 
-  return hasValidServicePointLocation(value) && hasValidServicePointProvenance(value);
+  return (
+    hasValidServicePointLocation(value) &&
+    hasValidServicePointOpening(value) &&
+    hasValidServicePointProvenance(value)
+  );
 }

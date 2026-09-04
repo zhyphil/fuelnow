@@ -18,6 +18,10 @@ const validStaticChargingPoint: ChargingServicePoint = {
   longitude: 1.444,
   address: null,
   timezone: "Europe/Paris",
+  openingHours: null,
+  openingStatus: "unknown",
+  openingStatusEvaluatedAt: null,
+  temporaryClosure: null,
   sourceSummary: franceSourceSummary,
   createdAt: "2026-09-03T20:25:48Z",
   updatedAt: "2026-09-04T00:15:00Z",
@@ -92,6 +96,29 @@ describe("ChargingServicePoint contract", () => {
         charging: {
           ...validStaticChargingPoint.charging,
           evses: [{ ...evse, status: "available", sourceObservedAt: null }],
+        },
+      }),
+    ).toBe(false);
+  });
+
+  it("keeps operational state consistent with EVSE status", () => {
+    const evse = validStaticChargingPoint.charging.evses[0]!;
+    expect(
+      isChargingServicePoint({
+        ...validStaticChargingPoint,
+        charging: {
+          ...validStaticChargingPoint.charging,
+          evses: [
+            {
+              ...evse,
+              status: "available",
+              operational: false,
+              sourceObservedAt: "2026-09-04T00:14:00Z",
+            },
+          ],
+          availableEvses: 1,
+          knownStatusEvses: 1,
+          unknownStatusEvses: 0,
         },
       }),
     ).toBe(false);

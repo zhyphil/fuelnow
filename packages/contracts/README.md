@@ -21,3 +21,5 @@ Every point includes `SourceSummarySchema`; optional `FieldProvenanceSchema` ent
 Country, EUR currency, WGS84 coordinates and structured address schemas live in `geography.ts`. Service-level semantic predicates also verify address-country and country-timezone consistency.
 
 Canonical service, fuel and connector codes live only in `enums.ts`. They are language-neutral; provider labels are mapped at adapter boundaries and localized labels stay in clients.
+
+`opening.ts` defines normalized schedules, evaluated opening status and shared availability assessments. Unknown values always carry explicit semantics and never collapse into false, closed, unavailable, free or zero.
