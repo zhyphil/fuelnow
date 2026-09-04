@@ -24,6 +24,9 @@ export interface ServicePointCandidate {
   latitude: number;
   lifecycleStatus: ServicePointLifecycleStatus;
   openingStatus: CandidateOpeningStatus;
+  openingStatusEvaluatedAt: string | null;
+  serviceOpeningStatus: CandidateOpeningStatus;
+  serviceOpeningStatusEvaluatedAt: string | null;
   temporaryClosure: boolean | null;
   straightLineDistanceM: number;
 }
@@ -37,6 +40,9 @@ interface CandidateRow extends QueryResultRow {
   latitude: number | string;
   lifecycle_status: ServicePointLifecycleStatus;
   opening_status: CandidateOpeningStatus;
+  opening_status_evaluated_at: Date | string | null;
+  service_opening_status: CandidateOpeningStatus;
+  service_opening_status_evaluated_at: Date | string | null;
   temporary_closure: boolean | null;
   straight_line_distance_m: number | string;
 }
@@ -68,6 +74,15 @@ function finiteDatabaseNumber(value: number | string, label: string): number {
   return parsed;
 }
 
+function nullableDatabaseTimestamp(value: Date | string | null): string | null {
+  if (value === null) return null;
+  const timestamp = value instanceof Date ? value : new Date(value);
+  if (!Number.isFinite(timestamp.getTime())) {
+    throw new Error("Database returned an invalid opening-status timestamp");
+  }
+  return timestamp.toISOString();
+}
+
 export class PostgresCandidateSearch {
   public constructor(private readonly pool: CandidateSearchPool) {}
 
@@ -93,6 +108,9 @@ export class PostgresCandidateSearch {
          latitude,
          lifecycle_status,
          opening_status,
+         opening_status_evaluated_at,
+         service_opening_status,
+         service_opening_status_evaluated_at,
          temporary_closure,
          straight_line_distance_m
        FROM search_service_point_candidates($1, $2, $3, $4, $5)`,
@@ -108,6 +126,13 @@ export class PostgresCandidateSearch {
       latitude: finiteDatabaseNumber(row.latitude, "latitude"),
       lifecycleStatus: row.lifecycle_status,
       openingStatus: row.opening_status,
+      openingStatusEvaluatedAt: nullableDatabaseTimestamp(
+        row.opening_status_evaluated_at,
+      ),
+      serviceOpeningStatus: row.service_opening_status,
+      serviceOpeningStatusEvaluatedAt: nullableDatabaseTimestamp(
+        row.service_opening_status_evaluated_at,
+      ),
       temporaryClosure: row.temporary_closure,
       straightLineDistanceM: finiteDatabaseNumber(
         row.straight_line_distance_m,

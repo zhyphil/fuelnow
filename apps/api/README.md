@@ -60,7 +60,9 @@ provider or persists fixture rows in the development database.
 `PostgresCandidateSearch` coarse-filters canonical points by origin, bounded
 radius and service type through the indexed PostGIS geography column. It returns
 exact metre distances and deterministic ordering while excluding only permanent
-closures; later decision tasks handle temporary closure and Unknown states.
+closures. Site schedule status and the requested service's schedule status are
+returned as separate fields so downstream decisions cannot accidentally inherit
+Fuel-station hours for another service.
 
 `findCandidatesWithExpansion` wraps that query with a bounded sparse-area
 policy. It grows the radius geometrically until the requested minimum is met or
@@ -92,3 +94,9 @@ The decision engine's `rankCheapest` enables price ranking only for Fuel with a
 requested fuel type and at least one current comparable price. Other services,
 or Fuel searches without an eligible price, return a shared capability reason
 instead of a fabricated Cheapest result.
+
+`filterOpenNow` uses site schedule evidence for Fuel and only explicitly stored
+service-scoped evidence for Charge, Air and Wash. It returns enabled or
+conditional capability metadata when decision-grade hours exist, otherwise
+`service_hours_unknown`; unknown hours never pass the filter and explicit point
+closures always override an open schedule.

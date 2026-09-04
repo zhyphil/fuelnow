@@ -17,6 +17,9 @@ function candidate(id: string): ServicePointCandidate {
     latitude: 43,
     lifecycleStatus: "active",
     openingStatus: "unknown",
+    openingStatusEvaluatedAt: null,
+    serviceOpeningStatus: "unknown",
+    serviceOpeningStatusEvaluatedAt: null,
     temporaryClosure: null,
     straightLineDistanceM: 100,
   };

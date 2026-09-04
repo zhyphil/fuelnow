@@ -19,6 +19,9 @@ function candidate(id: string, straightLineDistanceM: number): ServicePointCandi
     latitude: 43,
     lifecycleStatus: "active",
     openingStatus: "unknown",
+    openingStatusEvaluatedAt: null,
+    serviceOpeningStatus: "unknown",
+    serviceOpeningStatusEvaluatedAt: null,
     temporaryClosure: null,
     straightLineDistanceM,
   };

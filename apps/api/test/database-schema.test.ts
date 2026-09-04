@@ -48,6 +48,14 @@ const routeCacheBudgetMigrationUrl = new URL(
   "../db/migrations/0011_route_cache_budget.sql",
   import.meta.url,
 );
+const serviceOpeningMigrationUrl = new URL(
+  "../db/migrations/0012_service_opening_evidence.sql",
+  import.meta.url,
+);
+const serviceOpeningVerificationUrl = new URL(
+  "../db/migrations/verify-service-opening-evidence.sql",
+  import.meta.url,
+);
 
 describe("initial PostgreSQL/PostGIS schema", () => {
   it("enables PostGIS and uses WGS84 geography points", async () => {
@@ -326,6 +334,28 @@ describe("initial PostgreSQL/PostGIS schema", () => {
     expect(migration).toContain(
       "ORDER BY ST_Distance(point.location, origin), point.id",
     );
+  });
+
+  it("stores service-scoped hours separately and exposes both status scopes", async () => {
+    const migration = await readFile(serviceOpeningMigrationUrl, "utf8");
+
+    expect(migration).toContain("ALTER TABLE service_point_services");
+    expect(migration).toContain("ADD COLUMN IF NOT EXISTS opening_hours jsonb");
+    expect(migration).toContain("service.opening_status");
+    expect(migration).toContain("point.opening_status");
+    expect(migration).toContain("service_opening_status_evaluated_at");
+  });
+
+  it("verifies that service hours never inherit site opening state", async () => {
+    const verification = await readFile(serviceOpeningVerificationUrl, "utf8");
+
+    expect(verification).toContain(
+      "Site and service opening evidence were not kept separate",
+    );
+    expect(verification).toContain(
+      "Known service opening status without a timestamp was accepted",
+    );
+    expect(verification).toContain("ROLLBACK;");
   });
 
   it("stores hashed route keys without exact origin coordinates", async () => {

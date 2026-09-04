@@ -4,7 +4,7 @@
 > 需求来源：[france_spain_driver_decision_engine_project.md](./france_spain_driver_decision_engine_project.md)  
 > 当前状态：进行中  
 > 当前阶段：Phase 3 — 搜索、路线与决策引擎
-> 下一项任务：`P3-SEA-08` 实现 capability-aware Open now
+> 下一项任务：`P3-SEA-09` 处理无结果、价格未知和状态未知
 > 最后更新：2026-09-04
 
 ## 使用方法
@@ -226,7 +226,7 @@ V1 的核心验收结果是：
 - [x] `P3-SEA-05` 将 Mapbox null matrix cell 标记为单目的地 unreachable；2.5 秒默认/10 秒最大超时、HTTP 429 reset、网络/HTTP 和非法响应均映射为脱敏 reason code，预算拒绝不发请求；无论 partial 或整体失败均保留全部候选与直线距离，ETA/road distance 保持 null，不盲目重试或伪造值（2026-09-04；268 tests；[路线失败降级说明](./docs/architecture/route-failure-degradation.md)）
 - [x] `P3-SEA-06` 实现不可变、稳定的 Nearest 排名：有有效路线时按 ETA、road distance、直线距离、canonical ID 排序；unreachable/unavailable/not requested 候选保留 reason 并在其后按直线距离+ID 降级排序，每项明确标记 driving_eta 或 straight_line_distance，拒绝不一致路线与重复 ID（2026-09-04；273 tests；[Nearest 排名说明](./docs/architecture/nearest-ranking.md)）
 - [x] `P3-SEA-07` 实现 capability-aware Cheapest：仅当 Fuel 的指定 canonical fuel 存在 current、EUR、正确单位、非缺货且非会员专属的可比较价格时启用；stale/unknown/missing/unavailable 不获得价格优势，Charge/Air/Wash 返回 `price_not_available_for_service`，Fuel 无合格价格返回 `no_eligible_fuel_price`，共享契约固定 capability 状态与可本地化 reason code（2026-09-04；288 tests；[Cheapest 说明](./docs/architecture/capability-aware-cheapest.md)）
-- [ ] `P3-SEA-08` 实现 capability-aware Open now：Fuel 使用站点排班；Charge/Air/Wash 仅使用服务专属时间证据
+- [x] `P3-SEA-08` 实现 capability-aware Open now：数据库分别保存并查询站点与服务专属排班状态；Fuel 仅使用站点证据，Charge/Air/Wash 仅在当前结果含服务专属证据时以 conditional 启用；Open/Closing soon 通过，Closed/Opening soon/Unknown 不通过，临时关闭始终覆盖排班（2026-09-04；300 tests；[Open now 说明](./docs/architecture/capability-aware-open-now.md)）
 - [ ] `P3-SEA-09` 处理无结果、价格未知和状态未知
 
 ## 3.2 营业时间
@@ -594,3 +594,4 @@ V1 的核心验收结果是：
 | 2026-09-04 | 实现路线失败诚实降级 | 不可达、超时、限流、预算和 provider/响应错误均转为明确 reason；保留全部候选及直线距离，绝不伪造驾车距离或 ETA，provider 错误不泄露 token/URL/body；完整质量门槛 268 项测试通过；见 `docs/architecture/route-failure-degradation.md` |
 | 2026-09-04 | 实现 Nearest 稳定排名 | 有真实路线时优先 ETA 并以 road/straight distance 和 ID 决胜；无路线候选保留原因并明确按直线距离降级，输入不被修改；完整质量门槛 273 项测试通过；见 `docs/architecture/nearest-ranking.md` |
 | 2026-09-04 | 实现 capability-aware Cheapest | 仅 Fuel 当前、可比较且可用的指定燃油价格参与 Cheapest；stale/Unknown/缺货/会员价无优势，其余三类服务返回共享 unavailable reason；完整质量门槛 288 项测试通过；见 `docs/architecture/capability-aware-cheapest.md` |
+| 2026-09-04 | 实现 capability-aware Open now | 数据库隔离站点与服务专属排班证据；Fuel 使用站点状态，Charge/Air/Wash 仅凭服务专属状态 conditional 启用，Unknown 不冒充营业且临时关闭优先；真实 PostgreSQL/PostGIS 验证通过，完整质量门槛 300 项测试通过；见 `docs/architecture/capability-aware-open-now.md` |
