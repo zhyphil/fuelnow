@@ -1,3 +1,4 @@
+import type { Freshness } from "@fuel-now/contracts";
 import { describe, expect, it } from "vitest";
 
 import {
@@ -13,6 +14,7 @@ interface AirOptions {
   openingScope?: AirLimitedServiceBestCandidate["serviceOpeningEvidenceScope"];
   confidence?: AirLimitedServiceBestCandidate["sourceConfidence"];
   confidenceScore?: number | null;
+  freshness?: Freshness | null;
   access?: AirLimitedServiceBestCandidate["access"];
   workingStatus?: AirLimitedServiceBestCandidate["workingStatus"];
   presenceConfirmed?: boolean;
@@ -30,6 +32,7 @@ function air(id: string, options: AirOptions = {}): AirLimitedServiceBestCandida
     straightLineDistanceM: options.distance ?? 1_000,
     serviceOpeningStatus: options.openingStatus ?? "unknown",
     serviceOpeningEvidenceScope: options.openingScope ?? "unknown",
+    sourceFreshness: options.freshness === undefined ? null : options.freshness,
     sourceConfidence: options.confidence === undefined ? null : options.confidence,
     sourceConfidenceScore:
       options.confidenceScore === undefined ? null : options.confidenceScore,
@@ -53,6 +56,7 @@ function wash(
     straightLineDistanceM: options.distance ?? 1_000,
     serviceOpeningStatus: options.openingStatus ?? "unknown",
     serviceOpeningEvidenceScope: options.openingScope ?? "unknown",
+    sourceFreshness: options.freshness === undefined ? null : options.freshness,
     sourceConfidence: options.confidence === undefined ? null : options.confidence,
     sourceConfidenceScore:
       options.confidenceScore === undefined ? null : options.confidenceScore,
@@ -88,6 +92,7 @@ describe("rankLimitedServiceBest", () => {
           openingStatus: "open",
           openingScope: "service",
           access: "public",
+          freshness: "recent",
           confidence: "high",
           confidenceScore: 90,
         }),
@@ -120,6 +125,9 @@ describe("rankLimitedServiceBest", () => {
           openingStatus: "open",
           openingScope: "service",
           access: "public",
+          freshness: "recent",
+          confidence: "high",
+          confidenceScore: 90,
         }),
         air("unknown", { distance: 1_000 }),
       ],
@@ -145,6 +153,9 @@ describe("rankLimitedServiceBest", () => {
         air("service-hours", {
           openingStatus: "closing_soon",
           openingScope: "service",
+          freshness: "recent",
+          confidence: "high",
+          confidenceScore: 90,
         }),
       ],
     });
@@ -166,6 +177,7 @@ describe("rankLimitedServiceBest", () => {
         wash("wash", {
           openingStatus: "open",
           openingScope: "service",
+          freshness: "recent",
           confidence: "medium",
           confidenceScore: 70,
         }),
@@ -217,12 +229,51 @@ describe("rankLimitedServiceBest", () => {
   it("treats customers-only access as a known restriction rather than public access", () => {
     const result = rankLimitedServiceBest({
       serviceType: "air",
-      candidates: [air("customer", { access: "customers_only" })],
+      candidates: [
+        air("customer", {
+          access: "customers_only",
+          freshness: "recent",
+          confidence: "high",
+          confidenceScore: 90,
+        }),
+      ],
     });
 
     expect(result.candidates[0]?.scoreBreakdown.access).toMatchObject({
       score: 0,
       weightedScore: 0,
+    });
+  });
+
+  it("downweights stale and low-confidence Air factors without hiding the reasons", () => {
+    const result = rankLimitedServiceBest({
+      serviceType: "air",
+      candidates: [
+        air("low-quality", {
+          openingStatus: "open",
+          openingScope: "service",
+          access: "public",
+          freshness: "stale",
+          confidence: "low",
+          confidenceScore: 40,
+        }),
+      ],
+    });
+
+    expect(result.candidates[0]).toMatchObject({
+      scoreBreakdown: {
+        open: { score: 0.2 },
+        access: { score: 0.2 },
+        reliability: { score: 0.4 },
+      },
+      qualityAdjustments: {
+        open: {
+          disposition: "downweighted",
+          freshnessMultiplier: 0.5,
+          confidenceMultiplier: 0.4,
+          reasons: ["stale_evidence", "low_confidence"],
+        },
+      },
     });
   });
 

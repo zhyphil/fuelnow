@@ -1,5 +1,14 @@
 export { buildSearchOutcome } from "./buildSearchOutcome.js";
 export type { SearchOutcomeInput } from "./buildSearchOutcome.js";
+export { adjustBestEvidenceScore } from "./adjustBestEvidenceScore.js";
+export type {
+  BestEvidenceAdjustmentReason,
+  BestEvidenceCriticality,
+  BestEvidenceDisposition,
+  BestEvidenceScoreInput,
+  BestEvidenceScoreResult,
+  BestEvidenceState,
+} from "./adjustBestEvidenceScore.js";
 export { filterOpenNow } from "./filterOpenNow.js";
 export type {
   OpenNowRequest,

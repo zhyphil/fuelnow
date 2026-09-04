@@ -9,6 +9,10 @@ import type {
 } from "@fuel-now/contracts";
 import { EV_CONNECTOR_TYPES } from "@fuel-now/contracts";
 
+import {
+  adjustBestEvidenceScore,
+  type BestEvidenceScoreResult,
+} from "./adjustBestEvidenceScore.js";
 import { scoreFreshness, scoreReliability } from "./scoreDataQuality.js";
 import { scoreDistances, scoreTravelTimes } from "./scoreDistanceAndTravelTime.js";
 import {
@@ -17,7 +21,7 @@ import {
   type EvBestResult,
   type EvBestCandidateInput,
 } from "./rankEvBest.js";
-import { scoreAvailabilityState, scoreOpeningState } from "./scoreOperationalState.js";
+import { scoreOpeningState } from "./scoreOperationalState.js";
 
 const QUALICHARGE_SOURCE_ID = "fr-qualicharge-irve";
 const AVAILABILITY_LIVE_MAX_MS = 5 * 60 * 1_000;
@@ -90,6 +94,11 @@ export interface PreparedEvBestCandidate extends EvBestCandidateInput {
   compatiblePowerScoreBasis: CompatiblePowerScoreBasis;
   liveAvailableEvseCount: number;
   availabilityScoreReason: EvAvailabilityScoreReason;
+  qualityAdjustments: {
+    compatiblePower: BestEvidenceScoreResult;
+    open: BestEvidenceScoreResult;
+    availability: BestEvidenceScoreResult;
+  };
 }
 
 export interface EvBestEvidenceRequest {
@@ -252,6 +261,17 @@ function rounded(value: number): number {
   return Math.round(value * 1_000_000) / 1_000_000;
 }
 
+function missingQualityAdjustment(): BestEvidenceScoreResult {
+  return adjustBestEvidenceScore({
+    baseScore: null,
+    evidenceState: "missing",
+    criticality: "supporting",
+    freshness: null,
+    confidence: null,
+    confidenceScore: null,
+  });
+}
+
 export function rankEvBestFromEvidence({
   evaluatedAt,
   compatibleConnectorTypes,
@@ -336,16 +356,60 @@ export function rankEvBestFromEvidence({
           : power === highestCompatibleRatedPowerKw
             ? "highest_compatible_rated_power"
             : "relative_compatible_rated_power";
+      const compatiblePowerQuality =
+        bestEligibility !== "eligible" || power === null
+          ? missingQualityAdjustment()
+          : adjustBestEvidenceScore({
+              baseScore: compatiblePowerScore,
+              evidenceState: "present",
+              criticality: "supporting",
+              freshness: candidate.freshness,
+              confidence: candidate.confidence,
+              confidenceScore: candidate.confidenceScore,
+            });
+      const rawOpenScore = scoreOpeningState({
+        openingStatus: candidate.serviceOpeningStatus,
+        temporaryClosure: candidate.temporaryClosure,
+      }).openScore;
+      const openQuality =
+        bestEligibility !== "eligible" || candidate.serviceOpeningStatus === "unknown"
+          ? missingQualityAdjustment()
+          : adjustBestEvidenceScore({
+              baseScore: rawOpenScore,
+              evidenceState: "present",
+              criticality: "supporting",
+              freshness: candidate.freshness,
+              confidence: candidate.confidence,
+              confidenceScore: candidate.confidenceScore,
+            });
+      const availabilityQuality =
+        bestEligibility !== "eligible"
+          ? missingQualityAdjustment()
+          : availability.reason === "availability_too_old"
+            ? adjustBestEvidenceScore({
+                baseScore: availability.liveAvailableEvseCount > 0 ? 1 : 0,
+                evidenceState: "expired",
+                criticality: "availability",
+                freshness: candidate.freshness,
+                confidence: candidate.confidence,
+                confidenceScore: candidate.confidenceScore,
+              })
+            : availability.reason === "eligible_live_available" ||
+                availability.reason === "no_available_evse"
+              ? adjustBestEvidenceScore({
+                  baseScore: availability.liveAvailableEvseCount > 0 ? 1 : 0,
+                  evidenceState: "present",
+                  criticality: "availability",
+                  freshness: candidate.freshness,
+                  confidence: candidate.confidence,
+                  confidenceScore: candidate.confidenceScore,
+                })
+              : missingQualityAdjustment();
       const operationalScores =
         bestEligibility === "eligible"
           ? {
-              open: scoreOpeningState({
-                openingStatus: candidate.serviceOpeningStatus,
-                temporaryClosure: candidate.temporaryClosure,
-              }).openScore,
-              availability: scoreAvailabilityState(
-                availability.liveAvailableEvseCount > 0 ? "available" : "unknown",
-              ).availabilityScore,
+              open: openQuality.adjustedScore,
+              availability: availabilityQuality.adjustedScore,
               freshness: scoreFreshness(candidate.freshness).freshnessScore,
               reliability: scoreReliability({
                 confidence: candidate.confidence,
@@ -364,10 +428,15 @@ export function rankEvBestFromEvidence({
         compatiblePowerScoreBasis,
         liveAvailableEvseCount: availability.liveAvailableEvseCount,
         availabilityScoreReason: availability.reason,
+        qualityAdjustments: {
+          compatiblePower: compatiblePowerQuality,
+          open: openQuality,
+          availability: availabilityQuality,
+        },
         componentScores: {
           distance: distanceById.get(candidate.id) ?? 0,
           travelTime: travelTimeById.get(candidate.id) ?? 0,
-          compatiblePower: compatiblePowerScore,
+          compatiblePower: compatiblePowerQuality.adjustedScore,
           ...operationalScores,
         },
         timeToSolution: {

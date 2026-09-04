@@ -228,6 +228,54 @@ describe("rankEvBestFromEvidence", () => {
     });
   });
 
+  it("downweights EV decision factors backed by medium-confidence evidence", () => {
+    const result = rank([
+      candidate("medium", { confidence: "medium", confidenceScore: 70 }),
+    ]);
+
+    expect(result.ranking.candidates[0]).toMatchObject({
+      componentScores: {
+        compatiblePower: 0.7,
+        open: 0.7,
+        availability: 0.7,
+        reliability: 0.7,
+      },
+      qualityAdjustments: {
+        compatiblePower: {
+          disposition: "downweighted",
+          reasons: ["medium_confidence"],
+        },
+        availability: {
+          disposition: "downweighted",
+          reasons: ["medium_confidence"],
+        },
+      },
+    });
+  });
+
+  it("halves stale supporting EV evidence but removes stale availability advantage", () => {
+    const result = rank([candidate("stale", { freshness: "stale" })]);
+
+    expect(result.ranking.candidates[0]).toMatchObject({
+      componentScores: {
+        compatiblePower: 0.5,
+        open: 0.5,
+        availability: 0,
+        freshness: 0.5,
+      },
+      qualityAdjustments: {
+        compatiblePower: {
+          disposition: "downweighted",
+          reasons: ["stale_evidence"],
+        },
+        availability: {
+          disposition: "excluded",
+          reasons: ["stale_critical_evidence"],
+        },
+      },
+    });
+  });
+
   it("excludes incompatible and explicitly closed candidates", () => {
     const result = rank([
       candidate("wrong-plug", {

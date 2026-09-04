@@ -2,10 +2,15 @@ import type {
   AirAccess,
   AirWorkingStatus,
   Confidence,
+  Freshness,
   OpeningStatus,
   WashWorkingStatus,
 } from "@fuel-now/contracts";
 
+import {
+  adjustBestEvidenceScore,
+  type BestEvidenceScoreResult,
+} from "./adjustBestEvidenceScore.js";
 import { scoreDistances } from "./scoreDistanceAndTravelTime.js";
 import { scoreOpeningState } from "./scoreOperationalState.js";
 import { scoreReliability } from "./scoreDataQuality.js";
@@ -57,6 +62,7 @@ interface LimitedServiceBestCandidateBase {
   straightLineDistanceM: number;
   serviceOpeningStatus: OpeningStatus;
   serviceOpeningEvidenceScope: ServiceOpeningEvidenceScope;
+  sourceFreshness: Freshness | null;
   sourceConfidence: Confidence | null;
   sourceConfidenceScore: number | null;
 }
@@ -108,6 +114,10 @@ export type RankedLimitedServiceBestCandidate = LimitedServiceBestCandidate & {
   degradationMode: LimitedServiceBestDegradationMode;
   bestScore: number;
   scoreBreakdown: LimitedServiceBestScoreBreakdown;
+  qualityAdjustments: {
+    open: BestEvidenceScoreResult;
+    access: BestEvidenceScoreResult;
+  };
   candidate: LimitedServiceBestCandidate;
 };
 
@@ -136,6 +146,8 @@ interface PreparedCandidate {
   openScore: number | null;
   accessScore: number | null;
   reliabilityScore: number | null;
+  openQuality: BestEvidenceScoreResult;
+  accessQuality: BestEvidenceScoreResult;
 }
 
 const COMPONENT_NAMES: LimitedServiceBestComponentName[] = [
@@ -195,12 +207,19 @@ function accessScore(candidate: LimitedServiceBestCandidate): number | null {
 }
 
 function reliabilityScore(candidate: LimitedServiceBestCandidate): number | null {
-  if (candidate.sourceConfidence === null || candidate.sourceConfidenceScore === null) {
+  if (
+    candidate.sourceFreshness === null ||
+    candidate.sourceConfidence === null ||
+    candidate.sourceConfidenceScore === null
+  ) {
     if (
+      candidate.sourceFreshness !== null ||
       candidate.sourceConfidence !== null ||
       candidate.sourceConfidenceScore !== null
     ) {
-      throw new Error("Source confidence label and score must be present together");
+      throw new Error(
+        "Source freshness, confidence label and score must be present together",
+      );
     }
     return null;
   }
@@ -208,6 +227,30 @@ function reliabilityScore(candidate: LimitedServiceBestCandidate): number | null
     confidence: candidate.sourceConfidence,
     confidenceScore: candidate.sourceConfidenceScore,
   }).reliabilityScore;
+}
+
+function qualityAdjustment(
+  candidate: LimitedServiceBestCandidate,
+  baseScore: number | null,
+): BestEvidenceScoreResult {
+  if (baseScore === null) {
+    return adjustBestEvidenceScore({
+      baseScore: null,
+      evidenceState: "missing",
+      criticality: "supporting",
+      freshness: null,
+      confidence: null,
+      confidenceScore: null,
+    });
+  }
+  return adjustBestEvidenceScore({
+    baseScore,
+    evidenceState: "present",
+    criticality: "supporting",
+    freshness: candidate.sourceFreshness,
+    confidence: candidate.sourceConfidence,
+    confidenceScore: candidate.sourceConfidenceScore,
+  });
 }
 
 function appliedWeights(
@@ -313,13 +356,21 @@ export function rankLimitedServiceBest({
 
   const distances = scoreDistances(eligible);
   const prepared: PreparedCandidate[] = distances.candidates.map(
-    ({ candidate, distanceScore }) => ({
-      candidate,
-      distanceScore,
-      openScore: openingScore(candidate),
-      accessScore: accessScore(candidate),
-      reliabilityScore: reliabilityScore(candidate),
-    }),
+    ({ candidate, distanceScore }) => {
+      const openQuality = qualityAdjustment(candidate, openingScore(candidate));
+      const accessQuality = qualityAdjustment(candidate, accessScore(candidate));
+      return {
+        candidate,
+        distanceScore,
+        openScore:
+          openQuality.disposition === "excluded" ? null : openQuality.adjustedScore,
+        accessScore:
+          accessQuality.disposition === "excluded" ? null : accessQuality.adjustedScore,
+        reliabilityScore: reliabilityScore(candidate),
+        openQuality,
+        accessQuality,
+      };
+    },
   );
   const weights = appliedWeights(serviceType, prepared);
   const mode = degradationMode(weights);
@@ -340,6 +391,10 @@ export function rankLimitedServiceBest({
           ),
         ),
         scoreBreakdown: breakdown,
+        qualityAdjustments: {
+          open: candidate.openQuality,
+          access: candidate.accessQuality,
+        },
       };
     })
     .sort(
