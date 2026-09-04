@@ -81,6 +81,8 @@ describe("GET /v1/nearby", () => {
       country: null,
       service: "fuel",
       fuelType: null,
+      connectorType: null,
+      minimumPowerKw: null,
       sort: "nearest",
       search: {
         requestedRadiusMetres: 10_000,
@@ -296,6 +298,76 @@ describe("GET /v1/nearby", () => {
     for (const url of [
       "/v1/nearby?latitude=43&longitude=1&service=fuel&fuelType=hydrogen",
       "/v1/nearby?latitude=43&longitude=1&service=charging&fuelType=diesel",
+    ]) {
+      const response = await app.inject({ method: "GET", url });
+      expect(response.statusCode).toBe(400);
+    }
+    expect(search.requests).toEqual([]);
+  });
+
+  it("passes compatible EV connector filters to candidate search and echoes them", async () => {
+    const search = new FakeCandidateSearch(() => [candidate(0)]);
+    const app = createApiApp({ candidateSearch: search, servicePointDetails });
+    apps.push(app);
+
+    const response = await app.inject({
+      method: "GET",
+      url: "/v1/nearby?latitude=41.38&longitude=2.17&service=charging&connectorType=ccs_combo_2&minimumPowerKw=150&radius=25000&sort=best",
+    });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.json()).toMatchObject({
+      service: "charging",
+      fuelType: null,
+      connectorType: "ccs_combo_2",
+      minimumPowerKw: 150,
+      ranking: {
+        requestedSort: "best",
+        appliedSort: "nearest",
+        degraded: true,
+        reason: "decision_evidence_unavailable",
+      },
+    });
+    expect(search.requests).toEqual([
+      {
+        latitude: 41.38,
+        longitude: 2.17,
+        radiusMetres: 25_000,
+        serviceType: "charging",
+        connectorType: "ccs_combo_2",
+        minimumPowerKw: 150,
+        limit: 50,
+      },
+    ]);
+  });
+
+  it("accepts either EV filter independently", async () => {
+    for (const suffix of ["connectorType=type_2", "minimumPowerKw=22.5"]) {
+      const search = new FakeCandidateSearch(() => []);
+      const app = createApiApp({ candidateSearch: search, servicePointDetails });
+      apps.push(app);
+
+      const response = await app.inject({
+        method: "GET",
+        url: `/v1/nearby?latitude=43&longitude=1&service=charging&radius=10000&${suffix}`,
+      });
+      expect(response.statusCode).toBe(200);
+      expect(search.requests).toHaveLength(1);
+    }
+  });
+
+  it("rejects unknown, implausible and cross-service EV filters before search", async () => {
+    const search = new FakeCandidateSearch(() => []);
+    const app = createApiApp({ candidateSearch: search, servicePointDetails });
+    apps.push(app);
+
+    for (const url of [
+      "/v1/nearby?latitude=43&longitude=1&service=charging&connectorType=unknown",
+      "/v1/nearby?latitude=43&longitude=1&service=charging&connectorType=type_1",
+      "/v1/nearby?latitude=43&longitude=1&service=charging&minimumPowerKw=0.5",
+      "/v1/nearby?latitude=43&longitude=1&service=charging&minimumPowerKw=1001",
+      "/v1/nearby?latitude=43&longitude=1&service=fuel&connectorType=ccs_combo_2",
+      "/v1/nearby?latitude=43&longitude=1&service=wash&minimumPowerKw=22",
     ]) {
       const response = await app.inject({ method: "GET", url });
       expect(response.statusCode).toBe(400);

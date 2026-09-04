@@ -56,9 +56,9 @@ describe("PostgreSQL service-point candidate search", () => {
     ]);
     expect(pool.query).toHaveBeenCalledWith(
       expect.stringContaining(
-        "FROM search_service_point_candidates($1, $2, $3, $4, $5, $6, $7)",
+        "FROM search_service_point_candidates($1, $2, $3, $4, $5, $6, $7, $8, $9)",
       ),
-      [1.444, 43.605, 10_000, "fuel", 25, "FR", "diesel"],
+      [1.444, 43.605, 10_000, "fuel", 25, "FR", "diesel", null, null],
     );
   });
 
@@ -81,6 +81,36 @@ describe("PostgreSQL service-point candidate search", () => {
       200,
       null,
       null,
+      null,
+      null,
+    ]);
+  });
+
+  it("passes connector type and minimum power through one parameterized query", async () => {
+    const pool = { query: vi.fn().mockResolvedValue({ rows: [] }) };
+    const search = new PostgresCandidateSearch(pool as never);
+
+    await search.findCandidates({
+      longitude: 2.17,
+      latitude: 41.38,
+      radiusMetres: 15_000,
+      serviceType: "charging",
+      country: "ES",
+      connectorType: "ccs_combo_2",
+      minimumPowerKw: 150,
+      limit: 40,
+    });
+
+    expect(pool.query.mock.calls[0]?.[1]).toEqual([
+      2.17,
+      41.38,
+      15_000,
+      "charging",
+      40,
+      "ES",
+      null,
+      "ccs_combo_2",
+      150,
     ]);
   });
 
@@ -143,6 +173,35 @@ describe("PostgreSQL service-point candidate search", () => {
         fuelType: "diesel",
       }),
     ).rejects.toThrow("fuelType requires fuel service");
+    expect(pool.query).not.toHaveBeenCalled();
+  });
+
+  it("rejects invalid, implausible and cross-service EV filters before querying", async () => {
+    const pool = { query: vi.fn() };
+    const search = new PostgresCandidateSearch(pool as never);
+    const base = {
+      longitude: 2,
+      latitude: 43,
+      radiusMetres: 1_000,
+      serviceType: "charging" as const,
+    };
+
+    await expect(
+      search.findCandidates({ ...base, connectorType: "unknown" }),
+    ).rejects.toThrow("selectable canonical EV connector type");
+    await expect(
+      search.findCandidates({ ...base, connectorType: "type_1" as never }),
+    ).rejects.toThrow("selectable canonical EV connector type");
+    await expect(
+      search.findCandidates({ ...base, minimumPowerKw: 0.5 }),
+    ).rejects.toThrow("minimumPowerKw must be between 1 and 1000");
+    await expect(
+      search.findCandidates({
+        ...base,
+        serviceType: "wash",
+        connectorType: "type_2",
+      }),
+    ).rejects.toThrow("EV connector filters require charging service");
     expect(pool.query).not.toHaveBeenCalled();
   });
 

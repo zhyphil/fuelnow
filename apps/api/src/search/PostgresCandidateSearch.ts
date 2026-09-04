@@ -1,6 +1,8 @@
 import {
+  EV_CONNECTOR_TYPES,
   FUEL_TYPES,
   type CountryCode,
+  type EvConnectorType,
   type FuelType,
   type ServiceType,
 } from "@fuel-now/contracts";
@@ -19,6 +21,8 @@ export interface CandidateSearchRequest {
   serviceType: ServiceType;
   country?: CountryCode;
   fuelType?: FuelType;
+  connectorType?: EvConnectorType;
+  minimumPowerKw?: number;
   limit?: number;
 }
 
@@ -100,6 +104,8 @@ export class PostgresCandidateSearch {
     serviceType,
     country,
     fuelType,
+    connectorType,
+    minimumPowerKw,
     limit = 200,
   }: CandidateSearchRequest): Promise<ServicePointCandidate[]> {
     assertFiniteRange("longitude", longitude, -180, 180);
@@ -114,6 +120,24 @@ export class PostgresCandidateSearch {
     }
     if (fuelType !== undefined && serviceType !== "fuel") {
       throw new Error("fuelType requires fuel service");
+    }
+    if (
+      connectorType !== undefined &&
+      (!EV_CONNECTOR_TYPES.includes(connectorType) || connectorType === "unknown")
+    ) {
+      throw new Error("connectorType must be a selectable canonical EV connector type");
+    }
+    if (
+      minimumPowerKw !== undefined &&
+      (!Number.isFinite(minimumPowerKw) || minimumPowerKw < 1 || minimumPowerKw > 1_000)
+    ) {
+      throw new Error("minimumPowerKw must be between 1 and 1000");
+    }
+    if (
+      (connectorType !== undefined || minimumPowerKw !== undefined) &&
+      serviceType !== "charging"
+    ) {
+      throw new Error("EV connector filters require charging service");
     }
 
     const result = await this.pool.query<CandidateRow>(
@@ -131,7 +155,7 @@ export class PostgresCandidateSearch {
          service_opening_status_evaluated_at,
          temporary_closure,
          straight_line_distance_m
-       FROM search_service_point_candidates($1, $2, $3, $4, $5, $6, $7)`,
+       FROM search_service_point_candidates($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
       [
         longitude,
         latitude,
@@ -140,6 +164,8 @@ export class PostgresCandidateSearch {
         limit,
         country ?? null,
         fuelType ?? null,
+        connectorType ?? null,
+        minimumPowerKw ?? null,
       ],
     );
 

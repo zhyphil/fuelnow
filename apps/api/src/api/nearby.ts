@@ -1,6 +1,8 @@
 import {
+  EV_CONNECTOR_TYPES,
   FuelTypeSchema,
   ServiceTypeSchema,
+  type EvConnectorType,
   type FuelType,
   type SearchSort,
   type ServiceType,
@@ -31,6 +33,11 @@ const SearchSortSchema = Type.Union([
   Type.Literal("open_now"),
   Type.Literal("best"),
 ]);
+const SelectableEvConnectorTypeSchema = Type.Union(
+  EV_CONNECTOR_TYPES.filter((connectorType) => connectorType !== "unknown").map(
+    (connectorType) => Type.Literal(connectorType),
+  ),
+);
 const SortDegradationReasonSchema = Type.Union([
   Type.Literal("fuel_type_required"),
   Type.Literal("price_not_available_for_service"),
@@ -45,6 +52,8 @@ export const NearbyQuerySchema = Type.Object(
     country: Type.Optional(CountrySchema),
     service: ServiceTypeSchema,
     fuelType: Type.Optional(FuelTypeSchema),
+    connectorType: Type.Optional(SelectableEvConnectorTypeSchema),
+    minimumPowerKw: Type.Optional(Type.Number({ minimum: 1, maximum: 1_000 })),
     radius: Type.Optional(
       Type.Integer({ minimum: 1, maximum: NEARBY_MAXIMUM_RADIUS_METRES }),
     ),
@@ -85,6 +94,11 @@ export const NearbyResponseSchema = Type.Object(
     country: Type.Union([CountrySchema, Type.Null()]),
     service: ServiceTypeSchema,
     fuelType: Type.Union([FuelTypeSchema, Type.Null()]),
+    connectorType: Type.Union([SelectableEvConnectorTypeSchema, Type.Null()]),
+    minimumPowerKw: Type.Union([
+      Type.Number({ minimum: 1, maximum: 1_000 }),
+      Type.Null(),
+    ]),
     sort: SearchSortSchema,
     search: Type.Object(
       {
@@ -134,6 +148,12 @@ function searchRequest(query: NearbyQuery): ExpandingCandidateSearchRequest {
     serviceType: query.service,
     ...(query.country === undefined ? {} : { country: query.country }),
     ...(query.fuelType === undefined ? {} : { fuelType: query.fuelType }),
+    ...(query.connectorType === undefined
+      ? {}
+      : { connectorType: query.connectorType as EvConnectorType }),
+    ...(query.minimumPowerKw === undefined
+      ? {}
+      : { minimumPowerKw: query.minimumPowerKw }),
   };
 }
 
@@ -142,6 +162,16 @@ function assertCompatibleFilters(query: NearbyQuery): void {
     const error = new Error("fuelType is only valid for fuel service") as Error & {
       statusCode: number;
     };
+    error.statusCode = 400;
+    throw error;
+  }
+  if (
+    (query.connectorType !== undefined || query.minimumPowerKw !== undefined) &&
+    query.service !== "charging"
+  ) {
+    const error = new Error(
+      "connectorType and minimumPowerKw are only valid for charging service",
+    ) as Error & { statusCode: number };
     error.statusCode = 400;
     throw error;
   }
@@ -267,6 +297,8 @@ export function registerNearbyRoute(
         country: request.query.country ?? null,
         service: request.query.service,
         fuelType: request.query.fuelType ?? null,
+        connectorType: request.query.connectorType ?? null,
+        minimumPowerKw: request.query.minimumPowerKw ?? null,
         sort,
         search: {
           requestedRadiusMetres: result.requestedRadiusMetres,

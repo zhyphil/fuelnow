@@ -72,6 +72,14 @@ const candidateFuelFilterVerificationUrl = new URL(
   "../db/migrations/verify-candidate-fuel-filter.sql",
   import.meta.url,
 );
+const candidateEvFilterMigrationUrl = new URL(
+  "../db/migrations/0015_candidate_ev_filter.sql",
+  import.meta.url,
+);
+const candidateEvFilterVerificationUrl = new URL(
+  "../db/migrations/verify-candidate-ev-filter.sql",
+  import.meta.url,
+);
 
 describe("initial PostgreSQL/PostGIS schema", () => {
   it("enables PostGIS and uses WGS84 geography points", async () => {
@@ -397,6 +405,23 @@ describe("initial PostgreSQL/PostGIS schema", () => {
     );
     expect(migration).toContain("p_service_type <> 'fuel'");
     expect(verification).toContain("diesel_count <> 1");
+    expect(verification).toContain("ROLLBACK;");
+  });
+
+  it("adds and transactionally verifies EV connector and power filtering", async () => {
+    const migration = await readFile(candidateEvFilterMigrationUrl, "utf8");
+    const verification = await readFile(candidateEvFilterVerificationUrl, "utf8");
+
+    expect(migration).toContain("p_connector_type text DEFAULT NULL");
+    expect(migration).toContain("p_minimum_power_kw double precision DEFAULT NULL");
+    expect(migration).toContain("FROM charging_evses AS evse");
+    expect(migration).toContain("JOIN charging_connectors AS connector");
+    expect(migration).toContain("connector.operational IS DISTINCT FROM false");
+    expect(migration).toContain("connector.connector_type = p_connector_type");
+    expect(migration).toContain("connector.power_kw >= p_minimum_power_kw");
+    expect(migration).toContain("p_service_type <> 'charging'");
+    expect(verification).toContain("combined_count <> 1");
+    expect(verification).toContain("Unknown connector was accepted");
     expect(verification).toContain("ROLLBACK;");
   });
 

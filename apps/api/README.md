@@ -27,6 +27,12 @@ only stations with a matching offer while preserving temporarily unavailable
 offers for honest status display; offers marked as permanently not provided do
 not satisfy the filter. Fuel filters are rejected for other service types.
 
+Charge searches may include a selectable canonical `connectorType`, a
+`minimumPowerKw` from 1 through 1,000, or both. When combined, one operational
+connector must satisfy both conditions; the API never combines connector type
+and rated power from different equipment. These filters are rejected for other
+service types, and `unknown` cannot be selected as a compatibility target.
+
 `GET /v1/service-points/:id` resolves one canonical UUID and returns its stable
 location, address, opening and lifecycle detail. Invalid identifiers are rejected
 before data access, while an unknown canonical point returns a traceable 404.
