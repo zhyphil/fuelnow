@@ -15,3 +15,10 @@ export type {
   CheapestResult,
   RankedCheapestCandidate,
 } from "./rankCheapest.js";
+export { PRICE_SCORE_MAX, PRICE_SCORE_MIN, scorePrices } from "./scorePrices.js";
+export type {
+  PriceScoreBasis,
+  PriceScoreCandidate,
+  PriceScoreResult,
+  ScoredPriceCandidate,
+} from "./scorePrices.js";
