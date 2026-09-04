@@ -1,5 +1,7 @@
 import type { RoutingProfile } from "./types.js";
 
+export { RouteBudgetExceededError } from "./errors.js";
+
 export interface CachedRouteValue {
   cacheKeyHash: string;
   destinationId: string;
@@ -35,13 +37,4 @@ export interface RouteCacheStore {
   ): Promise<void>;
   reserveElements(request: RouteUsageReservation): Promise<boolean>;
   finalizeUsage(request: FinalizeRouteUsageRequest): Promise<boolean>;
-}
-
-export class RouteBudgetExceededError extends Error {
-  public readonly code = "route_budget_exceeded";
-
-  public constructor() {
-    super("Route provider element budget is unavailable");
-    this.name = "RouteBudgetExceededError";
-  }
 }

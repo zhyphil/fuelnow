@@ -57,12 +57,12 @@ positive budget or providing a real token is a separate release decision.
 
 ## Boundaries
 
-This task deliberately throws a typed `route_budget_exceeded` error when a miss
-cannot be funded. `P3-SEA-05` converts that and provider timeout/rate-limit/
-unreachable states into per-result degradation instead of failing the search.
-Pricing review, account alerts and real production thresholds remain Phase 5
-release gates because they require current commercial information and owner
-approval.
+The cache wrapper throws a typed `route_budget_exceeded` error when a miss cannot
+be funded; the route-enrichment layer converts it and provider timeout/
+rate-limit/unreachable states into per-result degradation instead of failing
+the search. Pricing review, account alerts and real production thresholds
+remain Phase 5 release gates because they require current commercial
+information and owner approval.
 
 ## Verification
 

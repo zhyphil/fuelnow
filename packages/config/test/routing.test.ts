@@ -7,6 +7,7 @@ describe("routing configuration", () => {
     expect(resolveRoutingConfig()).toEqual({
       monthlyElementBudget: 0,
       elementsPerSearchMax: 9,
+      requestTimeoutMs: 2_500,
       cacheTtlSeconds: 300,
       paidRoutingEnabled: false,
     });
@@ -17,11 +18,13 @@ describe("routing configuration", () => {
       resolveRoutingConfig({
         monthlyElementBudget: "10000",
         elementsPerSearchMax: "6",
+        requestTimeoutMs: "1800",
         cacheTtlSeconds: "120",
       }),
     ).toEqual({
       monthlyElementBudget: 10_000,
       elementsPerSearchMax: 6,
+      requestTimeoutMs: 1_800,
       cacheTtlSeconds: 120,
       paidRoutingEnabled: true,
     });
@@ -33,6 +36,9 @@ describe("routing configuration", () => {
     );
     expect(() => resolveRoutingConfig({ cacheTtlSeconds: "901" })).toThrow(
       "ROUTE_CACHE_TTL_SECONDS",
+    );
+    expect(() => resolveRoutingConfig({ requestTimeoutMs: "99" })).toThrow(
+      "MAPBOX_TIMEOUT_MS",
     );
     expect(() => resolveRoutingConfig({ monthlyElementBudget: "-1" })).toThrow(
       "MAPBOX_MONTHLY_ELEMENT_BUDGET",

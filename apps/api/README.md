@@ -77,3 +77,9 @@ an atomic monthly element reservation. It requests only cache misses, records
 successful/failed usage and honors the repository's zero-budget default. Cache
 keys contain only a hash of a coarse origin cell and destination metadata; exact
 origins are never written to the cache table.
+
+Route enrichment treats provider failures as explicit degradation. Null matrix
+cells become per-destination `unreachable`; timeout, rate limit, budget and
+provider failures keep every candidate with `eta=null` and a reason code. The
+Mapbox adapter emits sanitized errors and never includes its token, URL or
+provider response body in application error messages.

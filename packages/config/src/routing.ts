@@ -1,12 +1,14 @@
 export interface RoutingConfigInput {
   monthlyElementBudget?: string;
   elementsPerSearchMax?: string;
+  requestTimeoutMs?: string;
   cacheTtlSeconds?: string;
 }
 
 export interface RoutingConfig {
   monthlyElementBudget: number;
   elementsPerSearchMax: number;
+  requestTimeoutMs: number;
   cacheTtlSeconds: number;
   paidRoutingEnabled: boolean;
 }
@@ -49,10 +51,18 @@ export function resolveRoutingConfig(input: RoutingConfigInput = {}): RoutingCon
     1,
     900,
   );
+  const requestTimeoutMs = integerSetting(
+    "MAPBOX_TIMEOUT_MS",
+    input.requestTimeoutMs,
+    2_500,
+    100,
+    10_000,
+  );
 
   return Object.freeze({
     monthlyElementBudget,
     elementsPerSearchMax,
+    requestTimeoutMs,
     cacheTtlSeconds,
     paidRoutingEnabled: monthlyElementBudget > 0,
   });

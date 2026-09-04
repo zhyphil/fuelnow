@@ -20,7 +20,7 @@ Environment files matching `.env` and `.env.*` are ignored. `.env.example` is th
 | Source network | `SOURCE_HTTP_TIMEOUT_MS`, `SOURCE_HTTP_MAX_RETRIES` | Worker config | Bounded timeouts/retries; provider-specific limits still apply |
 | Snapshot policy | `RAW_SNAPSHOT_RETENTION_DAYS` | Worker config | Applies to raw audit objects; canonical provenance follows its own retention |
 | Provider credentials | `REVE_API_KEY`, `MAPBOX_ACCESS_TOKEN` | Server secret | Empty in repository; inject from local secret store/CI/deployment runtime |
-| Routing budget | `MAPBOX_MONTHLY_ELEMENT_BUDGET`, `MAPBOX_ELEMENTS_PER_SEARCH_MAX`, `ROUTE_CACHE_TTL_SECONDS` | Server config | Budget `0` disables paid misses; traffic requests max 9 elements; cache max 15 minutes |
+| Routing budget | `MAPBOX_MONTHLY_ELEMENT_BUDGET`, `MAPBOX_ELEMENTS_PER_SEARCH_MAX`, `MAPBOX_TIMEOUT_MS`, `ROUTE_CACHE_TTL_SECONDS` | Server config | Budget `0` disables paid misses; traffic max 9 elements; timeout max 10 s; cache max 15 min |
 | OSM import | `OSM_PBF_PATH` | Worker path/config | Points to approved regional input; never configures public Overpass as app backend |
 | API boundary | `CORS_ALLOWED_ORIGINS`, `RATE_LIMIT_MAX_PER_MINUTE` | Server config | Production origins are explicit; wildcard CORS is not a production default |
 | Observability | `OTEL_EXPORTER_OTLP_ENDPOINT` | Server config/possibly secret | Treat authenticated endpoint URLs as secrets; redact headers/query credentials |

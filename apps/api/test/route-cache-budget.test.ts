@@ -223,6 +223,39 @@ describe("CachedBudgetedRoutingProvider", () => {
     expect(cacheStore.putMany).not.toHaveBeenCalled();
   });
 
+  it("settles and caches only reachable destinations from a partial matrix", async () => {
+    const reachable = destination("reachable", 1.45);
+    const unreachable = destination("unreachable", 1.46);
+    const cacheStore = store();
+    const provider: RoutingProvider = {
+      calculateMatrix: vi.fn().mockResolvedValue([estimate(reachable)]),
+    };
+    const cachedProvider = new CachedBudgetedRoutingProvider({
+      provider,
+      store: cacheStore,
+      providerName: "mapbox",
+      monthlyElementBudget: 100,
+      now: () => now,
+    });
+
+    const result = await cachedProvider.calculateMatrix(
+      request([reachable, unreachable]),
+    );
+
+    expect(result.map(({ destinationId }) => destinationId)).toEqual(["reachable"]);
+    expect(cacheStore.reserveElements).toHaveBeenCalledWith(
+      expect.objectContaining({ requestedElements: 2 }),
+    );
+    expect(cacheStore.finalizeUsage).toHaveBeenCalledWith(
+      expect.objectContaining({ successfulElements: 1 }),
+    );
+    expect(cacheStore.putMany).toHaveBeenCalledWith(
+      [expect.objectContaining({ destinationId: "reachable" })],
+      now,
+      300,
+    );
+  });
+
   it("enforces per-search cost and cache privacy limits", () => {
     const provider: RoutingProvider = { calculateMatrix: vi.fn() };
     const cacheStore = store();

@@ -1,11 +1,8 @@
 import { randomUUID } from "node:crypto";
 
 import { createRouteCacheKeyHash } from "./cacheKey.js";
-import {
-  RouteBudgetExceededError,
-  type CachedRouteValue,
-  type RouteCacheStore,
-} from "./routeCache.js";
+import { RouteBudgetExceededError } from "./errors.js";
+import { type CachedRouteValue, type RouteCacheStore } from "./routeCache.js";
 import type {
   RouteDestination,
   RouteEstimate,
@@ -71,9 +68,6 @@ function validateFreshEstimates(
       throw new Error("Route provider returned an invalid destination set");
     }
     indexed.set(estimate.destinationId, estimate);
-  }
-  if (indexed.size !== expectedIds.size) {
-    throw new Error("Route provider returned an incomplete destination set");
   }
   return indexed;
 }

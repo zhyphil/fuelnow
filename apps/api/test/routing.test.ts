@@ -1,5 +1,9 @@
 import { describe, expect, it, vi } from "vitest";
 
+import {
+  RouteBudgetExceededError,
+  RoutingProviderError,
+} from "../src/routing/errors.js";
 import { MapboxMatrixRoutingProvider } from "../src/routing/MapboxMatrixRoutingProvider.js";
 import { routeTopCandidates } from "../src/routing/routeTopCandidates.js";
 import type { RouteEstimate, RoutingProvider } from "../src/routing/types.js";
@@ -63,6 +67,7 @@ describe("routeTopCandidates", () => {
     expect(result.selectedCandidateIds).toEqual(["near", "mid"]);
     expect(result.matrixElementCount).toBe(2);
     expect(result.billableElementCount).toBe(2);
+    expect(result.routingStatus).toBe("complete");
     expect(result.candidates.map(({ id }) => id)).toEqual(["far", "near", "mid"]);
     expect(result.candidates.map(({ routeStatus }) => routeStatus)).toEqual([
       "not_requested",
@@ -98,7 +103,7 @@ describe("routeTopCandidates", () => {
     expect(provider.calculateMatrix).not.toHaveBeenCalled();
   });
 
-  it("rejects incomplete or ambiguous provider responses", async () => {
+  it("marks a missing destination as unreachable without losing candidates", async () => {
     const duplicateCandidates = [candidate("same", 1), candidate("same", 2)];
     const provider: RoutingProvider = {
       calculateMatrix: vi.fn().mockResolvedValue([]),
@@ -110,12 +115,56 @@ describe("routeTopCandidates", () => {
         candidates: duplicateCandidates,
       }),
     ).rejects.toThrow("Duplicate candidate id");
-    await expect(
-      routeTopCandidates(provider, {
-        origin: { longitude: 1, latitude: 43 },
-        candidates: [candidate("one", 1)],
-      }),
-    ).rejects.toThrow("incomplete destination set");
+    const result = await routeTopCandidates(provider, {
+      origin: { longitude: 1, latitude: 43 },
+      candidates: [candidate("one", 1)],
+    });
+    expect(result.routingStatus).toBe("partial");
+    expect(result.billableElementCount).toBe(1);
+    expect(result.candidates[0]).toMatchObject({
+      routeStatus: "unreachable",
+      route: null,
+      routeUnavailableReason: "unreachable",
+    });
+  });
+
+  it("degrades typed provider and budget failures to straight-line results", async () => {
+    const candidates = [candidate("near", 100), candidate("far", 200)];
+    const limitedProvider: RoutingProvider = {
+      calculateMatrix: vi
+        .fn()
+        .mockRejectedValue(new RoutingProviderError("rate_limited", true, 30)),
+    };
+
+    const limited = await routeTopCandidates(limitedProvider, {
+      origin: { longitude: 1, latitude: 43 },
+      candidates,
+    });
+    expect(limited).toMatchObject({
+      routingStatus: "unavailable",
+      routeUnavailableReason: "rate_limited",
+      retryAfterSeconds: 30,
+      billableElementCount: 2,
+    });
+    expect(limited.candidates.every(({ route }) => route === null)).toBe(true);
+    expect(
+      limited.candidates.every(
+        ({ routeUnavailableReason }) => routeUnavailableReason === "rate_limited",
+      ),
+    ).toBe(true);
+
+    const budgetProvider: RoutingProvider = {
+      calculateMatrix: vi.fn().mockRejectedValue(new RouteBudgetExceededError()),
+    };
+    const budget = await routeTopCandidates(budgetProvider, {
+      origin: { longitude: 1, latitude: 43 },
+      candidates,
+    });
+    expect(budget).toMatchObject({
+      routingStatus: "unavailable",
+      routeUnavailableReason: "budget_exceeded",
+      billableElementCount: 0,
+    });
   });
 });
 
@@ -187,12 +236,81 @@ describe("MapboxMatrixRoutingProvider", () => {
       fetchImplementation,
     });
 
-    await expect(
-      provider.calculateMatrix({
-        origin: { longitude: 1, latitude: 43 },
-        destinations: [{ id: "one", longitude: 1.1, latitude: 43.1 }],
-        profile: "driving-traffic",
-      }),
-    ).rejects.toThrow("invalid distance matrix");
+    const result = provider.calculateMatrix({
+      origin: { longitude: 1, latitude: 43 },
+      destinations: [{ id: "one", longitude: 1.1, latitude: 43.1 }],
+      profile: "driving-traffic",
+    });
+    await expect(result).rejects.toMatchObject({ reason: "invalid_response" });
+  });
+
+  it("preserves unreachable nulls as missing estimates", async () => {
+    const fetchImplementation = vi.fn().mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          code: "Ok",
+          durations: [[100, null]],
+          distances: [[1_000, null]],
+        }),
+        { status: 200 },
+      ),
+    );
+    const provider = new MapboxMatrixRoutingProvider({
+      accessToken: "test-token",
+      fetchImplementation,
+    });
+
+    const result = await provider.calculateMatrix({
+      origin: { longitude: 1, latitude: 43 },
+      destinations: [
+        { id: "reachable", longitude: 1.1, latitude: 43.1 },
+        { id: "unreachable", longitude: 1.2, latitude: 43.2 },
+      ],
+      profile: "driving-traffic",
+    });
+
+    expect(result.map(({ destinationId }) => destinationId)).toEqual(["reachable"]);
+  });
+
+  it("classifies timeout and rate-limit responses without exposing bodies", async () => {
+    const timeoutProvider = new MapboxMatrixRoutingProvider({
+      accessToken: "test-token",
+      fetchImplementation: vi
+        .fn()
+        .mockRejectedValue(
+          new DOMException("request with sensitive URL", "TimeoutError"),
+        ),
+    });
+    const routeRequest = {
+      origin: { longitude: 1, latitude: 43 },
+      destinations: [{ id: "one", longitude: 1.1, latitude: 43.1 }],
+      profile: "driving-traffic" as const,
+    };
+
+    await expect(timeoutProvider.calculateMatrix(routeRequest)).rejects.toMatchObject({
+      reason: "timeout",
+      requestSent: true,
+      message: "Routing provider unavailable: timeout",
+    });
+
+    const limitedProvider = new MapboxMatrixRoutingProvider({
+      accessToken: "test-token",
+      now: () => new Date("2026-09-04T03:00:00.000Z"),
+      fetchImplementation: vi.fn().mockResolvedValue(
+        new Response("sensitive provider body", {
+          status: 429,
+          headers: {
+            "x-rate-limit-reset": String(
+              new Date("2026-09-04T03:00:45.000Z").getTime() / 1_000,
+            ),
+          },
+        }),
+      ),
+    });
+    await expect(limitedProvider.calculateMatrix(routeRequest)).rejects.toMatchObject({
+      reason: "rate_limited",
+      retryAfterSeconds: 45,
+      message: "Routing provider unavailable: rate_limited",
+    });
   });
 });

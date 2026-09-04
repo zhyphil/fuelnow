@@ -6,7 +6,12 @@ export { PostgresRouteCache } from "./PostgresRouteCache.js";
 export type { RouteMonthlyUsage } from "./PostgresRouteCache.js";
 export { createRouteCacheKeyHash, ROUTE_ORIGIN_CELL_DECIMALS } from "./cacheKey.js";
 export type { RouteCacheKeyInput } from "./cacheKey.js";
-export { RouteBudgetExceededError } from "./routeCache.js";
+export {
+  RouteBudgetExceededError,
+  RoutingProviderError,
+  routingFailure,
+} from "./errors.js";
+export type { RouteUnavailableReason } from "./errors.js";
 export type {
   CachedRouteValue,
   FinalizeRouteUsageRequest,

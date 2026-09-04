@@ -7,6 +7,7 @@ Environment-variable validation remains owned by the executable application beca
 `resolveEnvironmentProfile` is pure and does not read `process.env`. Executable workspaces pass `APP_ENV`/`NODE_ENV` after reading their own runtime environment, which keeps browser/mobile bundles independent of Node globals and makes tests deterministic.
 
 `resolveRoutingConfig` validates the paid Matrix monthly element budget,
-per-search traffic element cap and route-cache TTL without reading environment
-variables directly. Its defaults keep paid routing disabled, restrict a search
-to nine provider elements and expire route data after five minutes.
+per-search traffic element cap, request timeout and route-cache TTL without
+reading environment variables directly. Its defaults keep paid routing
+disabled, restrict a search to nine provider elements, time out after 2.5
+seconds and expire route data after five minutes.

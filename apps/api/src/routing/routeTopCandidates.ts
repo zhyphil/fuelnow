@@ -1,4 +1,5 @@
 import type { ServicePointCandidate } from "../search/PostgresCandidateSearch.js";
+import { routingFailure, type RouteUnavailableReason } from "./errors.js";
 import {
   maximumDestinationsForProfile,
   type RouteCoordinate,
@@ -7,11 +8,13 @@ import {
   type RoutingProvider,
 } from "./types.js";
 
-export type CandidateRouteStatus = "calculated" | "not_requested";
+export type CandidateRouteStatus =
+  "calculated" | "not_requested" | "unavailable" | "unreachable";
 
 export interface CandidateWithRoute extends ServicePointCandidate {
   routeStatus: CandidateRouteStatus;
   route: RouteEstimate | null;
+  routeUnavailableReason: RouteUnavailableReason | null;
 }
 
 export interface RouteTopCandidatesRequest {
@@ -27,6 +30,9 @@ export interface RouteTopCandidatesResult {
   matrixElementCount: number;
   billableElementCount: number;
   profile: RoutingProfile;
+  routingStatus: "complete" | "partial" | "unavailable";
+  routeUnavailableReason: RouteUnavailableReason | null;
+  retryAfterSeconds: number | null;
 }
 
 function assertTopN(topN: number, maximum: number): void {
@@ -78,10 +84,36 @@ function indexEstimates(
     indexed.set(estimate.destinationId, estimate);
   }
 
-  if (indexed.size !== selectedCandidateIds.size) {
-    throw new Error("Routing provider returned an incomplete destination set");
-  }
   return indexed;
+}
+
+function unavailableResult(
+  candidates: ServicePointCandidate[],
+  selectedCandidateIds: string[],
+  profile: RoutingProfile,
+  reason: RouteUnavailableReason,
+  billableElementCount: number,
+  retryAfterSeconds: number | null,
+): RouteTopCandidatesResult {
+  const selected = new Set(selectedCandidateIds);
+  return {
+    candidates: candidates.map((candidate) => {
+      const wasSelected = selected.has(candidate.id);
+      return {
+        ...candidate,
+        routeStatus: wasSelected ? "unavailable" : "not_requested",
+        route: null,
+        routeUnavailableReason: wasSelected ? reason : null,
+      };
+    }),
+    selectedCandidateIds,
+    matrixElementCount: selectedCandidateIds.length,
+    billableElementCount,
+    profile,
+    routingStatus: "unavailable",
+    routeUnavailableReason: reason,
+    retryAfterSeconds,
+  };
 }
 
 export async function routeTopCandidates(
@@ -104,19 +136,36 @@ export async function routeTopCandidates(
       matrixElementCount: 0,
       billableElementCount: 0,
       profile,
+      routingStatus: "complete",
+      routeUnavailableReason: null,
+      retryAfterSeconds: null,
     };
   }
 
   const selectedCandidateIds = selected.map(({ id }) => id);
-  const estimates = await provider.calculateMatrix({
-    origin,
-    destinations: selected.map(({ id, longitude, latitude }) => ({
-      id,
-      longitude,
-      latitude,
-    })),
-    profile,
-  });
+  let estimates: RouteEstimate[];
+  try {
+    estimates = await provider.calculateMatrix({
+      origin,
+      destinations: selected.map(({ id, longitude, latitude }) => ({
+        id,
+        longitude,
+        latitude,
+      })),
+      profile,
+    });
+  } catch (error) {
+    const failure = routingFailure(error);
+    if (failure === null) throw error;
+    return unavailableResult(
+      candidates,
+      selectedCandidateIds,
+      profile,
+      failure.reason,
+      failure.billableElementCount ?? (failure.requestSent ? selected.length : 0),
+      "retryAfterSeconds" in failure ? failure.retryAfterSeconds : null,
+    );
+  }
   const estimateByDestination = indexEstimates(
     estimates,
     new Set(selectedCandidateIds),
@@ -125,16 +174,24 @@ export async function routeTopCandidates(
   return {
     candidates: candidates.map((candidate) => {
       const route = estimateByDestination.get(candidate.id) ?? null;
+      const wasSelected = selectedCandidateIds.includes(candidate.id);
       return {
         ...candidate,
-        routeStatus: route === null ? "not_requested" : "calculated",
+        routeStatus:
+          route !== null ? "calculated" : wasSelected ? "unreachable" : "not_requested",
         route,
+        routeUnavailableReason: route === null && wasSelected ? "unreachable" : null,
       };
     }),
     selectedCandidateIds,
     matrixElementCount: selected.length,
-    billableElementCount: estimates.filter(({ cacheStatus }) => cacheStatus === "miss")
-      .length,
+    billableElementCount:
+      selected.length -
+      estimates.filter(({ cacheStatus }) => cacheStatus === "hit").length,
     profile,
+    routingStatus:
+      estimateByDestination.size === selected.length ? "complete" : "partial",
+    routeUnavailableReason: null,
+    retryAfterSeconds: null,
   };
 }
