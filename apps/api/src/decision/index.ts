@@ -46,3 +46,15 @@ export type {
   OpenScoreInput,
   OpenScoreResult,
 } from "./scoreOperationalState.js";
+export {
+  FRESHNESS_SCORE_BY_LEVEL,
+  scoreFreshness,
+  scoreReliability,
+} from "./scoreDataQuality.js";
+export type {
+  FreshnessScoreBasis,
+  FreshnessScoreResult,
+  ReliabilityScoreBasis,
+  ReliabilityScoreInput,
+  ReliabilityScoreResult,
+} from "./scoreDataQuality.js";

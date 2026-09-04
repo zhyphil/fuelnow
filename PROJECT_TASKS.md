@@ -4,7 +4,7 @@
 > 需求来源：[france_spain_driver_decision_engine_project.md](./france_spain_driver_decision_engine_project.md)  
 > 当前状态：进行中  
 > 当前阶段：Phase 3 — 搜索、路线与决策引擎
-> 下一项任务：`P3-BEST-04` 定义 FreshnessScore 和 ReliabilityScore
+> 下一项任务：`P3-BEST-05` 定义 Fuel 专属 Best 公式
 > 最后更新：2026-09-04
 
 ## 使用方法
@@ -242,7 +242,7 @@ V1 的核心验收结果是：
 - [x] `P3-BEST-01` 定义 0–1 PriceScore：最低可比价得 1，其余按最低价/当前价计分，Unknown 得 0，覆盖免费价格、并列、异常数值、重复 ID 与高价离群值稳定性，输出可解释 basis 和比较基准（2026-09-04；354 tests；[PriceScore 说明](./docs/architecture/best-price-score.md)）
 - [x] `P3-BEST-02` 定义 0–1 DistanceScore 与 TravelTimeScore：全量候选统一按最近直线距离/当前距离计分，真实路线候选按最快 ETA/当前 ETA 计分，未知 ETA 得 0 且不伪造，覆盖并列、零值、空集、异常输入与离群值稳定性（2026-09-04；362 tests；[距离与 ETA 评分说明](./docs/architecture/best-distance-travel-time-scores.md)）
 - [x] `P3-BEST-03` 定义 OpenScore 与 AvailabilityScore：Open=1、Closing soon=0.75、Opening soon=0.25，Closed/Unknown=0 且临时关闭强制覆盖；仅明确 Available 获得可用性正分，其他 canonical 状态均不推断可用，并保留解释 basis（2026-09-04；378 tests；[营业与可用性评分说明](./docs/architecture/best-open-availability-scores.md)）
-- [ ] `P3-BEST-04` 定义 FreshnessScore 和 ReliabilityScore
+- [x] `P3-BEST-04` 定义 FreshnessScore 与 ReliabilityScore：Live/Verified/Recent=1、Stale=0.5、Unknown=0；复用既有 0–100 confidenceScore 归一化并强制 high/medium/low 区间一致，避免重复应用来源质量惩罚且不将分数表述为准确率（2026-09-04；388 tests；[数据质量评分说明](./docs/architecture/best-data-quality-scores.md)）
 - [ ] `P3-BEST-05` 定义 Fuel 专属 Best 公式
 - [ ] `P3-BEST-06` 将预计加油量、车辆油耗和绕路成本纳入 Fuel 计算
 - [ ] `P3-BEST-07` 定义 EV 专属 Best/Time-to-Solution 公式
@@ -604,3 +604,4 @@ V1 的核心验收结果是：
 | 2026-09-04 | 定义 Best PriceScore                           | 以最低可比价为 1、最低价/当前价为相对分，Unknown 为 0；免费、并列、异常值和离群值行为确定并返回解释 basis；完整质量门槛 354 项测试通过；见 `docs/architecture/best-price-score.md`                                                                           |
 | 2026-09-04 | 定义 Best DistanceScore 与 TravelTimeScore     | 直线距离为全候选诚实降级分，真实路线 ETA 独立计分；未知 ETA 不伪造，零值、并列、空集、异常输入与离群值行为固定；完整质量门槛 362 项测试通过；见 `docs/architecture/best-distance-travel-time-scores.md`                                                      |
 | 2026-09-04 | 定义 Best OpenScore 与 AvailabilityScore       | 明确 Open/Closing soon/Opening soon 分值，Closed/Unknown 无正分且临时关闭覆盖；只有 Available 获得可用性正分，所有 canonical 状态均有稳定 basis；完整质量门槛 378 项测试通过；见 `docs/architecture/best-open-availability-scores.md`                        |
+| 2026-09-04 | 定义 Best FreshnessScore 与 ReliabilityScore   | Live/Verified/Recent 无惩罚、Stale 降权、Unknown 无正分；confidenceScore 归一化并校验标签区间，不重复应用来源质量调整；完整质量门槛 388 项测试通过；见 `docs/architecture/best-data-quality-scores.md`                                                       |
