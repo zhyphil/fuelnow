@@ -4,7 +4,7 @@
 > 需求来源：[france_spain_driver_decision_engine_project.md](./france_spain_driver_decision_engine_project.md)  
 > 当前状态：进行中  
 > 当前阶段：Phase 3 — 搜索、路线与决策引擎
-> 下一项任务：`P3-BEST-02` 定义 DistanceScore 和 TravelTimeScore
+> 下一项任务：`P3-BEST-03` 定义 OpenScore 和 AvailabilityScore
 > 最后更新：2026-09-04
 
 ## 使用方法
@@ -240,7 +240,7 @@ V1 的核心验收结果是：
 ## 3.3 Best 排名
 
 - [x] `P3-BEST-01` 定义 0–1 PriceScore：最低可比价得 1，其余按最低价/当前价计分，Unknown 得 0，覆盖免费价格、并列、异常数值、重复 ID 与高价离群值稳定性，输出可解释 basis 和比较基准（2026-09-04；354 tests；[PriceScore 说明](./docs/architecture/best-price-score.md)）
-- [ ] `P3-BEST-02` 定义 DistanceScore 和 TravelTimeScore
+- [x] `P3-BEST-02` 定义 0–1 DistanceScore 与 TravelTimeScore：全量候选统一按最近直线距离/当前距离计分，真实路线候选按最快 ETA/当前 ETA 计分，未知 ETA 得 0 且不伪造，覆盖并列、零值、空集、异常输入与离群值稳定性（2026-09-04；362 tests；[距离与 ETA 评分说明](./docs/architecture/best-distance-travel-time-scores.md)）
 - [ ] `P3-BEST-03` 定义 OpenScore 和 AvailabilityScore
 - [ ] `P3-BEST-04` 定义 FreshnessScore 和 ReliabilityScore
 - [ ] `P3-BEST-05` 定义 Fuel 专属 Best 公式
@@ -602,3 +602,4 @@ V1 的核心验收结果是：
 | 2026-09-04 | 处理节假日 Unknown 与临时关闭                  | 周排班在 public holiday/日历未知时不冒充营业并输出专属 warning；临时关闭覆盖全部排班与 24/7 证据；完整质量门槛 339 项测试通过；见 `docs/architecture/holiday-and-temporary-closure.md`                                                                       |
 | 2026-09-04 | 无法解析的营业时间降级 Unknown                 | 区分缺失、部分与完全无法解析输入，重复/空日期和错误类型不生成无效排班；服务点保留且防御性求值不误报 Open/Closed；完整质量门槛 347 项测试通过；见 `docs/architecture/unparseable-opening-hours.md`                                                            |
 | 2026-09-04 | 定义 Best PriceScore                           | 以最低可比价为 1、最低价/当前价为相对分，Unknown 为 0；免费、并列、异常值和离群值行为确定并返回解释 basis；完整质量门槛 354 项测试通过；见 `docs/architecture/best-price-score.md`                                                                           |
+| 2026-09-04 | 定义 Best DistanceScore 与 TravelTimeScore     | 直线距离为全候选诚实降级分，真实路线 ETA 独立计分；未知 ETA 不伪造，零值、并列、空集、异常输入与离群值行为固定；完整质量门槛 362 项测试通过；见 `docs/architecture/best-distance-travel-time-scores.md`                                                      |

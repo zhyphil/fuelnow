@@ -22,3 +22,14 @@ export type {
   PriceScoreResult,
   ScoredPriceCandidate,
 } from "./scorePrices.js";
+export { scoreDistances, scoreTravelTimes } from "./scoreDistanceAndTravelTime.js";
+export type {
+  DistanceScoreBasis,
+  DistanceScoreCandidate,
+  DistanceScoreResult,
+  ScoredDistanceCandidate,
+  ScoredTravelTimeCandidate,
+  TravelTimeScoreBasis,
+  TravelTimeScoreCandidate,
+  TravelTimeScoreResult,
+} from "./scoreDistanceAndTravelTime.js";
