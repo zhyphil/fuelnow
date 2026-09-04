@@ -61,3 +61,8 @@ provider or persists fixture rows in the development database.
 radius and service type through the indexed PostGIS geography column. It returns
 exact metre distances and deterministic ordering while excluding only permanent
 closures; later decision tasks handle temporary closure and Unknown states.
+
+`findCandidatesWithExpansion` wraps that query with a bounded sparse-area
+policy. It grows the radius geometrically until the requested minimum is met or
+the hard maximum is reached, and returns the attempted radii and stop reason so
+callers can disclose expansion instead of padding results.
