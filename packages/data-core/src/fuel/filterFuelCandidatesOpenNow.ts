@@ -8,6 +8,14 @@ import type {
 } from "../domain.js";
 import type { FuelDistanceCandidate } from "./selectNearbyFuelCandidates.js";
 
+const COUNTRY_TIMEZONES = {
+  FR: "Europe/Paris",
+  ES: "Europe/Madrid",
+} as const;
+
+type SupportedOpeningTimezone =
+  (typeof COUNTRY_TIMEZONES)[keyof typeof COUNTRY_TIMEZONES];
+
 export interface EvaluatedFuelOpeningCandidate<
   TCandidate extends FuelDistanceCandidate = FuelDistanceCandidate,
 > {
@@ -83,10 +91,13 @@ function hasValidFullWeekSchedule(openingHours: NormalizedOpeningHours): boolean
 
 export function evaluateOpeningStatusAt(
   openingHours: NormalizedOpeningHours | null,
-  timezone: "Europe/Paris" | "Europe/Madrid",
+  timezone: SupportedOpeningTimezone,
   instant: DateTime,
 ): Extract<OpeningStatus, "open" | "closed" | "unknown"> {
   if (openingHours === null) {
+    return "unknown";
+  }
+  if (!Object.values(COUNTRY_TIMEZONES).includes(timezone)) {
     return "unknown";
   }
   if (openingHours.siteSchedule24Seven) {
@@ -150,8 +161,12 @@ export function filterFuelCandidatesOpenNow<TCandidate extends FuelDistanceCandi
     unknownCandidates: [],
   };
   for (const candidate of candidates) {
-    const openingStatus =
-      candidate.servicePoint.unattendedFuelPayment24Seven === true
+    const hasExpectedTimezone =
+      candidate.servicePoint.timezone ===
+      COUNTRY_TIMEZONES[candidate.servicePoint.country];
+    const openingStatus = !hasExpectedTimezone
+      ? "unknown"
+      : candidate.servicePoint.unattendedFuelPayment24Seven === true
         ? "open"
         : evaluateOpeningStatusAt(
             candidate.servicePoint.openingHours,

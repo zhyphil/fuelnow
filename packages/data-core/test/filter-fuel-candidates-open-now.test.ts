@@ -52,6 +52,7 @@ function makeCandidate(
     straightLineDistanceM: 100,
     servicePoint: {
       id,
+      country: timezone === "Europe/Paris" ? "FR" : "ES",
       timezone,
       openingHours,
     } as NormalizedServicePoint,
