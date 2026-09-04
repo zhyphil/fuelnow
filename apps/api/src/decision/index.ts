@@ -84,3 +84,23 @@ export type {
   FuelTripCostScoreResult,
   ScoredFuelTripCostCandidate,
 } from "./estimateFuelTripCost.js";
+export {
+  EV_BEST_FORMULA_VERSION,
+  EV_BEST_WEIGHTS,
+  estimateEvTimeToSolution,
+  rankEvBest,
+} from "./rankEvBest.js";
+export type {
+  EvBestCandidateInput,
+  EvBestComponentName,
+  EvBestComponentScores,
+  EvBestEligibility,
+  EvBestResult,
+  EvBestScoreBreakdown,
+  EvBestScoreContribution,
+  EvTimeToSolutionAssessment,
+  EvTimeToSolutionComponent,
+  EvTimeToSolutionInput,
+  ExcludedEvBestCandidate,
+  RankedEvBestCandidate,
+} from "./rankEvBest.js";
