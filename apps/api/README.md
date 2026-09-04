@@ -35,3 +35,7 @@ durable incremental checkpoints and a PostgreSQL store. Each page's raw records
 and next checkpoint commit in one transaction, so a failed page can be retried
 without losing or skipping source rows. Live provider readers remain disabled
 until their dedicated source-integration tasks.
+
+`runMeasuredSourceImport` wraps that pipeline with a durable sync-run record.
+It records mode, timing, committed pages/records, failed pages and a bounded,
+credential-redacted error while preserving the original error for the worker.

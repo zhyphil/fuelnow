@@ -1,6 +1,7 @@
 import { isDeepStrictEqual } from "node:util";
 
 import type {
+  IncrementalImportProgress,
   IncrementalImportResult,
   SourceCheckpoint,
   SourceImportStore,
@@ -13,6 +14,7 @@ export interface IncrementalImportOptions {
   store: SourceImportStore;
   maxPages?: number;
   signal?: AbortSignal;
+  onPagePersisted?: (progress: IncrementalImportProgress) => void;
 }
 
 function checkpointTimestamp(value: string | null, label: string): number | null {
@@ -51,6 +53,7 @@ export async function importSourceIncrementally({
   store,
   maxPages = 10_000,
   signal,
+  onPagePersisted,
 }: IncrementalImportOptions): Promise<IncrementalImportResult> {
   if (sourceId.trim().length === 0) {
     throw new Error("sourceId must not be blank");
@@ -94,6 +97,7 @@ export async function importSourceIncrementally({
 
     recordsProcessed += page.records.length;
     checkpoint = page.nextCheckpoint;
+    onPagePersisted?.({ checkpoint, pagesRead, recordsProcessed });
 
     if (page.done) {
       return {

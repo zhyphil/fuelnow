@@ -55,3 +55,9 @@ export interface IncrementalImportResult {
   pagesRead: number;
   recordsProcessed: number;
 }
+
+export interface IncrementalImportProgress {
+  checkpoint: SourceCheckpoint;
+  pagesRead: number;
+  recordsProcessed: number;
+}

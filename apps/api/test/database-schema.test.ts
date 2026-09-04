@@ -28,6 +28,10 @@ const lifecycleMigrationUrl = new URL(
   "../db/migrations/0006_source_lifecycle.sql",
   import.meta.url,
 );
+const syncRunMigrationUrl = new URL(
+  "../db/migrations/0007_sync_run_observability.sql",
+  import.meta.url,
+);
 
 describe("initial PostgreSQL/PostGIS schema", () => {
   it("enables PostGIS and uses WGS84 geography points", async () => {
@@ -184,5 +188,38 @@ describe("initial PostgreSQL/PostGIS schema", () => {
     expect(migration).toContain("FUNCTION mark_source_record_deleted");
     expect(migration).toContain("FUNCTION withdraw_data_source");
     expect(migration).toContain("source_records_withdrawn_source_guard");
+  });
+
+  it("records sync timing, volume, failure and bounded error fields", async () => {
+    const migration = await readFile(syncRunMigrationUrl, "utf8");
+
+    for (const column of [
+      "pages_processed",
+      "records_processed",
+      "failed_pages",
+      "duration_ms",
+      "error_code",
+      "error_message",
+    ]) {
+      expect(migration).toContain(`ADD COLUMN ${column}`);
+    }
+    expect(migration).toContain("length(error_message) <= 1000");
+  });
+
+  it("allows only one running sync per source", async () => {
+    const migration = await readFile(syncRunMigrationUrl, "utf8");
+
+    expect(migration).toContain(
+      "CREATE UNIQUE INDEX sync_runs_one_running_per_source_uidx",
+    );
+    expect(migration).toContain("WHERE status = 'running'");
+  });
+
+  it("starts and terminally completes sync runs through guarded functions", async () => {
+    const migration = await readFile(syncRunMigrationUrl, "utf8");
+
+    expect(migration).toContain("FUNCTION start_sync_run");
+    expect(migration).toContain("FUNCTION finish_sync_run");
+    expect(migration).toContain("AND status = 'running'");
   });
 });
