@@ -703,6 +703,11 @@ describe("API runtime configuration", () => {
       databaseUrl: "postgresql://example.invalid/fuel_now",
       databasePoolMax: 10,
       databaseSsl: false,
+      corsAllowedOrigins: ["http://localhost:8081"],
+      rateLimitMaxPerMinute: 60,
+      bodyLimitBytes: 16_384,
+      trustedProxies: [],
+      requireSecureTransport: false,
     });
     expect(() => resolveApiRuntimeConfig({ APP_ENV: "test" })).toThrow(
       "DATABASE_URL is required",
@@ -718,6 +723,10 @@ describe("API runtime configuration", () => {
         DATABASE_URL: "postgresql://example.invalid/fuel_now",
         DATABASE_POOL_MAX: "20",
         DATABASE_SSL_MODE: "require",
+        CORS_ALLOWED_ORIGINS: "https://app.fuel-now.example",
+        RATE_LIMIT_MAX_PER_MINUTE: "120",
+        API_BODY_LIMIT_BYTES: "32768",
+        API_TRUSTED_PROXIES: "10.0.0.0/8,2001:db8::/32",
       }),
     ).toMatchObject({
       host: "0.0.0.0",
@@ -725,6 +734,11 @@ describe("API runtime configuration", () => {
       logLevel: "info",
       databasePoolMax: 20,
       databaseSsl: true,
+      corsAllowedOrigins: ["https://app.fuel-now.example"],
+      rateLimitMaxPerMinute: 120,
+      bodyLimitBytes: 32_768,
+      trustedProxies: ["10.0.0.0/8", "2001:db8::/32"],
+      requireSecureTransport: true,
     });
   });
 
@@ -739,5 +753,24 @@ describe("API runtime configuration", () => {
     expect(() =>
       resolveApiRuntimeConfig({ ...base, DATABASE_SSL_MODE: "prefer" }),
     ).toThrow("DATABASE_SSL_MODE");
+    expect(() =>
+      resolveApiRuntimeConfig({ ...base, RATE_LIMIT_MAX_PER_MINUTE: "0" }),
+    ).toThrow("RATE_LIMIT_MAX_PER_MINUTE");
+    expect(() =>
+      resolveApiRuntimeConfig({ ...base, API_BODY_LIMIT_BYTES: "1000" }),
+    ).toThrow("API_BODY_LIMIT_BYTES");
+    expect(() =>
+      resolveApiRuntimeConfig({ ...base, API_TRUSTED_PROXIES: "any" }),
+    ).toThrow("API_TRUSTED_PROXIES");
+    expect(() =>
+      resolveApiRuntimeConfig({ ...base, CORS_ALLOWED_ORIGINS: "*" }),
+    ).toThrow("CORS_ALLOWED_ORIGINS");
+    expect(() =>
+      resolveApiRuntimeConfig({
+        ...base,
+        APP_ENV: "production",
+        CORS_ALLOWED_ORIGINS: "http://app.fuel-now.example",
+      }),
+    ).toThrow("HTTPS in production");
   });
 });

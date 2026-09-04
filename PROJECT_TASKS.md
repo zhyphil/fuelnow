@@ -4,7 +4,7 @@
 > 需求来源：[france_spain_driver_decision_engine_project.md](./france_spain_driver_decision_engine_project.md)  
 > 当前状态：进行中  
 > 当前阶段：Phase 3 — 搜索、路线与决策引擎
-> 下一项任务：`P3-API-08` 添加接口输入校验、限流和基本安全保护
+> 下一项任务：`P3-API-09` 编写 API 文档与示例
 > 最后更新：2026-09-04
 
 ## 使用方法
@@ -261,7 +261,7 @@ V1 的核心验收结果是：
 - [x] `P3-API-05` 为 `GET /v1/nearby` 增加可独立或组合使用的 connectorType 与 minimumPowerKw（1–1,000 kW）：仅允许 Charge 服务并在数据访问前拒绝 unknown/非法接口、越界功率与跨服务组合；PostGIS 参数化 EXISTS 要求同一 operational connector 同时满足所有条件，避免跨设备拼接类型和功率，同时保留 operational Unknown 候选；响应回显有效筛选，Best 在完整证据接入前明确降级（2026-09-04；500 tests；[EV connector 过滤](./docs/architecture/nearby-ev-filter.md)）
 - [x] `P3-API-06` 为附近结果和详情页接入同一批量证据读取/响应契约，返回独立营业与服务状态、可空价格、按 country+service 选择的 source/许可/时间、请求时重算 freshness、非伪造 confidence 及四服务专属字段；Fuel Cheapest 仅在当前可比价格存在时启用，stale/expired/Unknown/会员价无低价优势，无合格价格明确降级，Charge price/live availability 保持政策性 Unknown；真实 Node/pg + 全新 PostgreSQL/PostGIS 四服务 fixture 查询通过（2026-09-04；509 tests；[API 服务证据](./docs/architecture/api-service-evidence.md)）
 - [x] `P3-API-07` 统一所有 API 错误为 requestId/code/message/retryable 契约，区分 schema、筛选组合、未知路由/站点与脱敏内部错误；附近搜索同时返回请求 capability、实际 appliedSort 与共享 SearchOutcome，精确表达空结果、Nearest 回退及价格/营业/设备/路线 Unknown 计数，避免把降级结果伪装成请求模式成功（2026-09-04；513 tests；[API 错误与结果](./docs/architecture/api-errors-and-outcomes.md)）
-- [ ] `P3-API-08` 添加接口输入校验、限流和基本安全保护
+- [x] `P3-API-08` 在既有 TypeBox 严格输入校验上增加显式 CORS 白名单、每客户端 60/min 默认限流（含未知路由）、16 KiB 默认 body 上限、Helmet/no-store 响应头与生产 HTTPS 门槛；只信任显式 IP/CIDR 代理，默认忽略伪造 Forwarded headers；关闭含精确坐标 URL 的内置日志并仅记录 route template，固定 Fastify 5 兼容插件版本，同时声明多实例发布前需共享 limiter store（2026-09-04；521 tests；[API 输入与安全边界](./docs/architecture/api-input-rate-security.md)）
 - [ ] `P3-API-09` 编写 API 文档与示例
 - [ ] `P3-API-10` 建立接口集成与性能测试
 
@@ -620,3 +620,4 @@ V1 的核心验收结果是：
 | 2026-09-04 | 支持附近 EV connector 与功率过滤              | 新增 connectorType 与 minimumPowerKw，请求组合必须由同一 operational connector 满足；拒绝 unknown、越界与跨服务筛选并回显有效条件；全新 PostGIS 迁移验证通过，完整质量门槛 500 项测试通过；见 `docs/architecture/nearby-ev-filter.md`                    |
 | 2026-09-04 | 接入 API 价格、状态与来源质量证据              | 附近和详情共用批量服务证据；返回价格/状态/source/freshness/confidence 与四服务字段，按请求时间淘汰过期 Fuel 价格并正式启用合格 Cheapest；真实 Node/pg 四服务 fixture 查询通过，完整质量门槛 509 项测试通过；见 `docs/architecture/api-service-evidence.md`     |
 | 2026-09-04 | 统一 API 错误与降级结果                        | 全部错误使用 requestId/code/message/retryable 且内部细节不外泄；附近响应区分请求 capability 与实际 outcome，返回空结果、回退和 Unknown 精确计数；完整质量门槛 513 项测试通过；见 `docs/architecture/api-errors-and-outcomes.md`                  |
+| 2026-09-04 | 建立 API 输入、限流与安全边界                  | 严格 schema 之外新增 CORS、单客户端/未知路由限流、body 上限、安全/no-store headers、生产 HTTPS 与显式可信代理；精确 origin 不进入请求日志；固定 Fastify 5 插件并记录多实例共享存储门槛；完整质量门槛 521 项测试通过；见 `docs/architecture/api-input-rate-security.md` |

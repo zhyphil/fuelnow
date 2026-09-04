@@ -22,7 +22,7 @@ Environment files matching `.env` and `.env.*` are ignored. `.env.example` is th
 | Provider credentials | `REVE_API_KEY`, `MAPBOX_ACCESS_TOKEN` | Server secret | Empty in repository; inject from local secret store/CI/deployment runtime |
 | Routing budget | `MAPBOX_MONTHLY_ELEMENT_BUDGET`, `MAPBOX_ELEMENTS_PER_SEARCH_MAX`, `MAPBOX_TIMEOUT_MS`, `ROUTE_CACHE_TTL_SECONDS` | Server config | Budget `0` disables paid misses; traffic max 9 elements; timeout max 10 s; cache max 15 min |
 | OSM import | `OSM_PBF_PATH` | Worker path/config | Points to approved regional input; never configures public Overpass as app backend |
-| API boundary | `CORS_ALLOWED_ORIGINS`, `RATE_LIMIT_MAX_PER_MINUTE` | Server config | Production origins are explicit; wildcard CORS is not a production default |
+| API boundary | `CORS_ALLOWED_ORIGINS`, `RATE_LIMIT_MAX_PER_MINUTE`, `API_BODY_LIMIT_BYTES`, `API_TRUSTED_PROXIES` | Server config | Production origins are explicit HTTPS origins; forwarded headers are ignored unless the direct proxy IP/CIDR is trusted |
 | Observability | `OTEL_EXPORTER_OTLP_ENDPOINT` | Server config/possibly secret | Treat authenticated endpoint URLs as secrets; redact headers/query credentials |
 | Mobile-public | `EXPO_PUBLIC_APP_ENV`, `EXPO_PUBLIC_API_BASE_URL` | Public client bundle | Never store secrets, database URLs or provider tokens in `EXPO_PUBLIC_*` |
 
@@ -70,6 +70,10 @@ Only `EXPO_PUBLIC_*` variables may be embedded. `EXPO_PUBLIC_API_BASE_URL` point
 - Reve and OSM supplement are disabled.
 - Mapbox monthly element budget is `0`, selecting the free straight-line fallback.
 - API listens on loopback for local development.
+- Browser origins default only to the local Expo development origin; production
+  must provide one or more exact HTTPS origins and never accepts `*`.
+- The read API defaults to 60 requests per client/minute and a 16 KiB request
+  body; trusted proxy addresses default to none.
 - Local database credentials are clearly placeholders and must not be reused outside local Docker.
 
 ## Verification

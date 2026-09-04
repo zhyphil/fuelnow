@@ -28,6 +28,9 @@ Every API error has exactly these fields:
 | --- | --- | --- |
 | 400 | `invalid_request` | Query/path schema or request parsing failed |
 | 400 | `invalid_filter_combination` | Individually valid filters cannot be combined with the selected service |
+| 400 | `secure_transport_required` | Production request did not arrive over direct or trusted-proxy HTTPS |
+| 413 | `request_too_large` | The request body exceeded the configured byte limit |
+| 429 | `rate_limit_exceeded` | The client exceeded the configured minute window; response is retryable |
 | 404 | `route_not_found` | The API route does not exist |
 | 404 | `service_point_not_found` | A valid canonical service-point ID does not exist |
 | 500 | `internal_server_error` | An unexpected internal or dependency failure occurred |

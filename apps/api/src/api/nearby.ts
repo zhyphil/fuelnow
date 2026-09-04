@@ -357,6 +357,8 @@ export function registerNearbyRoute(
         response: {
           200: NearbyResponseSchema,
           400: ApiErrorResponseSchema,
+          413: ApiErrorResponseSchema,
+          429: ApiErrorResponseSchema,
           500: ApiErrorResponseSchema,
         },
       },

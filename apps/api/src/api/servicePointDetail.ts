@@ -143,7 +143,9 @@ export function registerServicePointDetailRoute(
         response: {
           200: ServicePointDetailResponseSchema,
           400: ApiErrorResponseSchema,
+          413: ApiErrorResponseSchema,
           404: ServicePointNotFoundResponseSchema,
+          429: ApiErrorResponseSchema,
           500: ApiErrorResponseSchema,
         },
       },

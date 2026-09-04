@@ -4,6 +4,9 @@ import type { FastifyInstance } from "fastify";
 export const API_ERROR_CODES = [
   "invalid_request",
   "invalid_filter_combination",
+  "request_too_large",
+  "rate_limit_exceeded",
+  "secure_transport_required",
   "route_not_found",
   "service_point_not_found",
   "internal_server_error",
@@ -30,7 +33,10 @@ export class ApiRequestError extends Error {
   public readonly statusCode = 400;
 
   public constructor(
-    public readonly apiCode: Extract<ApiErrorCode, "invalid_filter_combination">,
+    public readonly apiCode: Extract<
+      ApiErrorCode,
+      "invalid_filter_combination" | "secure_transport_required"
+    >,
     message: string,
   ) {
     super(message);
@@ -48,12 +54,6 @@ export function apiErrorResponse(
 }
 
 export function registerApiErrorHandling(app: FastifyInstance): void {
-  app.setNotFoundHandler((request, reply) =>
-    reply
-      .code(404)
-      .send(apiErrorResponse(request.id, "route_not_found", "Route not found")),
-  );
-
   app.setErrorHandler((error, request, reply) => {
     if (error instanceof ApiRequestError) {
       return reply
@@ -73,6 +73,27 @@ export function registerApiErrorHandling(app: FastifyInstance): void {
         );
     }
 
+    if (errorMetadata?.statusCode === 413) {
+      return reply
+        .code(413)
+        .send(
+          apiErrorResponse(request.id, "request_too_large", "Request body too large"),
+        );
+    }
+
+    if (errorMetadata?.statusCode === 429) {
+      return reply
+        .code(429)
+        .send(
+          apiErrorResponse(
+            request.id,
+            "rate_limit_exceeded",
+            "Rate limit exceeded",
+            true,
+          ),
+        );
+    }
+
     request.log.error(
       { errorName: error instanceof Error ? error.name : "UnknownError" },
       "Unhandled API request failure",
@@ -83,4 +104,12 @@ export function registerApiErrorHandling(app: FastifyInstance): void {
         apiErrorResponse(request.id, "internal_server_error", "Internal server error"),
       );
   });
+}
+
+export function registerApiNotFoundHandler(app: FastifyInstance): void {
+  app.setNotFoundHandler({ preHandler: app.rateLimit() }, (request, reply) =>
+    reply
+      .code(404)
+      .send(apiErrorResponse(request.id, "route_not_found", "Route not found")),
+  );
 }

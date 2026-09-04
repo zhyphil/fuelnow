@@ -17,6 +17,13 @@ async function startApi(): Promise<void> {
     candidateSearch: new PostgresCandidateSearch(pool),
     servicePointDetails: new PostgresServicePointDetail(pool),
     servicePointEvidence: new PostgresServicePointEvidence(pool),
+    security: {
+      corsAllowedOrigins: config.corsAllowedOrigins,
+      rateLimitMaxPerMinute: config.rateLimitMaxPerMinute,
+      bodyLimitBytes: config.bodyLimitBytes,
+      trustedProxies: config.trustedProxies,
+      requireSecureTransport: config.requireSecureTransport,
+    },
     logger:
       config.logLevel === "silent"
         ? false

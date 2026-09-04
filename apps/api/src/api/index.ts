@@ -9,8 +9,11 @@ export {
   ApiRequestError,
   apiErrorResponse,
   registerApiErrorHandling,
+  registerApiNotFoundHandler,
 } from "./errors.js";
 export type { ApiErrorCode, ApiErrorResponse } from "./errors.js";
+export { DEFAULT_API_SECURITY_OPTIONS, registerApiSecurity } from "./security.js";
+export type { ApiSecurityOptions } from "./security.js";
 export {
   NEARBY_DEFAULT_RADIUS_METRES,
   NEARBY_MAXIMUM_RADIUS_METRES,

@@ -1,4 +1,5 @@
 import { resolveEnvironmentProfile, type LogLevel } from "@fuel-now/config";
+import { isIP } from "node:net";
 
 export interface ApiRuntimeConfig {
   host: string;
@@ -7,6 +8,11 @@ export interface ApiRuntimeConfig {
   databaseUrl: string;
   databasePoolMax: number;
   databaseSsl: boolean;
+  corsAllowedOrigins: string[];
+  rateLimitMaxPerMinute: number;
+  bodyLimitBytes: number;
+  trustedProxies: string[];
+  requireSecureTransport: boolean;
 }
 
 function integerInRange(
@@ -29,6 +35,74 @@ function required(name: string, value: string | undefined): string {
     throw new Error(`${name} is required`);
   }
   return value;
+}
+
+function corsAllowedOrigins(
+  value: string | undefined,
+  isProduction: boolean,
+): string[] {
+  const rawOrigins =
+    value
+      ?.split(",")
+      .map((origin) => origin.trim())
+      .filter((origin) => origin !== "") ?? [];
+  if (rawOrigins.length === 0) {
+    if (isProduction) {
+      throw new Error("CORS_ALLOWED_ORIGINS is required in production");
+    }
+    return ["http://localhost:8081"];
+  }
+  if (rawOrigins.length > 20 || new Set(rawOrigins).size !== rawOrigins.length) {
+    throw new Error("CORS_ALLOWED_ORIGINS must contain 1 to 20 unique origins");
+  }
+  return rawOrigins.map((origin) => {
+    let parsed: URL;
+    try {
+      parsed = new URL(origin);
+    } catch {
+      throw new Error("CORS_ALLOWED_ORIGINS contains an invalid origin");
+    }
+    if (
+      !["http:", "https:"].includes(parsed.protocol) ||
+      parsed.username !== "" ||
+      parsed.password !== "" ||
+      parsed.pathname !== "/" ||
+      parsed.search !== "" ||
+      parsed.hash !== "" ||
+      origin !== parsed.origin ||
+      (isProduction && parsed.protocol !== "https:")
+    ) {
+      throw new Error(
+        "CORS_ALLOWED_ORIGINS must contain exact HTTP origins (HTTPS in production)",
+      );
+    }
+    return parsed.origin;
+  });
+}
+
+function trustedProxies(value: string | undefined): string[] {
+  const entries =
+    value
+      ?.split(",")
+      .map((entry) => entry.trim())
+      .filter((entry) => entry !== "") ?? [];
+  if (entries.length > 20 || new Set(entries).size !== entries.length) {
+    throw new Error("API_TRUSTED_PROXIES must contain at most 20 unique entries");
+  }
+  for (const entry of entries) {
+    const [address, prefix, extra] = entry.split("/");
+    const family = address === undefined ? 0 : isIP(address);
+    const maximumPrefix = family === 4 ? 32 : 128;
+    if (
+      family === 0 ||
+      extra !== undefined ||
+      (prefix !== undefined &&
+        (!/^\d+$/.test(prefix) || Number(prefix) < 0 || Number(prefix) > maximumPrefix))
+    ) {
+      throw new Error("API_TRUSTED_PROXIES must contain only IP or CIDR entries");
+    }
+  }
+  return entries;
 }
 
 export function resolveApiRuntimeConfig(
@@ -55,5 +129,25 @@ export function resolveApiRuntimeConfig(
       100,
     ),
     databaseSsl: databaseSslMode === "require",
+    corsAllowedOrigins: corsAllowedOrigins(
+      environment.CORS_ALLOWED_ORIGINS,
+      profile.isProduction,
+    ),
+    rateLimitMaxPerMinute: integerInRange(
+      "RATE_LIMIT_MAX_PER_MINUTE",
+      environment.RATE_LIMIT_MAX_PER_MINUTE,
+      60,
+      1,
+      10_000,
+    ),
+    bodyLimitBytes: integerInRange(
+      "API_BODY_LIMIT_BYTES",
+      environment.API_BODY_LIMIT_BYTES,
+      16_384,
+      1_024,
+      1_048_576,
+    ),
+    trustedProxies: trustedProxies(environment.API_TRUSTED_PROXIES),
+    requireSecureTransport: profile.requireSecureTransport,
   };
 }

@@ -54,6 +54,15 @@ incompatible filters, missing routes or points, and unexpected server failures
 have stable codes. Validation responses do not echo input, and unexpected error
 details are not exposed to the client.
 
+The API boundary applies an explicit CORS allowlist, per-client in-memory rate
+limit, a 16 KiB default body limit, security headers and `private, no-store`
+responses. Production requires HTTPS, including through an explicitly trusted
+proxy IP/CIDR when TLS terminates upstream. Forwarded address/protocol headers
+are ignored by default. Built-in URL request logging is disabled; the replacement
+completion log records only the method, route template, status and duration, not
+the coordinate-bearing query string. Multi-instance deployments must replace
+the bounded local limiter store with a shared store before public release.
+
 `GET /v1/service-points/:id` resolves one canonical UUID and returns its stable
 location, address, opening and lifecycle detail. Invalid identifiers are rejected
 before data access, while an unknown canonical point returns a traceable 404.
