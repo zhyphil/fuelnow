@@ -14,3 +14,15 @@ Current implementation work proceeds through Phase 2, then the decision API, mob
 The pnpm monorepo layout is documented in [`docs/architecture/repository-structure.md`](./docs/architecture/repository-structure.md).
 
 For local configuration, copy [`.env.example`](./.env.example) to an untracked `.env`. Provider credentials are optional and remain blank; the default configuration disables source synchronization and paid routing.
+
+## Local development
+
+Use Node.js 24 and pnpm 10.28.2, then run:
+
+```text
+pnpm install --frozen-lockfile
+cp .env.example .env
+pnpm check
+```
+
+The API and mobile workspaces are currently composition placeholders and receive runnable commands in their implementation phases. See the [local development guide](./docs/development/local-development.md) for workspace-specific commands, source-safety rules and troubleshooting.
