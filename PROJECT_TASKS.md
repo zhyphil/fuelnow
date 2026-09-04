@@ -4,7 +4,7 @@
 > 需求来源：[france_spain_driver_decision_engine_project.md](./france_spain_driver_decision_engine_project.md)  
 > 当前状态：进行中  
 > 当前阶段：Phase 2 — 项目骨架与统一数据层
-> 下一项任务：`P2-DB-04` 建立原始数据导入与增量更新任务
+> 下一项任务：`P2-DB-05` 建立不同来源的站点去重与合并规则
 > 最后更新：2026-09-04
 
 ## 使用方法
@@ -196,7 +196,7 @@ V1 的核心验收结果是：
 - [x] `P2-DB-01` 建立 PostgreSQL 18/PostGIS 3.6 SQL-first 数据库结构，覆盖 canonical 站点、四类服务、来源证据与同步记录；锁定本地镜像，提供可重复迁移和结构检查命令，并在真实 PostgreSQL 18.6/PostGIS 3.6 上连续执行两次迁移通过（2026-09-04；17 tables；164 tests；[数据库结构说明](./docs/architecture/database-schema.md)）
 - [x] `P2-DB-02` 建立 1 个 PostGIS GiST 位置索引和 8 个国家/服务/状态/Fuel/EV 常用筛选索引，迁移执行器按编号顺序发现并跳过已记录版本；真实 PostgreSQL 验证索引 ready/valid，`EXPLAIN` 确认半径、服务类型和最新 Fuel 价格查询分别使用目标索引（2026-09-04；167 tests；[索引说明](./docs/architecture/database-indexes.md)）
 - [x] `P2-DB-03` 以 `(source_id, source_record_id)` 保存并唯一约束来源原始身份，提供防旧数据覆盖的事务 upsert；真实数据库验证相同输入不变、较新输入原地更新、过时输入不覆盖且始终只有一条身份记录（2026-09-04；170 tests；[来源幂等说明](./docs/architecture/source-record-idempotency.md)）
-- [ ] `P2-DB-04` 建立原始数据导入与增量更新任务
+- [x] `P2-DB-04` 建立 provider-neutral 分页原始数据导入与 PostgreSQL 增量 checkpoint，逐页事务原子提交 raw records + cursor/high watermark，支持恢复、取消、最大页数、停滞和时间倒退保护；真实数据库验证 checkpoint 推进后完整回滚（2026-09-04；178 tests；[增量导入说明](./docs/architecture/incremental-source-import.md)）
 - [ ] `P2-DB-05` 建立不同来源的站点去重与合并规则
 - [ ] `P2-DB-06` 处理删除、关闭、缺货和来源撤回
 - [ ] `P2-DB-07` 记录每次同步时间、数量、错误和耗时
@@ -579,3 +579,4 @@ V1 的核心验收结果是：
 | 2026-09-04 | 建立 PostgreSQL/PostGIS 数据库结构 | 在真实 PostgreSQL 18.6/PostGIS 3.6 上连续两次成功执行事务迁移，验证 17 张基础表、迁移记录和 WGS84 geography 字段；完整质量门槛 164 项测试通过；见 `docs/architecture/database-schema.md` |
 | 2026-09-04 | 建立地理位置和常用筛选索引 | 创建 9 个空间/常用筛选索引；数据库确认均 ready/valid，执行计划实际使用 GiST、service type 与 latest Fuel price 索引；完整质量门槛 167 项测试通过；见 `docs/architecture/database-indexes.md` |
 | 2026-09-04 | 建立来源原始身份与同步幂等 | 以来源+原始 ID 唯一约束 raw record，事务验证重复输入不变、较新输入更新、过时输入不覆盖且无重复；完整质量门槛 170 项测试通过；见 `docs/architecture/source-record-idempotency.md` |
+| 2026-09-04 | 建立原始数据导入与增量更新 | worker 按已保存 checkpoint 分页读取，逐页原子提交 raw records 与下一 cursor/high watermark，覆盖恢复、失败回滚、停滞、循环和时间倒退防护；完整质量门槛 178 项测试通过；见 `docs/architecture/incremental-source-import.md` |

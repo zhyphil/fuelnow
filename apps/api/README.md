@@ -29,3 +29,9 @@ SQL migrations in order and can be executed again without deleting data.
 `db:verify` checks the PostGIS extension, required tables, migration ledger,
 WGS84 geography column and required query indexes. `db:down` stops the local
 service but intentionally preserves its named Docker volume.
+
+The worker's `source-import` module provides a provider-neutral paged reader,
+durable incremental checkpoints and a PostgreSQL store. Each page's raw records
+and next checkpoint commit in one transaction, so a failed page can be retried
+without losing or skipping source rows. Live provider readers remain disabled
+until their dedicated source-integration tasks.
