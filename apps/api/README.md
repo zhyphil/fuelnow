@@ -21,6 +21,12 @@ precise request origin is passed directly to PostGIS but is not included in the
 response, logs or persistent API state. Radius, country and sort controls are
 added by their dedicated follow-up tasks.
 
+`GET /v1/service-points/:id` resolves one canonical UUID and returns its stable
+location, address, opening and lifecycle detail. Invalid identifiers are rejected
+before data access, while an unknown canonical point returns a traceable 404.
+Evidence-bearing price, equipment status and provenance fields remain assigned
+to their dedicated API response task.
+
 ## Local database
 
 The repository includes a local PostgreSQL 18/PostGIS 3.6 service and a versioned,
@@ -72,6 +78,11 @@ exact metre distances and deterministic ordering while excluding only permanent
 closures. Site schedule status and the requested service's schedule status are
 returned as separate fields so downstream decisions cannot accidentally inherit
 Fuel-station hours for another service.
+
+`PostgresServicePointDetail` performs a parameterized primary-key lookup and
+maps the canonical point plus its declared service types into the HTTP detail
+shape. It validates database values before returning them and keeps closed
+points directly addressable so clients can explain their lifecycle state.
 
 `findCandidatesWithExpansion` wraps that query with a bounded sparse-area
 policy. It grows the radius geometrically until the requested minimum is met or

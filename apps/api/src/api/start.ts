@@ -1,5 +1,6 @@
 import { Pool } from "pg";
 
+import { PostgresServicePointDetail } from "../detail/PostgresServicePointDetail.js";
 import { PostgresCandidateSearch } from "../search/PostgresCandidateSearch.js";
 import { createApiApp } from "./app.js";
 import { resolveApiRuntimeConfig } from "./config.js";
@@ -13,6 +14,7 @@ async function startApi(): Promise<void> {
   });
   const app = createApiApp({
     candidateSearch: new PostgresCandidateSearch(pool),
+    servicePointDetails: new PostgresServicePointDetail(pool),
     logger:
       config.logLevel === "silent"
         ? false

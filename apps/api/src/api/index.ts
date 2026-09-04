@@ -13,3 +13,15 @@ export {
   registerNearbyRoute,
 } from "./nearby.js";
 export type { NearbyQuery, NearbyResponse, NearbyServicePoint } from "./nearby.js";
+export {
+  ServicePointDetailResponseSchema,
+  ServicePointDetailSchema,
+  ServicePointIdParamsSchema,
+  ServicePointNotFoundResponseSchema,
+  registerServicePointDetailRoute,
+} from "./servicePointDetail.js";
+export type {
+  ServicePointDetailResponse,
+  ServicePointIdParams,
+  ServicePointNotFoundResponse,
+} from "./servicePointDetail.js";

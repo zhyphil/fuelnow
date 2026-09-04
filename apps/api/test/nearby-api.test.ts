@@ -2,6 +2,7 @@ import type {
   CandidateSearchRequest,
   ServicePointCandidate,
 } from "../src/search/PostgresCandidateSearch.js";
+import type { ServicePointDetailPort } from "../src/detail/PostgresServicePointDetail.js";
 import type { CandidateSearchPort } from "../src/search/expandingCandidateSearch.js";
 import { afterEach, describe, expect, it } from "vitest";
 
@@ -43,6 +44,12 @@ class FakeCandidateSearch implements CandidateSearchPort {
   }
 }
 
+const servicePointDetails: ServicePointDetailPort = {
+  async findById() {
+    return null;
+  },
+};
+
 const apps: Array<ReturnType<typeof createApiApp>> = [];
 
 afterEach(async () => {
@@ -56,7 +63,7 @@ describe("GET /v1/nearby", () => {
         ? Array.from({ length: 10 }, (_, index) => candidate(index))
         : [],
     );
-    const app = createApiApp({ candidateSearch: search });
+    const app = createApiApp({ candidateSearch: search, servicePointDetails });
     apps.push(app);
 
     const response = await app.inject({
@@ -109,7 +116,7 @@ describe("GET /v1/nearby", () => {
 
   it("returns an honest empty result after reaching the maximum radius", async () => {
     const search = new FakeCandidateSearch(() => []);
-    const app = createApiApp({ candidateSearch: search });
+    const app = createApiApp({ candidateSearch: search, servicePointDetails });
     apps.push(app);
 
     const response = await app.inject({
@@ -134,7 +141,7 @@ describe("GET /v1/nearby", () => {
 
   it("rejects missing, out-of-range and unknown query values before search", async () => {
     const search = new FakeCandidateSearch(() => []);
-    const app = createApiApp({ candidateSearch: search });
+    const app = createApiApp({ candidateSearch: search, servicePointDetails });
     apps.push(app);
 
     for (const url of [
