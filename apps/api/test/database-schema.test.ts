@@ -36,6 +36,10 @@ const syncRetryMigrationUrl = new URL(
   "../db/migrations/0008_sync_retry_alerting.sql",
   import.meta.url,
 );
+const queryCacheMigrationUrl = new URL(
+  "../db/migrations/0009_query_cache.sql",
+  import.meta.url,
+);
 
 describe("initial PostgreSQL/PostGIS schema", () => {
   it("enables PostGIS and uses WGS84 geography points", async () => {
@@ -257,5 +261,35 @@ describe("initial PostgreSQL/PostGIS schema", () => {
     expect(migration).toContain("FUNCTION enqueue_stale_sync_run_alerts");
     expect(migration).toContain("ON CONFLICT (dedupe_key) DO NOTHING");
     expect(migration).toContain("FUNCTION complete_sync_alert_delivery");
+  });
+
+  it("stores only hashed cache keys with bounded TTLs", async () => {
+    const migration = await readFile(queryCacheMigrationUrl, "utf8");
+
+    expect(migration).toContain("CREATE TABLE query_cache_entries");
+    expect(migration).toContain("cache_key_hash ~ '^[0-9a-f]{64}$'");
+    expect(migration).toContain(
+      "PRIMARY KEY (namespace, cache_key_hash, country, service_type)",
+    );
+    expect(migration).toContain("interval '1 hour'");
+    expect(migration).toContain("jsonb_typeof(payload) IN ('object', 'array')");
+  });
+
+  it("uses cache generations to reject stale reads and writes", async () => {
+    const migration = await readFile(queryCacheMigrationUrl, "utf8");
+
+    expect(migration).toContain("FUNCTION put_query_cache");
+    expect(migration).toContain("current_generation <> p_generation");
+    expect(migration).toContain("FUNCTION read_query_cache");
+    expect(migration).toContain("current_generation.generation = entry.generation");
+  });
+
+  it("maps source changes to scoped invalidation and bounded pruning", async () => {
+    const migration = await readFile(queryCacheMigrationUrl, "utf8");
+
+    expect(migration).toContain("CREATE TABLE source_cache_scopes");
+    expect(migration).toContain("FUNCTION invalidate_source_query_cache");
+    expect(migration).toContain("FUNCTION upsert_source_record_with_change");
+    expect(migration).toContain("FUNCTION prune_query_cache");
   });
 });

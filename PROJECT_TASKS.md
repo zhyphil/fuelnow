@@ -4,7 +4,7 @@
 > 需求来源：[france_spain_driver_decision_engine_project.md](./france_spain_driver_decision_engine_project.md)  
 > 当前状态：进行中  
 > 当前阶段：Phase 2 — 项目骨架与统一数据层
-> 下一项任务：`P2-DB-09` 建立缓存和缓存失效规则
+> 下一项任务：`P2-DB-10` 准备可重复使用的测试数据集
 > 最后更新：2026-09-04
 
 ## 使用方法
@@ -201,7 +201,7 @@ V1 的核心验收结果是：
 - [x] `P2-DB-06` 以非破坏生命周期区分完整快照缺失、显式删除、来源撤回、临时/永久关闭与 Fuel 缺货/未知；较新重现可恢复 missing/deleted，撤回来源禁止继续写入，三类事件表保留历史且 RESTRICT 阻止硬删除（2026-09-04；201 tests；[生命周期说明](./docs/architecture/source-lifecycle.md)）
 - [x] `P2-DB-07` 为每次 full/incremental 同步记录开始/完成时间、毫秒耗时、已提交页/记录数、失败页及限长脱敏错误；同一来源只允许一个 running run，终态不可重复完成，worker 失败后保留原错误供重试（2026-09-04；208 tests；[同步可观测性说明](./docs/architecture/sync-run-observability.md)）
 - [x] `P2-DB-08` 建立可配置且有界的同步失败策略：临时错误采用带 jitter 的指数退避，永久/取消错误不重试，耗尽或永久失败写入去重告警 outbox；数据库原子记录失败决定、重试父子链与 due time，阻止提前/重复领取，并检测 stale run、追踪告警投递（2026-09-04；221 tests；[重试与告警说明](./docs/architecture/sync-retry-alerting.md)）
-- [ ] `P2-DB-09` 建立缓存和缓存失效规则
+- [x] `P2-DB-09` 建立按国家+服务作用域的 PostgreSQL 查询缓存：只存 SHA-256 key、应用与数据库共同限制 TTL≤1 小时，以 generation token 防止计算/失效竞态；来源页仅在真实变化时于同一事务推进已登记 scope，旧代际立即不可读且可批量清理（2026-09-04；229 tests；[缓存失效说明](./docs/architecture/query-cache-invalidation.md)）
 - [ ] `P2-DB-10` 准备可重复使用的测试数据集
 
 ## Phase 2 验收门槛
@@ -584,3 +584,4 @@ V1 的核心验收结果是：
 | 2026-09-04 | 建立来源、关闭与缺货生命周期 | 区分 missing/deleted/withdrawn、站点关闭与单项 Fuel 库存，支持安全恢复、撤回写入阻断和事件历史，真实数据库验证硬删除受限；完整质量门槛 201 项测试通过；见 `docs/architecture/source-lifecycle.md` |
 | 2026-09-04 | 记录同步时间、数量、错误与耗时 | 每次同步持久化模式、起止、耗时、已提交页/记录、失败页和脱敏错误，同源并发与重复终结受数据库阻止；完整质量门槛 208 项测试通过；见 `docs/architecture/sync-run-observability.md` |
 | 2026-09-04 | 建立同步失败重试与告警 | 临时错误按有界指数退避重试，永久/耗尽失败与 stale run 写入去重告警 outbox，数据库原子记录 retry chain、due time 和投递结果；完整质量门槛 221 项测试通过；见 `docs/architecture/sync-retry-alerting.md` |
+| 2026-09-04 | 建立查询缓存与失效规则 | 以国家+服务 generation 保证来源变化后旧缓存不可读，拒绝竞态产生的过时代际写入，只持久化哈希 key 并限制 TTL；完整质量门槛 229 项测试通过；见 `docs/architecture/query-cache-invalidation.md` |

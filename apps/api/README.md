@@ -45,3 +45,9 @@ capped exponential backoff with jitter, retries only transient failures and
 stores retry ancestry and due times. Permanent failures, exhausted retries and
 stale runs create deduplicated rows in the channel-neutral alert outbox; an
 external monitoring destination is intentionally deferred to the release phase.
+
+The query cache stores only hashed keys and scopes every entry by country and
+service. Writes carry a cache generation; source pages that actually change data
+advance the mapped scope generation in the same transaction, making older
+entries unreadable without relying on best-effort deletion. Service defaults are
+bounded by a one-hour database TTL ceiling.

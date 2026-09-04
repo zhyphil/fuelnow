@@ -200,7 +200,13 @@ describe("incremental source import", () => {
 
   it("persists records and checkpoint in one PostgreSQL transaction", async () => {
     const client = {
-      query: vi.fn().mockResolvedValue({ rows: [] }),
+      query: vi
+        .fn()
+        .mockImplementation(async (sql: string) =>
+          sql.includes("upsert_source_record_with_change")
+            ? { rows: [{ changed: true }] }
+            : { rows: [] },
+        ),
       release: vi.fn(),
     };
     const pool = {
@@ -216,7 +222,9 @@ describe("incremental source import", () => {
     });
 
     expect(client.query.mock.calls[0]).toEqual(["BEGIN"]);
-    expect(client.query.mock.calls[1]?.[0]).toContain("upsert_source_record($1");
+    expect(client.query.mock.calls[1]?.[0]).toContain(
+      "upsert_source_record_with_change($1",
+    );
     expect(client.query.mock.calls[1]?.[1]).toEqual([
       "fr-fuel",
       "one",
@@ -229,8 +237,42 @@ describe("incremental source import", () => {
     expect(client.query.mock.calls[2]?.[0]).toContain(
       "INSERT INTO source_sync_checkpoints",
     );
-    expect(client.query.mock.calls[3]).toEqual(["COMMIT"]);
+    expect(client.query.mock.calls[3]).toEqual([
+      "SELECT invalidate_source_query_cache($1, now())",
+      ["fr-fuel"],
+    ]);
+    expect(client.query.mock.calls[4]).toEqual(["COMMIT"]);
     expect(client.release).toHaveBeenCalledOnce();
+  });
+
+  it("keeps the current cache generation for an identical source replay", async () => {
+    const client = {
+      query: vi
+        .fn()
+        .mockImplementation(async (sql: string) =>
+          sql.includes("upsert_source_record_with_change")
+            ? { rows: [{ changed: false }] }
+            : { rows: [] },
+        ),
+      release: vi.fn(),
+    };
+    const store = new PostgresSourceImportStore({
+      query: vi.fn(),
+      connect: vi.fn().mockResolvedValue(client),
+    } as never);
+
+    await store.persistPage({
+      sourceId: "fr-fuel",
+      records: [record("same")],
+      nextCheckpoint: finalCheckpoint,
+    });
+
+    expect(
+      client.query.mock.calls.some(([sql]) =>
+        String(sql).includes("invalidate_source_query_cache"),
+      ),
+    ).toBe(false);
+    expect(client.query).toHaveBeenLastCalledWith("COMMIT");
   });
 
   it("rolls back the page and checkpoint when one record fails", async () => {

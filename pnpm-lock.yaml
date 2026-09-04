@@ -32,6 +32,9 @@ importers:
 
   apps/api:
     dependencies:
+      '@fuel-now/contracts':
+        specifier: workspace:*
+        version: link:../../packages/contracts
       pg:
         specifier: 8.23.0
         version: 8.23.0

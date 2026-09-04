@@ -12,6 +12,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@fuel-now/contracts": "workspace:*",
     "pg": "8.23.0"
   },
   "devDependencies": {

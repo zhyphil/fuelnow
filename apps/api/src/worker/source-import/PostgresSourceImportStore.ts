@@ -12,6 +12,10 @@ interface CheckpointRow extends QueryResultRow {
   high_watermark: Date | string | null;
 }
 
+interface ChangedRecordRow extends QueryResultRow {
+  changed: boolean;
+}
+
 type SourceImportPool = Pick<Pool, "connect" | "query">;
 type SourceImportClient = Pick<PoolClient, "query" | "release">;
 
@@ -57,11 +61,12 @@ export class PostgresSourceImportStore implements SourceImportStore {
 
     try {
       await client.query("BEGIN");
+      let pageChanged = false;
 
       for (const record of records) {
-        await client.query(
-          `SELECT id
-           FROM upsert_source_record($1, $2, $3, $4::jsonb, $5, $6, $7)`,
+        const result = await client.query<ChangedRecordRow>(
+          `SELECT record_id, changed
+           FROM upsert_source_record_with_change($1, $2, $3, $4::jsonb, $5, $6, $7)`,
           [
             sourceId,
             record.sourceRecordId,
@@ -72,6 +77,7 @@ export class PostgresSourceImportStore implements SourceImportStore {
             record.fetchedAt,
           ],
         );
+        pageChanged ||= result.rows[0]?.changed === true;
       }
 
       await client.query(
@@ -92,6 +98,12 @@ export class PostgresSourceImportStore implements SourceImportStore {
           nextCheckpoint.highWatermark,
         ],
       );
+
+      if (pageChanged) {
+        await client.query("SELECT invalidate_source_query_cache($1, now())", [
+          sourceId,
+        ]);
+      }
 
       await client.query("COMMIT");
     } catch (error) {
