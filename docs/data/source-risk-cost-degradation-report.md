@@ -51,7 +51,7 @@ The official [Mapbox Matrix API documentation](https://docs.mapbox.com/api/navig
 Fuel Now must:
 
 - coarse-filter and statically rank before routing;
-- request one origin to at most 10 destinations using explicit `sources`/`destinations`, producing 10 useful elements instead of an accidental 11×11 matrix;
+- request one origin to at most 9 destinations per traffic-aware request using explicit `sources`/`destinations`, producing only useful elements instead of an accidental full matrix;
 - cache short-lived route results by provider, profile, rounded origin cell and destination set while respecting provider terms;
 - set daily/monthly request and element budgets, per-user/IP abuse limits and alerts;
 - keep server tokens secret, URL-restricted where supported, and rotate on exposure;

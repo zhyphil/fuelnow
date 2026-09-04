@@ -66,3 +66,8 @@ closures; later decision tasks handle temporary closure and Unknown states.
 policy. It grows the radius geometrically until the requested minimum is met or
 the hard maximum is reached, and returns the attempted radii and stop reason so
 callers can disclose expansion instead of padding results.
+
+`routeTopCandidates` selects the closest bounded points and enriches them through
+a provider-neutral one-origin-to-many matrix request. The Mapbox adapter returns
+validated road distance, ETA, calculation time, profile and traffic metadata;
+traffic-aware calls are capped at nine destinations plus the origin.
