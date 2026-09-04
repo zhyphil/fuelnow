@@ -8,7 +8,8 @@
 
 - Git;
 - Node.js 24 (the repository includes `.nvmrc` for compatible version managers);
-- pnpm 10.28.2, as pinned in the root `packageManager` field.
+- pnpm 10.28.2, as pinned in the root `packageManager` field;
+- Docker Desktop or another Docker Engine with Compose, when working with the local database.
 
 Confirm the active tools before installing dependencies:
 
@@ -46,12 +47,30 @@ If dependencies are intentionally changed, run the appropriate `pnpm add` or `pn
 | `pnpm --filter @fuel-now/config test` | Run only environment/config tests |
 | `pnpm --filter @fuel-now/data-core test` | Run only data normalization/decision tests |
 | `pnpm --filter @fuel-now/data-core test -- --watch` | Watch data-core tests while editing |
+| `pnpm db:up` | Start PostgreSQL/PostGIS and wait until it is healthy |
+| `pnpm db:migrate` | Apply the versioned local database schema |
+| `pnpm db:verify` | Verify the installed extension, tables and geography column |
+| `pnpm db:down` | Stop the local database while preserving its named volume |
+
+## Local database
+
+The Compose service binds PostgreSQL only to `127.0.0.1:5432` and uses the local-only placeholder credentials from `.env.example`. Start and initialize it with:
+
+```text
+pnpm db:up
+pnpm db:migrate
+pnpm db:verify
+```
+
+The initial migration is non-destructive and repeatable. The database data lives in the named `fuel-now_postgres_data` Docker volume, so `pnpm db:down` does not erase it. Production and release-test environments must use externally managed credentials, TLS and a dedicated migration role; the Compose credentials are never valid outside local development.
+
+The current official PostgreSQL 18/PostGIS image publishes an amd64 build, so Apple Silicon machines run this local service through Docker emulation. This affects startup time, not the production architecture. The pinned digest prevents an unnoticed image change; updating it is an explicit, reviewed maintenance task.
 
 ## Workspace responsibilities
 
 | Workspace | Current local use |
 | --- | --- |
-| `apps/api` | Reserved API composition root; it becomes runnable during the backend API tasks |
+| `apps/api` | API composition root plus local database migration and verification commands |
 | `apps/mobile` | Reserved Expo/React Native client; it becomes runnable during the mobile tasks |
 | `packages/contracts` | Shared API/domain contracts, starting with `P2-MOD-01` |
 | `packages/config` | Environment names, profiles and safe runtime rules |

@@ -1,0 +1,25 @@
+name: fuel-now
+
+services:
+  db:
+    image: postgis/postgis:18-3.6@sha256:60f6ad1d21ea86a67d47780b9a0d1e1d200500f62b19293fa834d0dea80b8677
+    platform: linux/amd64
+    environment:
+      POSTGRES_DB: fuel_now
+      POSTGRES_USER: fuel_now
+      POSTGRES_PASSWORD: fuel_now
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql
+      - ./apps/api/db/migrations:/migrations:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready --username fuel_now --dbname fuel_now"]
+      interval: 2s
+      timeout: 3s
+      retries: 20
+      start_period: 10s
+    stop_grace_period: 20s
+
+volumes:
+  postgres_data:

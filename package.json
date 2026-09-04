@@ -9,8 +9,12 @@
   },
   "scripts": {
     "check": "pnpm format:check && pnpm lint && pnpm typecheck && pnpm test",
-    "format": "prettier --write --ignore-unknown .github apps packages package.json tsconfig.json pnpm-workspace.yaml eslint.config.js .prettierrc.json",
-    "format:check": "prettier --check --ignore-unknown .github apps packages package.json tsconfig.json pnpm-workspace.yaml eslint.config.js .prettierrc.json",
+    "db:down": "pnpm --filter @fuel-now/api db:down",
+    "db:migrate": "pnpm --filter @fuel-now/api db:migrate",
+    "db:up": "pnpm --filter @fuel-now/api db:up",
+    "db:verify": "pnpm --filter @fuel-now/api db:verify",
+    "format": "prettier --write --ignore-unknown .github apps packages compose.yaml package.json tsconfig.json pnpm-workspace.yaml eslint.config.js .prettierrc.json",
+    "format:check": "prettier --check --ignore-unknown .github apps packages compose.yaml package.json tsconfig.json pnpm-workspace.yaml eslint.config.js .prettierrc.json",
     "lint": "eslint .",
     "test": "pnpm --recursive test",
     "typecheck": "pnpm --recursive typecheck"
