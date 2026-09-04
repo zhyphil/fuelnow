@@ -4,7 +4,7 @@
 > 需求来源：[france_spain_driver_decision_engine_project.md](./france_spain_driver_decision_engine_project.md)  
 > 当前状态：进行中  
 > 当前阶段：Phase 3 — 搜索、路线与决策引擎
-> 下一项任务：`P3-OPEN-05` 对无法解析的营业时间降级为 Unknown
+> 下一项任务：`P3-BEST-01` 定义 PriceScore
 > 最后更新：2026-09-04
 
 ## 使用方法
@@ -235,7 +235,7 @@ V1 的核心验收结果是：
 - [x] `P3-OPEN-02` 固化两国 24/7、跨午夜、分段营业及开门含/关门不含边界：仅法国 `00.00–00.00` 与西班牙 `24H` 可声明全天，24/7 标记必须由 7 个完整日期支撑；跨日延续至次日本地关门时刻，分段区间去重稳定排序，非零点同开同关降级而不误判全天（2026-09-04；329 tests；[高级营业时间说明](./docs/architecture/advanced-opening-hours.md)）
 - [x] `P3-OPEN-03` 所有排班按服务点 IANA 时区求值：法国固定 `Europe/Paris`、西班牙固定 `Europe/Madrid`，覆盖冬/夏 UTC 偏移、UTC 跨日本地星期、春季跳时与秋季重复小时；国家与时区不匹配、未知或不支持时即使有 24/7 自助标记也降级 Unknown（2026-09-04；334 tests；[时区说明](./docs/architecture/opening-hours-timezones.md)）
 - [x] `P3-OPEN-04` 增加 regular/public holiday/unknown 日历上下文与 `holiday_hours_unknown` 共享提示/计数：普通周排班在节假日或日历未知时不宣称营业，并单独统计 holiday Unknown；明确临时关闭优先于排班、站点 24/7 和无人 Fuel 24/7，后者可在无关闭证据时作为更强全天证据（2026-09-04；339 tests；[节假日与临时关闭说明](./docs/architecture/holiday-and-temporary-closure.md)）
-- [ ] `P3-OPEN-05` 对无法解析的营业时间降级为 Unknown
+- [x] `P3-OPEN-05` 区分缺失、部分可解析与完全无法解析的营业时间：空/畸形/重复法国日期和错误西班牙类型均输出稳定 warning，未知排班不误判 Open/Closed，防御性求值拒绝结构异常且保留服务点其他数据（2026-09-04；347 tests；[无法解析营业时间降级说明](./docs/architecture/unparseable-opening-hours.md)）
 
 ## 3.3 Best 排名
 
@@ -453,150 +453,151 @@ V1 的核心验收结果是：
 
 在这里记录会影响实现和范围的决定，避免后续反复讨论。
 
-| 日期 | 决策 | 选择 | 理由 | 影响的任务 |
-|---|---|---|---|---|
-| 2026-09-03 | 首发客户端 | React Native + Expo + TypeScript；首发 iOS/Android，Web 不纳入 V1 | 单一移动代码库适合定位、导航与跨平台 MVP；保留未来 Web 路径 | P0-01 |
-| 2026-09-03 | 后端技术栈 | Node.js 24 LTS、TypeScript、Fastify、pnpm workspace；本地 Docker Compose、生产 OCI 容器 | 与客户端共享 TypeScript 契约；适合 Adapter、API 与 Worker；保持部署平台中立 | P0-02 |
-| 2026-09-03 | 地理数据库 | PostgreSQL 18 + PostGIS 3.6；geography(Point, 4326) + GiST | 支持米制范围查询、空间索引、关系约束与可追溯数据同步 | P0-03 |
-| 2026-09-03 | 地图、路线与 ETA | 后端 Mapbox Matrix；客户端 react-native-maps；外部导航 App | 列表和排名不绑定地图 SDK；小规模 1×N Matrix 符合 Top N ETA 计算；HERE 为首选备选 | P0-04 |
-| 2026-09-03 | 数据与搜索验证区域 | Paris、Toulouse、Carcassonne、Perpignan、La Jonquera、Girona、Barcelona、Madrid | 同时覆盖两国大城市、区域城市、跨境走廊和不同站点密度 | P0-05 |
-| 2026-09-03 | V1 账号策略 | 核心搜索与导航免登录；偏好保存在设备本地 | 降低紧急场景使用阻力，避免在数据验证前引入账号、恢复与身份数据范围 | P0-06 |
-| 2026-09-03 | 位置与隐私边界 | 仅前台按需定位；支持手动输入；精确出发点默认不落库、不进日志和分析 | 遵循目的限制、数据最小化和保存期限原则；避免形成位置历史 | P0-07 |
-| 2026-09-03 | 数据来源署名 | API、结果卡、详情页、全局来源/许可证注册表四层展示；保留字段级 provenance | 兼顾用户可信度判断、多来源合并和不同许可证的署名要求 | P0-08 |
-| 2026-09-03 | 新鲜度与可信度 | 按字段计算 Live/Verified/Recent/Stale/Unknown；confidence 独立为 high/medium/low | 不让新抓取的旧值伪装成实时数据，并对不同服务使用不同有效期 | P0-09 |
-| 2026-09-03 | V1 服务字段 | 按搜索准入、必需可空、可选和查询派生字段定义 Fuel/Charge/Air/Wash | 让未知值保持透明，避免用 0、false、closed 或 free 代替缺失数据 | P0-10 |
-| 2026-09-03 | 首发区域 | 全国数据导入与实验性搜索；首轮公开 Beta 质量承诺聚焦 Toulouse–Barcelona 走廊；Paris/Madrid 强制回归 | 先验证跨境核心价值，并将人工验证与运营支持控制在可管理范围 | P0-05、P0-11 |
-| 2026-09-03 | 西班牙 Fuel 价格与单位 | 9 个明确产品映射到 V1；液体按 EUR/升，GNC/GNL 按 EUR/公斤；`Fecha` 是当前价格快照断言而非单站提交时间 | 避免混合单位比较和夸大更新时间；保持跨端展示一致 | P1-ES-05、P1-ES-07、P1-FUEL-04 |
-| 2026-09-03 | 西班牙 REST/XLS 组合 | REST `IDEESS` 保持主身份；只对确定的一对一 XLS 行补充 `Toma de datos` 和 `Tipo servicio`，不按行序关联 | REST 缺少单站时间/服务方式，XLS 缺少稳定 ID；同址重复站会造成歧义 | P1-ES-06、P1-ES-07 |
-| 2026-09-04 | EV 统一层级与容量 | 统一为 service point → EVSE → connector；availability 和容量按 EVSE 计算，connector 只表达兼容接口 | 法国按 EVSE 行给 connector flags，西班牙按 connector 行重复 EVSE；直接数 connector 会夸大可同时充电数量 | P1-EV-01 |
-| 2026-09-04 | EV 来源许可与更新政策 | 法国 PAN/QualiCharge 与西班牙 RIPREE 可用于受控开发；Reve/SGV 在书面商用授权、可用配额和再分发条款确认前禁用 | 公开数据许可允许前三类来源缓存、转换和展示；Reve 通用条款不构成 Fuel Now 商用授权 | P1-EV-02 |
-| 2026-09-04 | V1 EV 实时能力边界 | 不承诺两国全国实时 availability/price；法国仅逐 EVSE 条件显示 Live，西班牙动态与两国 Charge Cheapest 默认禁用 | 实测法国 5 分钟内状态占全国静态 PDC 不足 1%，西班牙 Reve 未获商用/API 条件；避免把部分或旧数据包装成全国实时 | P1-EV-03 |
-| 2026-09-04 | Phase 1 后 V1 范围 | 保留 France/Spain 四入口；Fuel 完整决策，Charge/Air/Wash 按来源能力启用、条件启用或明确不可用 | 实测数据支持静态发现，但不能支持所有服务的价格/实时状态；能力矩阵同时保留产品价值和真实性 | P1-RPT-06 |
+| 日期       | 决策                   | 选择                                                                                                          | 理由                                                                                                         | 影响的任务                     |
+| ---------- | ---------------------- | ------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ | ------------------------------ |
+| 2026-09-03 | 首发客户端             | React Native + Expo + TypeScript；首发 iOS/Android，Web 不纳入 V1                                             | 单一移动代码库适合定位、导航与跨平台 MVP；保留未来 Web 路径                                                  | P0-01                          |
+| 2026-09-03 | 后端技术栈             | Node.js 24 LTS、TypeScript、Fastify、pnpm workspace；本地 Docker Compose、生产 OCI 容器                       | 与客户端共享 TypeScript 契约；适合 Adapter、API 与 Worker；保持部署平台中立                                  | P0-02                          |
+| 2026-09-03 | 地理数据库             | PostgreSQL 18 + PostGIS 3.6；geography(Point, 4326) + GiST                                                    | 支持米制范围查询、空间索引、关系约束与可追溯数据同步                                                         | P0-03                          |
+| 2026-09-03 | 地图、路线与 ETA       | 后端 Mapbox Matrix；客户端 react-native-maps；外部导航 App                                                    | 列表和排名不绑定地图 SDK；小规模 1×N Matrix 符合 Top N ETA 计算；HERE 为首选备选                             | P0-04                          |
+| 2026-09-03 | 数据与搜索验证区域     | Paris、Toulouse、Carcassonne、Perpignan、La Jonquera、Girona、Barcelona、Madrid                               | 同时覆盖两国大城市、区域城市、跨境走廊和不同站点密度                                                         | P0-05                          |
+| 2026-09-03 | V1 账号策略            | 核心搜索与导航免登录；偏好保存在设备本地                                                                      | 降低紧急场景使用阻力，避免在数据验证前引入账号、恢复与身份数据范围                                           | P0-06                          |
+| 2026-09-03 | 位置与隐私边界         | 仅前台按需定位；支持手动输入；精确出发点默认不落库、不进日志和分析                                            | 遵循目的限制、数据最小化和保存期限原则；避免形成位置历史                                                     | P0-07                          |
+| 2026-09-03 | 数据来源署名           | API、结果卡、详情页、全局来源/许可证注册表四层展示；保留字段级 provenance                                     | 兼顾用户可信度判断、多来源合并和不同许可证的署名要求                                                         | P0-08                          |
+| 2026-09-03 | 新鲜度与可信度         | 按字段计算 Live/Verified/Recent/Stale/Unknown；confidence 独立为 high/medium/low                              | 不让新抓取的旧值伪装成实时数据，并对不同服务使用不同有效期                                                   | P0-09                          |
+| 2026-09-03 | V1 服务字段            | 按搜索准入、必需可空、可选和查询派生字段定义 Fuel/Charge/Air/Wash                                             | 让未知值保持透明，避免用 0、false、closed 或 free 代替缺失数据                                               | P0-10                          |
+| 2026-09-03 | 首发区域               | 全国数据导入与实验性搜索；首轮公开 Beta 质量承诺聚焦 Toulouse–Barcelona 走廊；Paris/Madrid 强制回归           | 先验证跨境核心价值，并将人工验证与运营支持控制在可管理范围                                                   | P0-05、P0-11                   |
+| 2026-09-03 | 西班牙 Fuel 价格与单位 | 9 个明确产品映射到 V1；液体按 EUR/升，GNC/GNL 按 EUR/公斤；`Fecha` 是当前价格快照断言而非单站提交时间         | 避免混合单位比较和夸大更新时间；保持跨端展示一致                                                             | P1-ES-05、P1-ES-07、P1-FUEL-04 |
+| 2026-09-03 | 西班牙 REST/XLS 组合   | REST `IDEESS` 保持主身份；只对确定的一对一 XLS 行补充 `Toma de datos` 和 `Tipo servicio`，不按行序关联        | REST 缺少单站时间/服务方式，XLS 缺少稳定 ID；同址重复站会造成歧义                                            | P1-ES-06、P1-ES-07             |
+| 2026-09-04 | EV 统一层级与容量      | 统一为 service point → EVSE → connector；availability 和容量按 EVSE 计算，connector 只表达兼容接口            | 法国按 EVSE 行给 connector flags，西班牙按 connector 行重复 EVSE；直接数 connector 会夸大可同时充电数量      | P1-EV-01                       |
+| 2026-09-04 | EV 来源许可与更新政策  | 法国 PAN/QualiCharge 与西班牙 RIPREE 可用于受控开发；Reve/SGV 在书面商用授权、可用配额和再分发条款确认前禁用  | 公开数据许可允许前三类来源缓存、转换和展示；Reve 通用条款不构成 Fuel Now 商用授权                            | P1-EV-02                       |
+| 2026-09-04 | V1 EV 实时能力边界     | 不承诺两国全国实时 availability/price；法国仅逐 EVSE 条件显示 Live，西班牙动态与两国 Charge Cheapest 默认禁用 | 实测法国 5 分钟内状态占全国静态 PDC 不足 1%，西班牙 Reve 未获商用/API 条件；避免把部分或旧数据包装成全国实时 | P1-EV-03                       |
+| 2026-09-04 | Phase 1 后 V1 范围     | 保留 France/Spain 四入口；Fuel 完整决策，Charge/Air/Wash 按来源能力启用、条件启用或明确不可用                 | 实测数据支持静态发现，但不能支持所有服务的价格/实时状态；能力矩阵同时保留产品价值和真实性                    | P1-RPT-06                      |
 
 # 风险与阻塞记录
 
-| 日期 | 风险或阻塞 | 严重度 | 应对方式 | 状态 |
-|---|---|---|---|---|
-| 2026-09-03 | Air/Wash 价格与设备状态覆盖不足 | 高 | V1 限为 presence discovery；价格、设备状态、服务专属营业时间保持 Unknown，不启用 Cheapest/Available now | 已验证，能力已缩减 |
-| 2026-09-04 | OSM Air/Wash 补充的生产获取方式与 ODbL 合并数据库义务未关闭 | 高 | Phase 2 使用区域 extract/自建/合规托管服务；保持来源分离；公开 Beta 前完成数据库分类、署名和提供义务审查 | 开发可继续，发布受阻 |
-| 2026-09-04 | 法国 PAN Charge 为 Beta 且存在重复 ID、坐标、功率和未来时间异常 | 高 | staging 全量校验、异常隔离、原子发布与 last-known-good；PAN dynamic 保持 shadow-only | 开发可继续，需实现监控 |
-| 2026-09-03 | 西班牙 EV 实时 availability/price 虽在 Reve 内覆盖高，但通用条款未授予商用复用，外部 API 还需审批密钥、限 5 次/小时且精确状态逐点读取 | 高 | 不依赖匿名 UI API；取得书面商用缓存/转换/展示授权、正式访问与生产配额，并完成 RIPREE 全量身份关联，在此之前不接入生产或承诺全国实时 | 已验证，生产接入受阻 |
-| 2026-09-03 | Best 权重尚未定义 | 中 | 先采用可解释规则，再根据导航行为校准 | 待处理 |
-| 2026-09-03 | 路线 API 会带来成本和限流 | 中 | Top N 分批计算，增加缓存、用量指标、预算告警和无 ETA 降级；Beta 前复核价格 | 应对方案已定义，待实现 |
-| 2026-09-03 | 法国 Fuel 门户的 typed datetime 偏移与原始 France-local 墙钟语义不一致 | 高 | 从原始 `@maj/@debut` 按 `Europe/Paris` 解析，保留原值，隔离未来时间，并用夏/冬令时测试保护 | 已在 `FranceFuelAdapter` 缓解，待持续监控 |
-| 2026-09-03 | 当前开发机 Node.js 22 低于项目锁定的 Node.js 24 LTS | 中 | `.nvmrc` 和 `engines` 固定 Node 24；当前兼容性测试通过，CI/发布环境必须使用 Node 24 | 发布环境待落实 |
-| 2026-09-03 | MITECO 现代资源的 CC BY 4.0 与旧政府通用声明的“不得更改内容/元数据”措辞存在解释差异 | 高 | 保留原始数据、明确标记 Fuel Now 转换、完整署名；公开 Beta 前由法务复核当时有效条款 | 技术开发获准，发布门槛未关闭 |
-| 2026-09-03 | MITECO 全国 Fuel 快照中存在 3 个零坐标和 1 个疑似经纬度互换记录 | 中 | 对西班牙服务区域做地理边界校验并隔离异常；不自动交换坐标 | 已在 `SpainFuelAdapter` 缓解，待持续监控 |
-| 2026-09-03 | 西班牙 XLS 有 134 个站点的 `Toma de datos` 超过 7 天，另有 2 个 REST/XLS 补充关联无法消歧 | 高 | 超过截止时间或无法安全关联的价格不获得 Cheapest/Best 优势；持续监控旧值和关联失败数量 | 适配器与匹配索引已缓解，正式同步待监控 |
+| 日期       | 风险或阻塞                                                                                                                            | 严重度 | 应对方式                                                                                                                            | 状态                                      |
+| ---------- | ------------------------------------------------------------------------------------------------------------------------------------- | ------ | ----------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------- |
+| 2026-09-03 | Air/Wash 价格与设备状态覆盖不足                                                                                                       | 高     | V1 限为 presence discovery；价格、设备状态、服务专属营业时间保持 Unknown，不启用 Cheapest/Available now                             | 已验证，能力已缩减                        |
+| 2026-09-04 | OSM Air/Wash 补充的生产获取方式与 ODbL 合并数据库义务未关闭                                                                           | 高     | Phase 2 使用区域 extract/自建/合规托管服务；保持来源分离；公开 Beta 前完成数据库分类、署名和提供义务审查                            | 开发可继续，发布受阻                      |
+| 2026-09-04 | 法国 PAN Charge 为 Beta 且存在重复 ID、坐标、功率和未来时间异常                                                                       | 高     | staging 全量校验、异常隔离、原子发布与 last-known-good；PAN dynamic 保持 shadow-only                                                | 开发可继续，需实现监控                    |
+| 2026-09-03 | 西班牙 EV 实时 availability/price 虽在 Reve 内覆盖高，但通用条款未授予商用复用，外部 API 还需审批密钥、限 5 次/小时且精确状态逐点读取 | 高     | 不依赖匿名 UI API；取得书面商用缓存/转换/展示授权、正式访问与生产配额，并完成 RIPREE 全量身份关联，在此之前不接入生产或承诺全国实时 | 已验证，生产接入受阻                      |
+| 2026-09-03 | Best 权重尚未定义                                                                                                                     | 中     | 先采用可解释规则，再根据导航行为校准                                                                                                | 待处理                                    |
+| 2026-09-03 | 路线 API 会带来成本和限流                                                                                                             | 中     | Top N 分批计算，增加缓存、用量指标、预算告警和无 ETA 降级；Beta 前复核价格                                                          | 应对方案已定义，待实现                    |
+| 2026-09-03 | 法国 Fuel 门户的 typed datetime 偏移与原始 France-local 墙钟语义不一致                                                                | 高     | 从原始 `@maj/@debut` 按 `Europe/Paris` 解析，保留原值，隔离未来时间，并用夏/冬令时测试保护                                          | 已在 `FranceFuelAdapter` 缓解，待持续监控 |
+| 2026-09-03 | 当前开发机 Node.js 22 低于项目锁定的 Node.js 24 LTS                                                                                   | 中     | `.nvmrc` 和 `engines` 固定 Node 24；当前兼容性测试通过，CI/发布环境必须使用 Node 24                                                 | 发布环境待落实                            |
+| 2026-09-03 | MITECO 现代资源的 CC BY 4.0 与旧政府通用声明的“不得更改内容/元数据”措辞存在解释差异                                                   | 高     | 保留原始数据、明确标记 Fuel Now 转换、完整署名；公开 Beta 前由法务复核当时有效条款                                                  | 技术开发获准，发布门槛未关闭              |
+| 2026-09-03 | MITECO 全国 Fuel 快照中存在 3 个零坐标和 1 个疑似经纬度互换记录                                                                       | 中     | 对西班牙服务区域做地理边界校验并隔离异常；不自动交换坐标                                                                            | 已在 `SpainFuelAdapter` 缓解，待持续监控  |
+| 2026-09-03 | 西班牙 XLS 有 134 个站点的 `Toma de datos` 超过 7 天，另有 2 个 REST/XLS 补充关联无法消歧                                             | 高     | 超过截止时间或无法安全关联的价格不获得 Cheapest/Best 优势；持续监控旧值和关联失败数量                                               | 适配器与匹配索引已缓解，正式同步待监控    |
 
 # 完成记录
 
 完成一个阶段时，在此追加简短记录。
 
-| 日期 | 完成内容 | 结果/证据 |
-|---|---|---|
-| 2026-09-03 | 建立项目任务清单 | `PROJECT_TASKS.md` |
-| 2026-09-03 | 连接 GitHub 仓库并推送项目文档 | `https://github.com/zhyphil/fuelnow`，`main` 跟踪 `origin/main` |
-| 2026-09-03 | 建立 Conventional Commits 与自动提交推送工作流 | `AGENTS.md`、`CONTRIBUTING.md` |
-| 2026-09-03 | 完成 V1 客户端平台选型 | React Native + Expo + TypeScript；见 `docs/decisions/0001-client-platform.md` |
-| 2026-09-03 | 完成后端技术栈与运行方式选型 | Node.js 24 LTS + TypeScript + Fastify + pnpm workspace；见 `docs/decisions/0002-backend-stack.md` |
-| 2026-09-03 | 完成地理数据库方案选型 | PostgreSQL 18 + PostGIS 3.6；见 `docs/decisions/0003-geospatial-database.md` |
-| 2026-09-03 | 完成地图、路线与 ETA 方案选型 | Mapbox Matrix + react-native-maps + 外部导航；见 `docs/decisions/0004-maps-routing-provider.md` |
-| 2026-09-03 | 固定法国、西班牙及跨境验证区域 | 8 个核心锚点和 Toulouse–Barcelona 走廊；见 `docs/decisions/0005-validation-geographies.md` |
-| 2026-09-03 | 确定 V1 免登录账号策略 | 核心搜索和导航无需账户；见 `docs/decisions/0006-account-policy.md` |
-| 2026-09-03 | 定义位置权限、保存与 GDPR 工程边界 | 前台按需定位且精确出发点默认不持久化；见 `docs/decisions/0007-location-privacy.md` |
-| 2026-09-03 | 定义数据来源与许可证署名体系 | 四层 provenance 展示并建立来源注册表；见 `docs/decisions/0008-source-attribution.md` |
-| 2026-09-03 | 定义按字段的新鲜度与可信度语义 | 五级 freshness + 独立 confidence；见 `docs/decisions/0009-freshness-confidence.md` |
-| 2026-09-03 | 定义 V1 四类服务字段契约 | 明确搜索准入、未知值、价格、状态、来源和查询派生字段；见 `docs/product/v1-service-fields.md` |
-| 2026-09-03 | 确定 V1 发布测试与区域 Beta 范围 | 全国数据能力 + Toulouse–Barcelona 走廊质量承诺；见 `docs/decisions/0010-beta-launch-scope.md` |
-| 2026-09-03 | 完成 Phase 0 开工决策 | 所有任务和验收门槛完成；ADR 索引见 `docs/decisions/README.md` |
-| 2026-09-03 | 找到并探测法国官方 Fuel 实时数据源 | v2 dataset、Records API、CSV/JSON/GeoJSON exports 均可访问；见 `docs/data/france-fuel-source.md` |
-| 2026-09-03 | 核实法国 Fuel 数据许可与使用约束 | 允许商业复用、缓存、转换和再分发；必须标注来源与最新更新时间；见 `docs/data/france-fuel-licence.md` |
-| 2026-09-03 | 保存法国 Fuel 原始样本与字段字典 | 固定 station `31000001` 的完整 Records API 响应，并记录 47 个字段；见 `fixtures/france-fuel/` 与 `docs/data/france-fuel-fields.md` |
-| 2026-09-03 | 验证法国 Fuel 站点基础字段 | 坐标和地址可用；名称/品牌无显式字段；营业时间覆盖 86.32% 且存在多种时段结构；见 `docs/data/france-fuel-basic-fields-validation.md` |
-| 2026-09-03 | 验证法国 Fuel 价格与缺货字段 | 价格与原始项一致；确认 France-local 时间解析要求及缺货汇总字段异常；见 `docs/data/france-fuel-price-validation.md` |
-| 2026-09-03 | 验证法国 Fuel 关闭、24/7 与设施字段 | 整站临时关闭不可得；区分自动付款与站点 24/7；验证 Air/Wash 标签；见 `docs/data/france-fuel-status-services-validation.md` |
-| 2026-09-03 | 实现法国 Fuel 数据适配器 | 建立最小 TypeScript 数据包；真实 fixture、时区、缺货、营业时间及设施映射共 7 项测试通过；见 `packages/data-core/` |
-| 2026-09-03 | 实现法国 Fuel 10 km GPS 查询 | Toulouse 官方 12 km 边界样本中正确返回 70 个 10 km 内结果，距离与源 API 相差均小于 2 m；见 `docs/data/france-fuel-nearby-validation.md` |
-| 2026-09-03 | 完成法国 Fuel 多地理场景验证 | Paris、Toulouse、Blagnac 郊区/机场和 A9 高速场景全部通过；17 项测试通过；见 `docs/data/france-fuel-geography-validation.md` |
-| 2026-09-03 | 找到并探测西班牙官方 Fuel 数据源 | MITECO 全国 REST JSON 返回 11,475 站点，并验证区域过滤、参考列表与 XLS；见 `docs/data/spain-fuel-source.md` |
-| 2026-09-03 | 核实西班牙 Fuel 数据许可与使用约束 | 现代资源 CC BY 4.0 允许商业复用、缓存、改编和再分发；记录旧通用声明差异；见 `docs/data/spain-fuel-licence.md` |
-| 2026-09-03 | 保存西班牙 Fuel 原始样本与字段字典 | 固定 Pinto 市级 17 条完整响应，并记录 41 个源字符串字段；见 `fixtures/spain-fuel/` 与 `docs/data/spain-fuel-fields.md` |
-| 2026-09-03 | 验证西班牙 Fuel 站点基础字段 | 身份和地址完整；确认 `Rótulo` 映射边界、4 个坐标异常及 1,172 种营业时间表达；见 `docs/data/spain-fuel-basic-fields-validation.md` |
-| 2026-09-03 | 验证西班牙 Fuel 产品、价格和时间语义 | 42,619 个价格值格式有效；确定 9 个 V1 映射、液体/气体单位和 `Fecha` 快照边界；见 `docs/data/spain-fuel-price-validation.md` |
-| 2026-09-03 | 验证西班牙 Fuel 关闭、24/7 与服务字段 | XLS 补充单站时间和服务方式；确认关闭、Air/Wash 与设备状态不可得；见 `docs/data/spain-fuel-status-services-validation.md` |
-| 2026-09-03 | 实现西班牙 Fuel 数据适配器 | 真实 Pinto fixture、时间/营业时间、9 种燃料、单位、异常坐标和安全 XLS 补充匹配共 12 项西班牙测试通过；全国 11,475 行验收符合预期；见 `packages/data-core/` |
-| 2026-09-03 | 实现西班牙 Fuel 10 km GPS 查询 | Madrid 独立边界 fixture 中正确返回 219 个 10 km 内结果，支持稳定排序、限制和逐行错误；见 `docs/data/spain-fuel-nearby-validation.md` |
-| 2026-09-03 | 完成西班牙 Fuel 多地理场景验证 | Madrid、Barcelona、El Prat 郊区/机场和 La Jonquera AP-7 高速场景全部通过；38 项测试通过；见 `docs/data/spain-fuel-geography-validation.md` |
-| 2026-09-03 | 统一法国与西班牙 Fuel 模型入口 | 两国真实记录经 country-discriminated 入口转换为同一 `NormalizedServicePoint` 契约；40 项测试通过；见 `docs/data/unified-fuel-model-validation.md` |
-| 2026-09-03 | 实现统一 Fuel 直线距离粗筛 | 对两国统一模型执行 0–100 km Haversine 半径筛选，保持输入顺序并验证精确边界；44 项测试通过；见 `docs/data/unified-fuel-distance-validation.md` |
-| 2026-09-03 | 实现统一 Fuel Nearest 排序 | 两国查询共用距离升序与全局 ID 决胜规则，排序不改变调用方数组；49 项测试通过；见 `docs/data/unified-fuel-nearest-validation.md` |
-| 2026-09-03 | 实现统一 Fuel Cheapest 排序 | 仅比较指定燃料与兼容单位，Stale/Unknown/不可用价格不获得旧低价优势，并以距离和全局 ID 决胜；55 项测试通过；见 `docs/data/unified-fuel-cheapest-validation.md` |
-| 2026-09-03 | 实现统一 Fuel Open now 筛选 | 按站点时区计算营业状态并区分 Open/Closed/Unknown，支持分段、跨午夜及法国 24/7 自助 Fuel；64 项测试通过；见 `docs/data/unified-fuel-open-now-validation.md` |
-| 2026-09-03 | 验证统一 Fuel 来源署名 | Toulouse 70 条与 Madrid 219 条结果全部返回来源 ID、名称和 HTTPS URL，全局 ID 可反查来源；66 项测试通过；见 `docs/data/unified-fuel-source-attribution-validation.md` |
-| 2026-09-03 | 验证统一 Fuel 来源时间 | Toulouse 70 条使用 source observed，Madrid 219 条使用 snapshot published，并始终与系统 fetched_at 分离；69 项测试通过；见 `docs/data/unified-fuel-source-timestamps-validation.md` |
-| 2026-09-03 | 定义统一 Fuel 显示和决策状态 | 价格 Current/Stale/Expired/Unknown、库存、关闭与本地化 warning code 形成可执行契约；78 项测试通过；见 `docs/data/unified-fuel-decision-state-validation.md` |
-| 2026-09-03 | 验证 Perpignan–Girona 跨境 Fuel 查询 | La Jonquera 25 km 返回法国 21 + 西班牙 67 条；北侧边境点保留更近西班牙站；80 项测试通过；见 `docs/data/cross-border-fuel-search-validation.md` |
-| 2026-09-03 | 人工抽查真实 Fuel 站点与价格 | 对照两国 10 个城市/机场/高速/边境样本，确认价格、单位、24/7 和临时/永久缺货语义；82 项测试通过；见 `docs/data/manual-fuel-sample-audit.md` |
-| 2026-09-03 | 验证法国 Fuel 的 Air 字段 | 全国 5,450/9,804 条含 `Station de gonflage`；244 条固定样本严格匹配 presence，价格/设备状态保持 Unknown；84 项测试通过；见 `docs/data/france-air-field-validation.md` |
-| 2026-09-03 | 验证西班牙 Fuel 的 Air 字段边界 | REST 41 字段、XLS 40 列均无 Air/水/设备字段；684 条固定样本保持 Unknown，服务方式不误映射；86 项测试通过；见 `docs/data/spain-air-field-validation.md` |
-| 2026-09-03 | 量化两国 Air 来源覆盖 | 法国全国 5,450/9,804（55.59%）明确声明 Air；西班牙 MITECO 无该字段，0 known-positive 不能解释为现实中不存在；见 `docs/data/air-coverage-validation.md` |
-| 2026-09-03 | 评估 Air 价格覆盖 | 法国 5,450 个 Air-positive 记录均无 free/paid/amount，价格 100% Unknown；西班牙无 Air denominator；见 `docs/data/air-price-coverage-validation.md` |
-| 2026-09-03 | 评估 Air 设备状态覆盖 | 法国 5,450 个 Air-positive 记录均无 working/broken/verified 时间，状态 100% Unknown；西班牙不可测；见 `docs/data/air-equipment-status-coverage-validation.md` |
-| 2026-09-03 | 验证法国 Fuel 的 Wash 字段 | 全国 4,052/9,804 条含自动或手动洗车标签；244 条固定样本严格匹配 presence，`Laverie` 不误映射；88 项测试通过；见 `docs/data/france-wash-field-validation.md` |
-| 2026-09-04 | 验证西班牙 Fuel 的 Wash 字段边界 | REST 41 字段、XLS 40 列均无 Wash/类型/价格/设备字段；684 条固定样本保持 Unknown，服务方式不误映射；90 项测试通过；见 `docs/data/spain-wash-field-validation.md` |
-| 2026-09-04 | 量化两国 Wash 来源覆盖 | 法国全国 4,052/9,804（41.33%）明确声明 Wash；西班牙 MITECO 无该字段，0 known-positive 不能解释为现实中不存在；见 `docs/data/wash-coverage-validation.md` |
-| 2026-09-04 | 评估 Wash 类型和价格覆盖 | 法国 4,052 个 Wash-positive 记录的详细类型与价格均为 0% known；西班牙无 Wash denominator；见 `docs/data/wash-type-price-coverage-validation.md` |
-| 2026-09-04 | 决定使用 OSM 补充 Air/Wash | 四个目标城市均有明确 Air/Wash 候选；仅采纳显式 presence，生产不依赖公共 Overpass，公开 Beta 前审查 ODbL 合并数据库义务；见 `docs/decisions/0011-osm-air-wash-supplement.md` |
-| 2026-09-04 | 验证法国 EV 静态数据源 | PAN Beta 49 字段含 166,339 个 PDC/48,181 个站；QualiCharge 99.97% 已包含，禁止重复叠加；记录重复 ID、坐标、功率和时间异常；见 `docs/data/france-ev-static-source.md` |
-| 2026-09-04 | 验证法国 EV 动态 availability/price | PAN 动态匹配 61.13% 静态 PDC，但最新去重后仅 5.43% 静态 PDC 在 60 分钟内；11,283 个重复 ID；动态价格字段为 0；见 `docs/data/france-ev-dynamic-coverage.md` |
-| 2026-09-04 | 验证西班牙 EV 静态数据源 | 选定官方 MITECO RIPREE 全国导出；43,610 个连接器行覆盖 36,465 个 PDC/12,214 个安装点；确认三级身份、非标准 CSV 解析、重复连接器和容量异常边界；见 `docs/data/spain-ev-static-source.md` |
-| 2026-09-04 | 验证西班牙 EV 动态 availability/price | Reve 内 42,800/44,631 个 EVSE 为 OCPI 动态来源，价格筛选匹配 13,323/14,564 个地点；确认正式 API key、5 次/小时、逐点精确状态及全量身份关联限制；见 `docs/data/spain-ev-dynamic-coverage.md` |
-| 2026-09-04 | 统一验证两国 EV 字段 | 建立 service point → EVSE → connector 模型，固定主要接口、功率隔离、运营商身份和 FR/ES 状态优先级；同步细化 V1 Charge 字段契约；见 `docs/data/unified-ev-fields-validation.md` |
-| 2026-09-04 | 固化 EV 来源更新与许可政策 | 法国 PAN/QualiCharge 和西班牙 RIPREE 可用于受控开发；Reve/SGV 因商用授权、API 配额和再分发条件未闭环而保持生产禁用；见 `docs/data/ev-source-licence-update-policy.md` |
-| 2026-09-04 | 确定 V1 EV 实时承诺范围 | 两国保留全国静态发现；法国仅满足逐 EVSE Live 门槛时显示可用性，西班牙动态与两国 Charge Cheapest 暂停；见 `docs/decisions/0012-v1-ev-realtime-scope.md` |
-| 2026-09-04 | 汇总全部来源字段映射 | 建立 Fuel、Charge、Air、Wash 的跨来源 canonical 字段、派生/补充/不可用边界，并统一西班牙 Fuel source ID；见 `docs/data/source-field-mapping-report.md` |
-| 2026-09-04 | 汇总四类服务覆盖率 | 统一 Fuel 区域密度、Air/Wash 来源确认率与 OSM 候选、Charge 静态规模及动态/新鲜覆盖，禁止混用不同分母；见 `docs/data/service-coverage-report.md` |
-| 2026-09-04 | 汇总决策字段缺失率 | 分别量化 Fuel/Charge 价格、排班营业与实时状态，以及 Air/Wash 价格/设备状态的 Unknown 边界；见 `docs/data/decision-field-missingness-report.md` |
-| 2026-09-04 | 汇总新鲜度与异常样本 | 量化 Fuel/Charge/静态/OSM 时间分布并登记时区、过期、坐标、身份、功率、未来时间和标签冲突样本；见 `docs/data/freshness-anomaly-report.md` |
-| 2026-09-04 | 完成来源风险、成本与降级方案 | 为开放数据、OSM、Reve 与 Mapbox 建立成本驱动、预算控制、故障降级和发布门槛；见 `docs/data/source-risk-cost-degradation-report.md` |
-| 2026-09-04 | 完成 Phase 1 并确认 V1 范围 | 六项 Phase 1 验收门槛通过；保留四类服务但采用 capability-aware 行为，进入 Phase 2；见 `docs/decisions/0013-v1-scope-after-data-feasibility.md` |
-| 2026-09-04 | 建立正式 monorepo 目录骨架 | pnpm 纳入 API、mobile、contracts、config 与 data-core 五个 workspace，并定义单向依赖和服务端凭据边界；见 `docs/architecture/repository-structure.md` |
-| 2026-09-04 | 配置开发、测试和生产环境语义 | 建立三环境严格解析、安全/隔离矩阵和 release-test 生产行为，测试默认禁止 live source；见 `docs/architecture/environments.md` |
-| 2026-09-04 | 建立环境变量与密钥模板 | 新增安全默认 `.env.example`，服务端密钥留空、同步和付费路线默认关闭，明确移动端公开变量边界；见 `docs/architecture/configuration-and-secrets.md` |
-| 2026-09-04 | 建立本地代码质量门槛 | 配置 Prettier、ESLint、TypeScript 和 Vitest，统一以 `pnpm check` 顺序执行格式、静态、类型与 95 项测试检查 |
-| 2026-09-04 | 接入持续集成质量门槛 | GitHub Actions 在 PR/`main` 上以 Node.js 24、冻结 lockfile、只读权限和禁用来源同步的测试环境执行完整 `pnpm check`；见 `docs/architecture/continuous-integration.md` |
-| 2026-09-04 | 完成本地开发指南 | 固化 Node/pnpm 版本、首次安装、workspace 命令、来源安全、逐任务提交流程和常见故障处理；见 `docs/development/local-development.md` |
-| 2026-09-04 | 建立基础 ServicePoint 契约 | TypeBox 同源生成运行时 Schema 和 TypeScript 类型，覆盖身份、服务分类、位置、地址和生命周期字段，以 7 项测试固定空值与非法输入边界；见 `docs/architecture/service-point-contract.md` |
-| 2026-09-04 | 建立 Fuel 专属契约 | 定义 Fuel offer/price/discount 字段，以运行时 Schema 和语义校验区分未知/零价、库存状态并固定燃油唯一性与计价单位；见 `docs/architecture/fuel-contract.md` |
-| 2026-09-04 | 建立 EV 专属契约 | 固化 ServicePoint → EVSE → connector → tariff 三级设备语义，校验真实容量、动态状态时间与汇总数量，避免以 connector 数冒充可充电车位；见 `docs/architecture/ev-contract.md` |
-| 2026-09-04 | 建立 Air 专属契约 | 分离设备存在、工作状态、免费/付费、价格、访问与验证时间，要求正向来源证据并拒绝价格语义冲突；见 `docs/architecture/air-contract.md` |
-| 2026-09-04 | 建立 Wash 专属契约 | 分离设备状态、洗车类型、套餐与起价，校验正向来源、类型一致性和最低已知套餐价；见 `docs/architecture/wash-contract.md` |
-| 2026-09-04 | 统一来源、新鲜度与可信度契约 | 每个 ServicePoint 强制来源/许可摘要，统一五档 freshness、三档 confidence/分数及字段级 provenance，校验独立证据时间与更新依据；见 `docs/architecture/source-quality-contract.md` |
-| 2026-09-04 | 统一地域与币种契约 | 四类服务共享 FR/ES、EUR、WGS84 坐标和结构化地址 Schema，并校验地址国家、时区及空值格式一致性；见 `docs/architecture/geography-currency-contract.md` |
-| 2026-09-04 | 统一 canonical 枚举 | service/fuel/EV connector 代码、Schema 与类型集中为唯一语言无关来源，明确未知与来源标签映射规则；见 `docs/architecture/canonical-enums.md` |
-| 2026-09-04 | 统一营业、可用性与未知语义 | ServicePoint 增加规范化排班、评估状态与临时关闭优先级，统一 availability/unknown reason，禁止将未知折叠为负值或零值；见 `docs/architecture/opening-availability-contract.md` |
-| 2026-09-04 | 建立 PostgreSQL/PostGIS 数据库结构 | 在真实 PostgreSQL 18.6/PostGIS 3.6 上连续两次成功执行事务迁移，验证 17 张基础表、迁移记录和 WGS84 geography 字段；完整质量门槛 164 项测试通过；见 `docs/architecture/database-schema.md` |
-| 2026-09-04 | 建立地理位置和常用筛选索引 | 创建 9 个空间/常用筛选索引；数据库确认均 ready/valid，执行计划实际使用 GiST、service type 与 latest Fuel price 索引；完整质量门槛 167 项测试通过；见 `docs/architecture/database-indexes.md` |
-| 2026-09-04 | 建立来源原始身份与同步幂等 | 以来源+原始 ID 唯一约束 raw record，事务验证重复输入不变、较新输入更新、过时输入不覆盖且无重复；完整质量门槛 170 项测试通过；见 `docs/architecture/source-record-idempotency.md` |
-| 2026-09-04 | 建立原始数据导入与增量更新 | worker 按已保存 checkpoint 分页读取，逐页原子提交 raw records 与下一 cursor/high watermark，覆盖恢复、失败回滚、停滞、循环和时间倒退防护；完整质量门槛 178 项测试通过；见 `docs/architecture/incremental-source-import.md` |
-| 2026-09-04 | 建立跨来源站点去重与合并规则 | 可信 ID/强地址才允许自动匹配，近分候选转人工复核，字段选择禁止旧值或低可信新值降级；数据库保留版本、得分和理由；完整质量门槛 190 项测试通过；见 `docs/architecture/service-point-deduplication.md` |
-| 2026-09-04 | 建立来源、关闭与缺货生命周期 | 区分 missing/deleted/withdrawn、站点关闭与单项 Fuel 库存，支持安全恢复、撤回写入阻断和事件历史，真实数据库验证硬删除受限；完整质量门槛 201 项测试通过；见 `docs/architecture/source-lifecycle.md` |
-| 2026-09-04 | 记录同步时间、数量、错误与耗时 | 每次同步持久化模式、起止、耗时、已提交页/记录、失败页和脱敏错误，同源并发与重复终结受数据库阻止；完整质量门槛 208 项测试通过；见 `docs/architecture/sync-run-observability.md` |
-| 2026-09-04 | 建立同步失败重试与告警 | 临时错误按有界指数退避重试，永久/耗尽失败与 stale run 写入去重告警 outbox，数据库原子记录 retry chain、due time 和投递结果；完整质量门槛 221 项测试通过；见 `docs/architecture/sync-retry-alerting.md` |
-| 2026-09-04 | 建立查询缓存与失效规则 | 以国家+服务 generation 保证来源变化后旧缓存不可读，拒绝竞态产生的过时代际写入，只持久化哈希 key 并限制 TTL；完整质量门槛 229 项测试通过；见 `docs/architecture/query-cache-invalidation.md` |
-| 2026-09-04 | 建立可重复数据库测试数据集 | 全合成固定 fixture 覆盖两国四服务及关闭、缺货、Unknown、EVSE、新旧价格和跨境场景；空库连续加载两次精确一致并回滚；完整质量门槛 233 项测试通过；见 `docs/testing/database-integration-fixture.md` |
-| 2026-09-04 | 完成 Phase 2 工程与统一数据层 | 工程基础、统一契约、PostGIS、幂等导入、生命周期、同步审计、重试告警、缓存和 fixture 全部完成；四项 Phase 2 验收门槛通过，进入 Phase 3 |
-| 2026-09-04 | 实现 PostGIS 服务候选粗筛 | 按经纬度、服务和有界半径使用 GiST/ST_DWithin 粗筛，返回精确米制距离并稳定排序，跨境结果与关闭状态边界经真实数据库验证；完整质量门槛 241 项测试通过；见 `docs/architecture/service-point-candidate-search.md` |
-| 2026-09-04 | 实现候选不足自动扩圈 | 按有界几何序列扩大搜索半径，达到目标数量即停止；上限耗尽时返回真实部分结果、完整尝试轨迹和明确原因；完整质量门槛 246 项测试通过；见 `docs/architecture/expanding-candidate-search.md` |
-| 2026-09-04 | 实现 Top N 路线距离与 ETA | 最近候选经 provider-neutral 的 1×N Matrix 获取真实驾车距离和 ETA；Mapbox traffic 请求限制为 origin + 最多 9 个目的地并按 ID 安全合并；完整质量门槛 252 项测试通过；见 `docs/architecture/top-candidate-routing.md` |
-| 2026-09-04 | 建立路线缓存与成本硬门槛 | 精确起点不落库，短时缓存按 coarse cell 的哈希复用；仅 cache miss 原子占用月度 element 预算并记录成功/失败，预算 0 时不调用付费服务；完整质量门槛 264 项测试通过；见 `docs/architecture/route-cache-budget.md` |
-| 2026-09-04 | 实现路线失败诚实降级 | 不可达、超时、限流、预算和 provider/响应错误均转为明确 reason；保留全部候选及直线距离，绝不伪造驾车距离或 ETA，provider 错误不泄露 token/URL/body；完整质量门槛 268 项测试通过；见 `docs/architecture/route-failure-degradation.md` |
-| 2026-09-04 | 实现 Nearest 稳定排名 | 有真实路线时优先 ETA 并以 road/straight distance 和 ID 决胜；无路线候选保留原因并明确按直线距离降级，输入不被修改；完整质量门槛 273 项测试通过；见 `docs/architecture/nearest-ranking.md` |
-| 2026-09-04 | 实现 capability-aware Cheapest | 仅 Fuel 当前、可比较且可用的指定燃油价格参与 Cheapest；stale/Unknown/缺货/会员价无优势，其余三类服务返回共享 unavailable reason；完整质量门槛 288 项测试通过；见 `docs/architecture/capability-aware-cheapest.md` |
-| 2026-09-04 | 实现 capability-aware Open now | 数据库隔离站点与服务专属排班证据；Fuel 使用站点状态，Charge/Air/Wash 仅凭服务专属状态 conditional 启用，Unknown 不冒充营业且临时关闭优先；真实 PostgreSQL/PostGIS 验证通过，完整质量门槛 300 项测试通过；见 `docs/architecture/capability-aware-open-now.md` |
-| 2026-09-04 | 统一空结果与 Unknown 响应 | 明确区分附近无站点、无可比价格、排班 Unknown、全部关闭与能力禁用；保留字段级 Unknown 计数/提示并提供扩圈或 Nearest 回退；完整质量门槛 315 项测试通过；见 `docs/architecture/search-empty-and-unknown-outcomes.md` |
-| 2026-09-04 | 统一法国/西班牙营业时间解析入口 | 法国 JSON `HH.mm` 与西班牙文本星期/范围统一输出 NormalizedOpeningHours，两国 Adapter 删除重复逻辑并保留 partial/Unknown 语义；完整质量门槛 322 项测试通过；见 `docs/architecture/source-opening-hours-parser.md` |
-| 2026-09-04 | 固化 24/7、跨午夜与分段营业语义 | 两国排班统一使用开门含/关门不含边界，跨日延续、分段空档、区间去重排序与同开同关异常均有确定行为；完整质量门槛 329 项测试通过；见 `docs/architecture/advanced-opening-hours.md` |
-| 2026-09-04 | 固化营业时间时区与 DST 行为 | 按站点国家匹配 Paris/Madrid IANA 时区，覆盖冬夏偏移、本地跨日、春季跳时和秋季重复小时；错误时区降级 Unknown；完整质量门槛 334 项测试通过；见 `docs/architecture/opening-hours-timezones.md` |
-| 2026-09-04 | 处理节假日 Unknown 与临时关闭 | 周排班在 public holiday/日历未知时不冒充营业并输出专属 warning；临时关闭覆盖全部排班与 24/7 证据；完整质量门槛 339 项测试通过；见 `docs/architecture/holiday-and-temporary-closure.md` |
+| 日期       | 完成内容                                       | 结果/证据                                                                                                                                                                                                                                                    |
+| ---------- | ---------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 2026-09-03 | 建立项目任务清单                               | `PROJECT_TASKS.md`                                                                                                                                                                                                                                           |
+| 2026-09-03 | 连接 GitHub 仓库并推送项目文档                 | `https://github.com/zhyphil/fuelnow`，`main` 跟踪 `origin/main`                                                                                                                                                                                              |
+| 2026-09-03 | 建立 Conventional Commits 与自动提交推送工作流 | `AGENTS.md`、`CONTRIBUTING.md`                                                                                                                                                                                                                               |
+| 2026-09-03 | 完成 V1 客户端平台选型                         | React Native + Expo + TypeScript；见 `docs/decisions/0001-client-platform.md`                                                                                                                                                                                |
+| 2026-09-03 | 完成后端技术栈与运行方式选型                   | Node.js 24 LTS + TypeScript + Fastify + pnpm workspace；见 `docs/decisions/0002-backend-stack.md`                                                                                                                                                            |
+| 2026-09-03 | 完成地理数据库方案选型                         | PostgreSQL 18 + PostGIS 3.6；见 `docs/decisions/0003-geospatial-database.md`                                                                                                                                                                                 |
+| 2026-09-03 | 完成地图、路线与 ETA 方案选型                  | Mapbox Matrix + react-native-maps + 外部导航；见 `docs/decisions/0004-maps-routing-provider.md`                                                                                                                                                              |
+| 2026-09-03 | 固定法国、西班牙及跨境验证区域                 | 8 个核心锚点和 Toulouse–Barcelona 走廊；见 `docs/decisions/0005-validation-geographies.md`                                                                                                                                                                   |
+| 2026-09-03 | 确定 V1 免登录账号策略                         | 核心搜索和导航无需账户；见 `docs/decisions/0006-account-policy.md`                                                                                                                                                                                           |
+| 2026-09-03 | 定义位置权限、保存与 GDPR 工程边界             | 前台按需定位且精确出发点默认不持久化；见 `docs/decisions/0007-location-privacy.md`                                                                                                                                                                           |
+| 2026-09-03 | 定义数据来源与许可证署名体系                   | 四层 provenance 展示并建立来源注册表；见 `docs/decisions/0008-source-attribution.md`                                                                                                                                                                         |
+| 2026-09-03 | 定义按字段的新鲜度与可信度语义                 | 五级 freshness + 独立 confidence；见 `docs/decisions/0009-freshness-confidence.md`                                                                                                                                                                           |
+| 2026-09-03 | 定义 V1 四类服务字段契约                       | 明确搜索准入、未知值、价格、状态、来源和查询派生字段；见 `docs/product/v1-service-fields.md`                                                                                                                                                                 |
+| 2026-09-03 | 确定 V1 发布测试与区域 Beta 范围               | 全国数据能力 + Toulouse–Barcelona 走廊质量承诺；见 `docs/decisions/0010-beta-launch-scope.md`                                                                                                                                                                |
+| 2026-09-03 | 完成 Phase 0 开工决策                          | 所有任务和验收门槛完成；ADR 索引见 `docs/decisions/README.md`                                                                                                                                                                                                |
+| 2026-09-03 | 找到并探测法国官方 Fuel 实时数据源             | v2 dataset、Records API、CSV/JSON/GeoJSON exports 均可访问；见 `docs/data/france-fuel-source.md`                                                                                                                                                             |
+| 2026-09-03 | 核实法国 Fuel 数据许可与使用约束               | 允许商业复用、缓存、转换和再分发；必须标注来源与最新更新时间；见 `docs/data/france-fuel-licence.md`                                                                                                                                                          |
+| 2026-09-03 | 保存法国 Fuel 原始样本与字段字典               | 固定 station `31000001` 的完整 Records API 响应，并记录 47 个字段；见 `fixtures/france-fuel/` 与 `docs/data/france-fuel-fields.md`                                                                                                                           |
+| 2026-09-03 | 验证法国 Fuel 站点基础字段                     | 坐标和地址可用；名称/品牌无显式字段；营业时间覆盖 86.32% 且存在多种时段结构；见 `docs/data/france-fuel-basic-fields-validation.md`                                                                                                                           |
+| 2026-09-03 | 验证法国 Fuel 价格与缺货字段                   | 价格与原始项一致；确认 France-local 时间解析要求及缺货汇总字段异常；见 `docs/data/france-fuel-price-validation.md`                                                                                                                                           |
+| 2026-09-03 | 验证法国 Fuel 关闭、24/7 与设施字段            | 整站临时关闭不可得；区分自动付款与站点 24/7；验证 Air/Wash 标签；见 `docs/data/france-fuel-status-services-validation.md`                                                                                                                                    |
+| 2026-09-03 | 实现法国 Fuel 数据适配器                       | 建立最小 TypeScript 数据包；真实 fixture、时区、缺货、营业时间及设施映射共 7 项测试通过；见 `packages/data-core/`                                                                                                                                            |
+| 2026-09-03 | 实现法国 Fuel 10 km GPS 查询                   | Toulouse 官方 12 km 边界样本中正确返回 70 个 10 km 内结果，距离与源 API 相差均小于 2 m；见 `docs/data/france-fuel-nearby-validation.md`                                                                                                                      |
+| 2026-09-03 | 完成法国 Fuel 多地理场景验证                   | Paris、Toulouse、Blagnac 郊区/机场和 A9 高速场景全部通过；17 项测试通过；见 `docs/data/france-fuel-geography-validation.md`                                                                                                                                  |
+| 2026-09-03 | 找到并探测西班牙官方 Fuel 数据源               | MITECO 全国 REST JSON 返回 11,475 站点，并验证区域过滤、参考列表与 XLS；见 `docs/data/spain-fuel-source.md`                                                                                                                                                  |
+| 2026-09-03 | 核实西班牙 Fuel 数据许可与使用约束             | 现代资源 CC BY 4.0 允许商业复用、缓存、改编和再分发；记录旧通用声明差异；见 `docs/data/spain-fuel-licence.md`                                                                                                                                                |
+| 2026-09-03 | 保存西班牙 Fuel 原始样本与字段字典             | 固定 Pinto 市级 17 条完整响应，并记录 41 个源字符串字段；见 `fixtures/spain-fuel/` 与 `docs/data/spain-fuel-fields.md`                                                                                                                                       |
+| 2026-09-03 | 验证西班牙 Fuel 站点基础字段                   | 身份和地址完整；确认 `Rótulo` 映射边界、4 个坐标异常及 1,172 种营业时间表达；见 `docs/data/spain-fuel-basic-fields-validation.md`                                                                                                                            |
+| 2026-09-03 | 验证西班牙 Fuel 产品、价格和时间语义           | 42,619 个价格值格式有效；确定 9 个 V1 映射、液体/气体单位和 `Fecha` 快照边界；见 `docs/data/spain-fuel-price-validation.md`                                                                                                                                  |
+| 2026-09-03 | 验证西班牙 Fuel 关闭、24/7 与服务字段          | XLS 补充单站时间和服务方式；确认关闭、Air/Wash 与设备状态不可得；见 `docs/data/spain-fuel-status-services-validation.md`                                                                                                                                     |
+| 2026-09-03 | 实现西班牙 Fuel 数据适配器                     | 真实 Pinto fixture、时间/营业时间、9 种燃料、单位、异常坐标和安全 XLS 补充匹配共 12 项西班牙测试通过；全国 11,475 行验收符合预期；见 `packages/data-core/`                                                                                                   |
+| 2026-09-03 | 实现西班牙 Fuel 10 km GPS 查询                 | Madrid 独立边界 fixture 中正确返回 219 个 10 km 内结果，支持稳定排序、限制和逐行错误；见 `docs/data/spain-fuel-nearby-validation.md`                                                                                                                         |
+| 2026-09-03 | 完成西班牙 Fuel 多地理场景验证                 | Madrid、Barcelona、El Prat 郊区/机场和 La Jonquera AP-7 高速场景全部通过；38 项测试通过；见 `docs/data/spain-fuel-geography-validation.md`                                                                                                                   |
+| 2026-09-03 | 统一法国与西班牙 Fuel 模型入口                 | 两国真实记录经 country-discriminated 入口转换为同一 `NormalizedServicePoint` 契约；40 项测试通过；见 `docs/data/unified-fuel-model-validation.md`                                                                                                            |
+| 2026-09-03 | 实现统一 Fuel 直线距离粗筛                     | 对两国统一模型执行 0–100 km Haversine 半径筛选，保持输入顺序并验证精确边界；44 项测试通过；见 `docs/data/unified-fuel-distance-validation.md`                                                                                                                |
+| 2026-09-03 | 实现统一 Fuel Nearest 排序                     | 两国查询共用距离升序与全局 ID 决胜规则，排序不改变调用方数组；49 项测试通过；见 `docs/data/unified-fuel-nearest-validation.md`                                                                                                                               |
+| 2026-09-03 | 实现统一 Fuel Cheapest 排序                    | 仅比较指定燃料与兼容单位，Stale/Unknown/不可用价格不获得旧低价优势，并以距离和全局 ID 决胜；55 项测试通过；见 `docs/data/unified-fuel-cheapest-validation.md`                                                                                                |
+| 2026-09-03 | 实现统一 Fuel Open now 筛选                    | 按站点时区计算营业状态并区分 Open/Closed/Unknown，支持分段、跨午夜及法国 24/7 自助 Fuel；64 项测试通过；见 `docs/data/unified-fuel-open-now-validation.md`                                                                                                   |
+| 2026-09-03 | 验证统一 Fuel 来源署名                         | Toulouse 70 条与 Madrid 219 条结果全部返回来源 ID、名称和 HTTPS URL，全局 ID 可反查来源；66 项测试通过；见 `docs/data/unified-fuel-source-attribution-validation.md`                                                                                         |
+| 2026-09-03 | 验证统一 Fuel 来源时间                         | Toulouse 70 条使用 source observed，Madrid 219 条使用 snapshot published，并始终与系统 fetched_at 分离；69 项测试通过；见 `docs/data/unified-fuel-source-timestamps-validation.md`                                                                           |
+| 2026-09-03 | 定义统一 Fuel 显示和决策状态                   | 价格 Current/Stale/Expired/Unknown、库存、关闭与本地化 warning code 形成可执行契约；78 项测试通过；见 `docs/data/unified-fuel-decision-state-validation.md`                                                                                                  |
+| 2026-09-03 | 验证 Perpignan–Girona 跨境 Fuel 查询           | La Jonquera 25 km 返回法国 21 + 西班牙 67 条；北侧边境点保留更近西班牙站；80 项测试通过；见 `docs/data/cross-border-fuel-search-validation.md`                                                                                                               |
+| 2026-09-03 | 人工抽查真实 Fuel 站点与价格                   | 对照两国 10 个城市/机场/高速/边境样本，确认价格、单位、24/7 和临时/永久缺货语义；82 项测试通过；见 `docs/data/manual-fuel-sample-audit.md`                                                                                                                   |
+| 2026-09-03 | 验证法国 Fuel 的 Air 字段                      | 全国 5,450/9,804 条含 `Station de gonflage`；244 条固定样本严格匹配 presence，价格/设备状态保持 Unknown；84 项测试通过；见 `docs/data/france-air-field-validation.md`                                                                                        |
+| 2026-09-03 | 验证西班牙 Fuel 的 Air 字段边界                | REST 41 字段、XLS 40 列均无 Air/水/设备字段；684 条固定样本保持 Unknown，服务方式不误映射；86 项测试通过；见 `docs/data/spain-air-field-validation.md`                                                                                                       |
+| 2026-09-03 | 量化两国 Air 来源覆盖                          | 法国全国 5,450/9,804（55.59%）明确声明 Air；西班牙 MITECO 无该字段，0 known-positive 不能解释为现实中不存在；见 `docs/data/air-coverage-validation.md`                                                                                                       |
+| 2026-09-03 | 评估 Air 价格覆盖                              | 法国 5,450 个 Air-positive 记录均无 free/paid/amount，价格 100% Unknown；西班牙无 Air denominator；见 `docs/data/air-price-coverage-validation.md`                                                                                                           |
+| 2026-09-03 | 评估 Air 设备状态覆盖                          | 法国 5,450 个 Air-positive 记录均无 working/broken/verified 时间，状态 100% Unknown；西班牙不可测；见 `docs/data/air-equipment-status-coverage-validation.md`                                                                                                |
+| 2026-09-03 | 验证法国 Fuel 的 Wash 字段                     | 全国 4,052/9,804 条含自动或手动洗车标签；244 条固定样本严格匹配 presence，`Laverie` 不误映射；88 项测试通过；见 `docs/data/france-wash-field-validation.md`                                                                                                  |
+| 2026-09-04 | 验证西班牙 Fuel 的 Wash 字段边界               | REST 41 字段、XLS 40 列均无 Wash/类型/价格/设备字段；684 条固定样本保持 Unknown，服务方式不误映射；90 项测试通过；见 `docs/data/spain-wash-field-validation.md`                                                                                              |
+| 2026-09-04 | 量化两国 Wash 来源覆盖                         | 法国全国 4,052/9,804（41.33%）明确声明 Wash；西班牙 MITECO 无该字段，0 known-positive 不能解释为现实中不存在；见 `docs/data/wash-coverage-validation.md`                                                                                                     |
+| 2026-09-04 | 评估 Wash 类型和价格覆盖                       | 法国 4,052 个 Wash-positive 记录的详细类型与价格均为 0% known；西班牙无 Wash denominator；见 `docs/data/wash-type-price-coverage-validation.md`                                                                                                              |
+| 2026-09-04 | 决定使用 OSM 补充 Air/Wash                     | 四个目标城市均有明确 Air/Wash 候选；仅采纳显式 presence，生产不依赖公共 Overpass，公开 Beta 前审查 ODbL 合并数据库义务；见 `docs/decisions/0011-osm-air-wash-supplement.md`                                                                                  |
+| 2026-09-04 | 验证法国 EV 静态数据源                         | PAN Beta 49 字段含 166,339 个 PDC/48,181 个站；QualiCharge 99.97% 已包含，禁止重复叠加；记录重复 ID、坐标、功率和时间异常；见 `docs/data/france-ev-static-source.md`                                                                                         |
+| 2026-09-04 | 验证法国 EV 动态 availability/price            | PAN 动态匹配 61.13% 静态 PDC，但最新去重后仅 5.43% 静态 PDC 在 60 分钟内；11,283 个重复 ID；动态价格字段为 0；见 `docs/data/france-ev-dynamic-coverage.md`                                                                                                   |
+| 2026-09-04 | 验证西班牙 EV 静态数据源                       | 选定官方 MITECO RIPREE 全国导出；43,610 个连接器行覆盖 36,465 个 PDC/12,214 个安装点；确认三级身份、非标准 CSV 解析、重复连接器和容量异常边界；见 `docs/data/spain-ev-static-source.md`                                                                      |
+| 2026-09-04 | 验证西班牙 EV 动态 availability/price          | Reve 内 42,800/44,631 个 EVSE 为 OCPI 动态来源，价格筛选匹配 13,323/14,564 个地点；确认正式 API key、5 次/小时、逐点精确状态及全量身份关联限制；见 `docs/data/spain-ev-dynamic-coverage.md`                                                                  |
+| 2026-09-04 | 统一验证两国 EV 字段                           | 建立 service point → EVSE → connector 模型，固定主要接口、功率隔离、运营商身份和 FR/ES 状态优先级；同步细化 V1 Charge 字段契约；见 `docs/data/unified-ev-fields-validation.md`                                                                               |
+| 2026-09-04 | 固化 EV 来源更新与许可政策                     | 法国 PAN/QualiCharge 和西班牙 RIPREE 可用于受控开发；Reve/SGV 因商用授权、API 配额和再分发条件未闭环而保持生产禁用；见 `docs/data/ev-source-licence-update-policy.md`                                                                                        |
+| 2026-09-04 | 确定 V1 EV 实时承诺范围                        | 两国保留全国静态发现；法国仅满足逐 EVSE Live 门槛时显示可用性，西班牙动态与两国 Charge Cheapest 暂停；见 `docs/decisions/0012-v1-ev-realtime-scope.md`                                                                                                       |
+| 2026-09-04 | 汇总全部来源字段映射                           | 建立 Fuel、Charge、Air、Wash 的跨来源 canonical 字段、派生/补充/不可用边界，并统一西班牙 Fuel source ID；见 `docs/data/source-field-mapping-report.md`                                                                                                       |
+| 2026-09-04 | 汇总四类服务覆盖率                             | 统一 Fuel 区域密度、Air/Wash 来源确认率与 OSM 候选、Charge 静态规模及动态/新鲜覆盖，禁止混用不同分母；见 `docs/data/service-coverage-report.md`                                                                                                              |
+| 2026-09-04 | 汇总决策字段缺失率                             | 分别量化 Fuel/Charge 价格、排班营业与实时状态，以及 Air/Wash 价格/设备状态的 Unknown 边界；见 `docs/data/decision-field-missingness-report.md`                                                                                                               |
+| 2026-09-04 | 汇总新鲜度与异常样本                           | 量化 Fuel/Charge/静态/OSM 时间分布并登记时区、过期、坐标、身份、功率、未来时间和标签冲突样本；见 `docs/data/freshness-anomaly-report.md`                                                                                                                     |
+| 2026-09-04 | 完成来源风险、成本与降级方案                   | 为开放数据、OSM、Reve 与 Mapbox 建立成本驱动、预算控制、故障降级和发布门槛；见 `docs/data/source-risk-cost-degradation-report.md`                                                                                                                            |
+| 2026-09-04 | 完成 Phase 1 并确认 V1 范围                    | 六项 Phase 1 验收门槛通过；保留四类服务但采用 capability-aware 行为，进入 Phase 2；见 `docs/decisions/0013-v1-scope-after-data-feasibility.md`                                                                                                               |
+| 2026-09-04 | 建立正式 monorepo 目录骨架                     | pnpm 纳入 API、mobile、contracts、config 与 data-core 五个 workspace，并定义单向依赖和服务端凭据边界；见 `docs/architecture/repository-structure.md`                                                                                                         |
+| 2026-09-04 | 配置开发、测试和生产环境语义                   | 建立三环境严格解析、安全/隔离矩阵和 release-test 生产行为，测试默认禁止 live source；见 `docs/architecture/environments.md`                                                                                                                                  |
+| 2026-09-04 | 建立环境变量与密钥模板                         | 新增安全默认 `.env.example`，服务端密钥留空、同步和付费路线默认关闭，明确移动端公开变量边界；见 `docs/architecture/configuration-and-secrets.md`                                                                                                             |
+| 2026-09-04 | 建立本地代码质量门槛                           | 配置 Prettier、ESLint、TypeScript 和 Vitest，统一以 `pnpm check` 顺序执行格式、静态、类型与 95 项测试检查                                                                                                                                                    |
+| 2026-09-04 | 接入持续集成质量门槛                           | GitHub Actions 在 PR/`main` 上以 Node.js 24、冻结 lockfile、只读权限和禁用来源同步的测试环境执行完整 `pnpm check`；见 `docs/architecture/continuous-integration.md`                                                                                          |
+| 2026-09-04 | 完成本地开发指南                               | 固化 Node/pnpm 版本、首次安装、workspace 命令、来源安全、逐任务提交流程和常见故障处理；见 `docs/development/local-development.md`                                                                                                                            |
+| 2026-09-04 | 建立基础 ServicePoint 契约                     | TypeBox 同源生成运行时 Schema 和 TypeScript 类型，覆盖身份、服务分类、位置、地址和生命周期字段，以 7 项测试固定空值与非法输入边界；见 `docs/architecture/service-point-contract.md`                                                                          |
+| 2026-09-04 | 建立 Fuel 专属契约                             | 定义 Fuel offer/price/discount 字段，以运行时 Schema 和语义校验区分未知/零价、库存状态并固定燃油唯一性与计价单位；见 `docs/architecture/fuel-contract.md`                                                                                                    |
+| 2026-09-04 | 建立 EV 专属契约                               | 固化 ServicePoint → EVSE → connector → tariff 三级设备语义，校验真实容量、动态状态时间与汇总数量，避免以 connector 数冒充可充电车位；见 `docs/architecture/ev-contract.md`                                                                                   |
+| 2026-09-04 | 建立 Air 专属契约                              | 分离设备存在、工作状态、免费/付费、价格、访问与验证时间，要求正向来源证据并拒绝价格语义冲突；见 `docs/architecture/air-contract.md`                                                                                                                          |
+| 2026-09-04 | 建立 Wash 专属契约                             | 分离设备状态、洗车类型、套餐与起价，校验正向来源、类型一致性和最低已知套餐价；见 `docs/architecture/wash-contract.md`                                                                                                                                        |
+| 2026-09-04 | 统一来源、新鲜度与可信度契约                   | 每个 ServicePoint 强制来源/许可摘要，统一五档 freshness、三档 confidence/分数及字段级 provenance，校验独立证据时间与更新依据；见 `docs/architecture/source-quality-contract.md`                                                                              |
+| 2026-09-04 | 统一地域与币种契约                             | 四类服务共享 FR/ES、EUR、WGS84 坐标和结构化地址 Schema，并校验地址国家、时区及空值格式一致性；见 `docs/architecture/geography-currency-contract.md`                                                                                                          |
+| 2026-09-04 | 统一 canonical 枚举                            | service/fuel/EV connector 代码、Schema 与类型集中为唯一语言无关来源，明确未知与来源标签映射规则；见 `docs/architecture/canonical-enums.md`                                                                                                                   |
+| 2026-09-04 | 统一营业、可用性与未知语义                     | ServicePoint 增加规范化排班、评估状态与临时关闭优先级，统一 availability/unknown reason，禁止将未知折叠为负值或零值；见 `docs/architecture/opening-availability-contract.md`                                                                                 |
+| 2026-09-04 | 建立 PostgreSQL/PostGIS 数据库结构             | 在真实 PostgreSQL 18.6/PostGIS 3.6 上连续两次成功执行事务迁移，验证 17 张基础表、迁移记录和 WGS84 geography 字段；完整质量门槛 164 项测试通过；见 `docs/architecture/database-schema.md`                                                                     |
+| 2026-09-04 | 建立地理位置和常用筛选索引                     | 创建 9 个空间/常用筛选索引；数据库确认均 ready/valid，执行计划实际使用 GiST、service type 与 latest Fuel price 索引；完整质量门槛 167 项测试通过；见 `docs/architecture/database-indexes.md`                                                                 |
+| 2026-09-04 | 建立来源原始身份与同步幂等                     | 以来源+原始 ID 唯一约束 raw record，事务验证重复输入不变、较新输入更新、过时输入不覆盖且无重复；完整质量门槛 170 项测试通过；见 `docs/architecture/source-record-idempotency.md`                                                                             |
+| 2026-09-04 | 建立原始数据导入与增量更新                     | worker 按已保存 checkpoint 分页读取，逐页原子提交 raw records 与下一 cursor/high watermark，覆盖恢复、失败回滚、停滞、循环和时间倒退防护；完整质量门槛 178 项测试通过；见 `docs/architecture/incremental-source-import.md`                                   |
+| 2026-09-04 | 建立跨来源站点去重与合并规则                   | 可信 ID/强地址才允许自动匹配，近分候选转人工复核，字段选择禁止旧值或低可信新值降级；数据库保留版本、得分和理由；完整质量门槛 190 项测试通过；见 `docs/architecture/service-point-deduplication.md`                                                           |
+| 2026-09-04 | 建立来源、关闭与缺货生命周期                   | 区分 missing/deleted/withdrawn、站点关闭与单项 Fuel 库存，支持安全恢复、撤回写入阻断和事件历史，真实数据库验证硬删除受限；完整质量门槛 201 项测试通过；见 `docs/architecture/source-lifecycle.md`                                                            |
+| 2026-09-04 | 记录同步时间、数量、错误与耗时                 | 每次同步持久化模式、起止、耗时、已提交页/记录、失败页和脱敏错误，同源并发与重复终结受数据库阻止；完整质量门槛 208 项测试通过；见 `docs/architecture/sync-run-observability.md`                                                                               |
+| 2026-09-04 | 建立同步失败重试与告警                         | 临时错误按有界指数退避重试，永久/耗尽失败与 stale run 写入去重告警 outbox，数据库原子记录 retry chain、due time 和投递结果；完整质量门槛 221 项测试通过；见 `docs/architecture/sync-retry-alerting.md`                                                       |
+| 2026-09-04 | 建立查询缓存与失效规则                         | 以国家+服务 generation 保证来源变化后旧缓存不可读，拒绝竞态产生的过时代际写入，只持久化哈希 key 并限制 TTL；完整质量门槛 229 项测试通过；见 `docs/architecture/query-cache-invalidation.md`                                                                  |
+| 2026-09-04 | 建立可重复数据库测试数据集                     | 全合成固定 fixture 覆盖两国四服务及关闭、缺货、Unknown、EVSE、新旧价格和跨境场景；空库连续加载两次精确一致并回滚；完整质量门槛 233 项测试通过；见 `docs/testing/database-integration-fixture.md`                                                             |
+| 2026-09-04 | 完成 Phase 2 工程与统一数据层                  | 工程基础、统一契约、PostGIS、幂等导入、生命周期、同步审计、重试告警、缓存和 fixture 全部完成；四项 Phase 2 验收门槛通过，进入 Phase 3                                                                                                                        |
+| 2026-09-04 | 实现 PostGIS 服务候选粗筛                      | 按经纬度、服务和有界半径使用 GiST/ST_DWithin 粗筛，返回精确米制距离并稳定排序，跨境结果与关闭状态边界经真实数据库验证；完整质量门槛 241 项测试通过；见 `docs/architecture/service-point-candidate-search.md`                                                 |
+| 2026-09-04 | 实现候选不足自动扩圈                           | 按有界几何序列扩大搜索半径，达到目标数量即停止；上限耗尽时返回真实部分结果、完整尝试轨迹和明确原因；完整质量门槛 246 项测试通过；见 `docs/architecture/expanding-candidate-search.md`                                                                        |
+| 2026-09-04 | 实现 Top N 路线距离与 ETA                      | 最近候选经 provider-neutral 的 1×N Matrix 获取真实驾车距离和 ETA；Mapbox traffic 请求限制为 origin + 最多 9 个目的地并按 ID 安全合并；完整质量门槛 252 项测试通过；见 `docs/architecture/top-candidate-routing.md`                                           |
+| 2026-09-04 | 建立路线缓存与成本硬门槛                       | 精确起点不落库，短时缓存按 coarse cell 的哈希复用；仅 cache miss 原子占用月度 element 预算并记录成功/失败，预算 0 时不调用付费服务；完整质量门槛 264 项测试通过；见 `docs/architecture/route-cache-budget.md`                                                |
+| 2026-09-04 | 实现路线失败诚实降级                           | 不可达、超时、限流、预算和 provider/响应错误均转为明确 reason；保留全部候选及直线距离，绝不伪造驾车距离或 ETA，provider 错误不泄露 token/URL/body；完整质量门槛 268 项测试通过；见 `docs/architecture/route-failure-degradation.md`                          |
+| 2026-09-04 | 实现 Nearest 稳定排名                          | 有真实路线时优先 ETA 并以 road/straight distance 和 ID 决胜；无路线候选保留原因并明确按直线距离降级，输入不被修改；完整质量门槛 273 项测试通过；见 `docs/architecture/nearest-ranking.md`                                                                    |
+| 2026-09-04 | 实现 capability-aware Cheapest                 | 仅 Fuel 当前、可比较且可用的指定燃油价格参与 Cheapest；stale/Unknown/缺货/会员价无优势，其余三类服务返回共享 unavailable reason；完整质量门槛 288 项测试通过；见 `docs/architecture/capability-aware-cheapest.md`                                            |
+| 2026-09-04 | 实现 capability-aware Open now                 | 数据库隔离站点与服务专属排班证据；Fuel 使用站点状态，Charge/Air/Wash 仅凭服务专属状态 conditional 启用，Unknown 不冒充营业且临时关闭优先；真实 PostgreSQL/PostGIS 验证通过，完整质量门槛 300 项测试通过；见 `docs/architecture/capability-aware-open-now.md` |
+| 2026-09-04 | 统一空结果与 Unknown 响应                      | 明确区分附近无站点、无可比价格、排班 Unknown、全部关闭与能力禁用；保留字段级 Unknown 计数/提示并提供扩圈或 Nearest 回退；完整质量门槛 315 项测试通过；见 `docs/architecture/search-empty-and-unknown-outcomes.md`                                            |
+| 2026-09-04 | 统一法国/西班牙营业时间解析入口                | 法国 JSON `HH.mm` 与西班牙文本星期/范围统一输出 NormalizedOpeningHours，两国 Adapter 删除重复逻辑并保留 partial/Unknown 语义；完整质量门槛 322 项测试通过；见 `docs/architecture/source-opening-hours-parser.md`                                             |
+| 2026-09-04 | 固化 24/7、跨午夜与分段营业语义                | 两国排班统一使用开门含/关门不含边界，跨日延续、分段空档、区间去重排序与同开同关异常均有确定行为；完整质量门槛 329 项测试通过；见 `docs/architecture/advanced-opening-hours.md`                                                                               |
+| 2026-09-04 | 固化营业时间时区与 DST 行为                    | 按站点国家匹配 Paris/Madrid IANA 时区，覆盖冬夏偏移、本地跨日、春季跳时和秋季重复小时；错误时区降级 Unknown；完整质量门槛 334 项测试通过；见 `docs/architecture/opening-hours-timezones.md`                                                                  |
+| 2026-09-04 | 处理节假日 Unknown 与临时关闭                  | 周排班在 public holiday/日历未知时不冒充营业并输出专属 warning；临时关闭覆盖全部排班与 24/7 证据；完整质量门槛 339 项测试通过；见 `docs/architecture/holiday-and-temporary-closure.md`                                                                       |
+| 2026-09-04 | 无法解析的营业时间降级 Unknown                 | 区分缺失、部分与完全无法解析输入，重复/空日期和错误类型不生成无效排班；服务点保留且防御性求值不误报 Open/Closed；完整质量门槛 347 项测试通过；见 `docs/architecture/unparseable-opening-hours.md`                                                            |

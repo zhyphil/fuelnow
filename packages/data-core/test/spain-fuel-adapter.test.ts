@@ -217,7 +217,7 @@ describe("SpainFuelAdapter", () => {
       result.data?.openingHours?.days.every((day) => day.status === "unknown"),
     ).toBe(true);
     expect(result.issues).toContainEqual(
-      expect.objectContaining({ code: "partial_opening_hours" }),
+      expect.objectContaining({ code: "unparseable_opening_hours" }),
     );
   });
 

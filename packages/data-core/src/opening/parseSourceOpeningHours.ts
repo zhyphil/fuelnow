@@ -152,8 +152,22 @@ function parseFranceOpeningHours(
     };
   }
 
+  if (decoded.jour.length === 0) {
+    return {
+      openingHours: null,
+      issues: [
+        warning(
+          "empty_opening_days",
+          "horaires",
+          "horaires jour must contain at least one day",
+        ),
+      ],
+    };
+  }
+
   const issues: AdapterIssue[] = [];
-  const days: OpeningDay[] = [];
+  const daysByNumber = new Map<OpeningDay["day"], OpeningDay>();
+  const duplicateDays = new Set<OpeningDay["day"]>();
   for (const rawDay of decoded.jour) {
     if (!isRecord(rawDay)) {
       issues.push(
@@ -172,13 +186,40 @@ function parseFranceOpeningHours(
       );
       continue;
     }
+    const day = dayNumber as OpeningDay["day"];
+    if (daysByNumber.has(day)) {
+      if (!duplicateDays.has(day)) {
+        issues.push(
+          warning(
+            "duplicate_opening_day",
+            "horaires",
+            `Opening day ID ${day} occurs more than once`,
+          ),
+        );
+      }
+      duplicateDays.add(day);
+      daysByNumber.set(day, { day, status: "unknown", intervals: [] });
+      continue;
+    }
+
     const closed = rawDay["@ferme"] === "1";
     const intervals = closed ? [] : parseFranceIntervals(rawDay.horaire, issues);
-    days.push({
-      day: dayNumber as OpeningDay["day"],
+    daysByNumber.set(day, {
+      day,
       status: closed ? "closed" : intervals.length > 0 ? "open" : "unknown",
       intervals,
     });
+  }
+  const days = [...daysByNumber.values()];
+  if (days.length === 0) {
+    issues.push(
+      warning(
+        "unparseable_opening_hours",
+        "horaires",
+        "horaires contains no usable opening day",
+      ),
+    );
+    return { openingHours: null, issues };
   }
   days.sort((left, right) => left.day - right.day);
   const siteSchedule24Seven =
@@ -262,7 +303,19 @@ function parseSpainIntervals(value: string): OpeningInterval[] | null {
 }
 
 function parseSpainOpeningHours(rawValue: unknown): SourceOpeningHoursParseResult {
-  const raw = typeof rawValue === "string" ? rawValue.trim() : "";
+  if (rawValue === null || rawValue === undefined || rawValue === "") {
+    return { openingHours: null, issues: [] };
+  }
+  if (typeof rawValue !== "string") {
+    return {
+      openingHours: null,
+      issues: [
+        warning("invalid_opening_hours_type", "Horario", "Horario must be a string"),
+      ],
+    };
+  }
+
+  const raw = rawValue.trim();
   if (raw === "") return { openingHours: null, issues: [] };
 
   const intervalsByDay = new Map<OpeningDay["day"], OpeningInterval[]>();
@@ -289,15 +342,24 @@ function parseSpainOpeningHours(rawValue: unknown): SourceOpeningHoursParseResul
     }
   }
 
-  const issues = partial
+  const hasParsedClause = intervalsByDay.size > 0;
+  const issues = !hasParsedClause
     ? [
         warning(
-          "partial_opening_hours",
+          "unparseable_opening_hours",
           "Horario",
-          "Opening hours contain an unsupported clause",
+          "Opening hours contain no supported clause",
         ),
       ]
-    : [];
+    : partial
+      ? [
+          warning(
+            "partial_opening_hours",
+            "Horario",
+            "Opening hours contain an unsupported clause",
+          ),
+        ]
+      : [];
   const days = SPAIN_DAY_TOKENS.map((_, index): OpeningDay => {
     const day = (index + 1) as OpeningDay["day"];
     const intervals = normalizedIntervals(intervalsByDay.get(day) ?? []);

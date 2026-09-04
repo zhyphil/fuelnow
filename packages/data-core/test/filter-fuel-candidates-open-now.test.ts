@@ -35,7 +35,9 @@ function makeHours(
   return {
     parseStatus,
     days: CLOSED_DAYS.map((item) =>
-      item.day === day ? { day, status: "open", intervals } : { ...item },
+      item.day === day
+        ? { day, status: intervals.length > 0 ? "open" : "closed", intervals }
+        : { ...item },
     ),
     siteSchedule24Seven: false,
     unattendedFuelPayment24Seven: null,

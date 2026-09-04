@@ -219,6 +219,24 @@ describe("FranceFuelAdapter", () => {
     );
   });
 
+  it("keeps the station when its opening hours cannot be parsed", async () => {
+    const source = (await loadFixtureRecord()) as Record<string, unknown>;
+    const result = adapter.adapt(
+      { ...source, horaires: "{" },
+      { fetchedAt: "2026-09-03T20:25:48Z" },
+    );
+
+    expect(result.data?.id).toBe("fr-fuel-realtime-v2:31000001");
+    expect(result.data?.openingHours).toBeNull();
+    expect(result.data?.openingStatus).toBe("unknown");
+    expect(result.issues).toContainEqual(
+      expect.objectContaining({
+        code: "invalid_opening_hours_json",
+        field: "horaires",
+      }),
+    );
+  });
+
   it("quarantines records without a valid source ID or coordinate", () => {
     const result = adapter.adapt(
       { id: null, geom: { lon: 500, lat: 43.6 } },

@@ -100,6 +100,46 @@ function hasValidFullWeekSchedule(openingHours: NormalizedOpeningHours): boolean
   );
 }
 
+function hasValidOpeningHoursStructure(openingHours: NormalizedOpeningHours): boolean {
+  if (
+    openingHours.raw.trim() === "" ||
+    openingHours.days.length < 1 ||
+    openingHours.days.length > 7 ||
+    (openingHours.parseStatus === "parsed" && openingHours.days.length !== 7)
+  ) {
+    return false;
+  }
+
+  const dayNumbers = new Set<number>();
+  for (const day of openingHours.days) {
+    if (
+      !Number.isInteger(day.day) ||
+      day.day < 1 ||
+      day.day > 7 ||
+      dayNumbers.has(day.day) ||
+      (day.status === "open" && day.intervals.length === 0) ||
+      (day.status !== "open" && day.intervals.length > 0)
+    ) {
+      return false;
+    }
+    dayNumbers.add(day.day);
+
+    for (const interval of day.intervals) {
+      const bounds = intervalBounds(interval);
+      if (
+        bounds === null ||
+        interval.spansFullDay !==
+          (interval.opensAt === "00:00" && interval.closesAt === "00:00") ||
+        (!interval.spansFullDay && bounds.opensAt === bounds.closesAt)
+      ) {
+        return false;
+      }
+    }
+  }
+
+  return !openingHours.siteSchedule24Seven || hasValidFullWeekSchedule(openingHours);
+}
+
 export function evaluateOpeningStatusAt(
   openingHours: NormalizedOpeningHours | null,
   timezone: SupportedOpeningTimezone,
@@ -107,6 +147,9 @@ export function evaluateOpeningStatusAt(
   { calendarDayType = "regular" }: OpeningEvaluationOptions = {},
 ): Extract<OpeningStatus, "open" | "closed" | "unknown"> {
   if (openingHours === null) {
+    return "unknown";
+  }
+  if (!hasValidOpeningHoursStructure(openingHours)) {
     return "unknown";
   }
   if (!Object.values(COUNTRY_TIMEZONES).includes(timezone)) {
