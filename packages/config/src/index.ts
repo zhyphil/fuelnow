@@ -9,6 +9,8 @@ export type {
   EnvironmentProfile,
   LogLevel,
 } from "./environment.js";
+export { resolveRoutingConfig } from "./routing.js";
+export type { RoutingConfig, RoutingConfigInput } from "./routing.js";
 export { resolveSyncReliabilityConfig } from "./sync-reliability.js";
 export type {
   SyncReliabilityConfig,

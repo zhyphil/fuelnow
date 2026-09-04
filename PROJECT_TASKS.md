@@ -4,7 +4,7 @@
 > 需求来源：[france_spain_driver_decision_engine_project.md](./france_spain_driver_decision_engine_project.md)  
 > 当前状态：进行中  
 > 当前阶段：Phase 3 — 搜索、路线与决策引擎
-> 下一项任务：`P3-SEA-04` 缓存路线结果并控制第三方接口成本
+> 下一项任务：`P3-SEA-05` 处理路线不可达、超时和限流
 > 最后更新：2026-09-04
 
 ## 使用方法
@@ -222,7 +222,7 @@ V1 的核心验收结果是：
 - [x] `P3-SEA-01` 使用 PostGIS geography + GiST 按经纬度、1 m–100 km 半径和 canonical service 粗筛候选，返回精确米制直线距离与目标坐标并稳定排序；默认/最大候选 200/500，排除永久关闭但保留临时关闭与 Unknown 给后续决策，应用和数据库双重校验且不持久化 origin（2026-09-04；241 tests；[候选搜索说明](./docs/architecture/service-point-candidate-search.md)）
 - [x] `P3-SEA-02` 以可配置倍数逐级扩大候选半径，达到最少候选立即停止；默认上限 50 km、绝对上限 100 km，最终尝试钳制到上限，候选仍不足时返回真实部分结果及明确 stop reason，不填充且不持久化位置（2026-09-04；246 tests；[扩圈搜索说明](./docs/architecture/expanding-candidate-search.md)）
 - [x] `P3-SEA-03` 按直线距离稳定选取 Top N，通过 provider-neutral 1×N Matrix 计算驾车距离和 ETA，并按 canonical ID 安全合并；实现 Mapbox adapter，显式限制 traffic 请求为 1 origin + 最多 9 destinations，返回计算时间、profile、traffic/cache metadata，未进入 Top N 的候选保留且明确标记未请求（2026-09-04；252 tests；[Top N 路线说明](./docs/architecture/top-candidate-routing.md)）
-- [ ] `P3-SEA-04` 缓存路线结果并控制第三方接口成本
+- [x] `P3-SEA-04` 建立不持久化精确 origin 的单目的地路线缓存：三位小数 origin cell 仅进入 SHA-256 key，TTL 默认 5 分钟/最大 15 分钟；只为 cache miss 原子预留月度 Matrix elements，预算 0 禁止付费 miss，持久记录 request/reserved/success/failed 且结算不可重复，单次最多 9 elements（2026-09-04；264 tests；[路线缓存与预算说明](./docs/architecture/route-cache-budget.md)）
 - [ ] `P3-SEA-05` 处理路线不可达、超时和限流
 - [ ] `P3-SEA-06` 实现 Nearest，优先按真实 ETA 排序
 - [ ] `P3-SEA-07` 实现 capability-aware Cheapest：V1 仅 Fuel 启用，Charge/Air/Wash 返回明确 unavailable reason
@@ -590,3 +590,4 @@ V1 的核心验收结果是：
 | 2026-09-04 | 实现 PostGIS 服务候选粗筛 | 按经纬度、服务和有界半径使用 GiST/ST_DWithin 粗筛，返回精确米制距离并稳定排序，跨境结果与关闭状态边界经真实数据库验证；完整质量门槛 241 项测试通过；见 `docs/architecture/service-point-candidate-search.md` |
 | 2026-09-04 | 实现候选不足自动扩圈 | 按有界几何序列扩大搜索半径，达到目标数量即停止；上限耗尽时返回真实部分结果、完整尝试轨迹和明确原因；完整质量门槛 246 项测试通过；见 `docs/architecture/expanding-candidate-search.md` |
 | 2026-09-04 | 实现 Top N 路线距离与 ETA | 最近候选经 provider-neutral 的 1×N Matrix 获取真实驾车距离和 ETA；Mapbox traffic 请求限制为 origin + 最多 9 个目的地并按 ID 安全合并；完整质量门槛 252 项测试通过；见 `docs/architecture/top-candidate-routing.md` |
+| 2026-09-04 | 建立路线缓存与成本硬门槛 | 精确起点不落库，短时缓存按 coarse cell 的哈希复用；仅 cache miss 原子占用月度 element 预算并记录成功/失败，预算 0 时不调用付费服务；完整质量门槛 264 项测试通过；见 `docs/architecture/route-cache-budget.md` |

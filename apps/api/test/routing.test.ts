@@ -62,6 +62,7 @@ describe("routeTopCandidates", () => {
     });
     expect(result.selectedCandidateIds).toEqual(["near", "mid"]);
     expect(result.matrixElementCount).toBe(2);
+    expect(result.billableElementCount).toBe(2);
     expect(result.candidates.map(({ id }) => id)).toEqual(["far", "near", "mid"]);
     expect(result.candidates.map(({ routeStatus }) => routeStatus)).toEqual([
       "not_requested",
@@ -80,6 +81,7 @@ describe("routeTopCandidates", () => {
     });
 
     expect(result.matrixElementCount).toBe(0);
+    expect(result.billableElementCount).toBe(0);
     expect(provider.calculateMatrix).not.toHaveBeenCalled();
   });
 

@@ -1,5 +1,18 @@
+export { CachedBudgetedRoutingProvider } from "./CachedBudgetedRoutingProvider.js";
+export type { CachedBudgetedRoutingProviderOptions } from "./CachedBudgetedRoutingProvider.js";
 export { MapboxMatrixRoutingProvider } from "./MapboxMatrixRoutingProvider.js";
 export type { MapboxMatrixRoutingProviderOptions } from "./MapboxMatrixRoutingProvider.js";
+export { PostgresRouteCache } from "./PostgresRouteCache.js";
+export type { RouteMonthlyUsage } from "./PostgresRouteCache.js";
+export { createRouteCacheKeyHash, ROUTE_ORIGIN_CELL_DECIMALS } from "./cacheKey.js";
+export type { RouteCacheKeyInput } from "./cacheKey.js";
+export { RouteBudgetExceededError } from "./routeCache.js";
+export type {
+  CachedRouteValue,
+  FinalizeRouteUsageRequest,
+  RouteCacheStore,
+  RouteUsageReservation,
+} from "./routeCache.js";
 export { routeTopCandidates } from "./routeTopCandidates.js";
 export type {
   CandidateRouteStatus,

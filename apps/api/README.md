@@ -71,3 +71,9 @@ callers can disclose expansion instead of padding results.
 a provider-neutral one-origin-to-many matrix request. The Mapbox adapter returns
 validated road distance, ETA, calculation time, profile and traffic metadata;
 traffic-aware calls are capped at nine destinations plus the origin.
+
+`CachedBudgetedRoutingProvider` wraps live routing with a short route cache and
+an atomic monthly element reservation. It requests only cache misses, records
+successful/failed usage and honors the repository's zero-budget default. Cache
+keys contain only a hash of a coarse origin cell and destination metadata; exact
+origins are never written to the cache table.

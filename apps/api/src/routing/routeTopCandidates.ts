@@ -25,6 +25,7 @@ export interface RouteTopCandidatesResult {
   candidates: CandidateWithRoute[];
   selectedCandidateIds: string[];
   matrixElementCount: number;
+  billableElementCount: number;
   profile: RoutingProfile;
 }
 
@@ -101,6 +102,7 @@ export async function routeTopCandidates(
       candidates: [],
       selectedCandidateIds: [],
       matrixElementCount: 0,
+      billableElementCount: 0,
       profile,
     };
   }
@@ -131,6 +133,8 @@ export async function routeTopCandidates(
     }),
     selectedCandidateIds,
     matrixElementCount: selected.length,
+    billableElementCount: estimates.filter(({ cacheStatus }) => cacheStatus === "miss")
+      .length,
     profile,
   };
 }

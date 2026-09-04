@@ -44,6 +44,10 @@ const candidateSearchMigrationUrl = new URL(
   "../db/migrations/0010_service_point_candidate_search.sql",
   import.meta.url,
 );
+const routeCacheBudgetMigrationUrl = new URL(
+  "../db/migrations/0011_route_cache_budget.sql",
+  import.meta.url,
+);
 
 describe("initial PostgreSQL/PostGIS schema", () => {
   it("enables PostGIS and uses WGS84 geography points", async () => {
@@ -322,5 +326,29 @@ describe("initial PostgreSQL/PostGIS schema", () => {
     expect(migration).toContain(
       "ORDER BY ST_Distance(point.location, origin), point.id",
     );
+  });
+
+  it("stores hashed route keys without exact origin coordinates", async () => {
+    const migration = await readFile(routeCacheBudgetMigrationUrl, "utf8");
+
+    expect(migration).toContain("CREATE TABLE route_cache_entries");
+    expect(migration).toContain("cache_key_hash ~ '^[0-9a-f]{64}$'");
+    expect(migration).not.toMatch(/origin_(?:longitude|latitude)/);
+    expect(migration).toContain("interval '15 minutes'");
+    expect(migration).toContain("FUNCTION read_route_cache");
+    expect(migration).toContain("FUNCTION put_route_cache_entries");
+  });
+
+  it("atomically enforces monthly route element budgets", async () => {
+    const migration = await readFile(routeCacheBudgetMigrationUrl, "utf8");
+
+    expect(migration).toContain("CREATE TABLE route_usage_monthly");
+    expect(migration).toContain("CREATE TABLE route_usage_reservations");
+    expect(migration).toContain("FUNCTION reserve_route_elements");
+    expect(migration).toContain(
+      "reserved_elements + p_requested_elements <= p_monthly_budget",
+    );
+    expect(migration).toContain("FUNCTION finalize_route_usage");
+    expect(migration).toContain("successful_elements + failed_elements");
   });
 });
