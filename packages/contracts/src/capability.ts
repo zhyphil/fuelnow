@@ -9,8 +9,10 @@ export const CAPABILITY_STATES = [
 ] as const;
 
 export const CAPABILITY_REASON_CODES = [
+  "fuel_type_required",
   "price_not_available_for_service",
   "no_eligible_fuel_price",
+  "decision_evidence_unavailable",
   "availability_not_supported_in_country",
   "availability_source_unhealthy",
   "service_hours_unknown",

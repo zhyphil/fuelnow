@@ -15,6 +15,7 @@ import {
   ServiceEvidenceResponseSchema,
   presentServiceEvidence,
 } from "./serviceEvidence.js";
+import { ApiErrorResponseSchema } from "./errors.js";
 
 const UUID_PATTERN = "^[0-9a-fA-F]{8}-(?:[0-9a-fA-F]{4}-){3}[0-9a-fA-F]{12}$";
 const CountrySchema = Type.Union([Type.Literal("FR"), Type.Literal("ES")]);
@@ -116,6 +117,7 @@ export const ServicePointNotFoundResponseSchema = Type.Object(
     requestId: Type.String({ minLength: 1 }),
     code: Type.Literal("service_point_not_found"),
     message: Type.Literal("Service point not found"),
+    retryable: Type.Literal(false),
   },
   { additionalProperties: false },
 );
@@ -140,7 +142,9 @@ export function registerServicePointDetailRoute(
         params: ServicePointIdParamsSchema,
         response: {
           200: ServicePointDetailResponseSchema,
+          400: ApiErrorResponseSchema,
           404: ServicePointNotFoundResponseSchema,
+          500: ApiErrorResponseSchema,
         },
       },
     },
@@ -151,6 +155,7 @@ export function registerServicePointDetailRoute(
           requestId: request.id,
           code: "service_point_not_found",
           message: "Service point not found",
+          retryable: false,
         });
       }
 

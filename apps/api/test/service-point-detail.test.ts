@@ -256,6 +256,7 @@ describe("GET /v1/service-points/:id", () => {
       requestId: expect.any(String),
       code: "service_point_not_found",
       message: "Service point not found",
+      retryable: false,
     });
     expect(servicePointDetails.ids).toEqual([MISSING_POINT_ID]);
   });
@@ -275,6 +276,12 @@ describe("GET /v1/service-points/:id", () => {
     });
 
     expect(response.statusCode).toBe(400);
+    expect(response.json()).toEqual({
+      requestId: expect.any(String),
+      code: "invalid_request",
+      message: "Request validation failed",
+      retryable: false,
+    });
     expect(servicePointDetails.ids).toEqual([]);
   });
 });

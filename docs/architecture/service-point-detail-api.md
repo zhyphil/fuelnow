@@ -34,8 +34,9 @@ GET /v1/service-points/00000000-0000-4000-8000-000000000101
 
 The path parameter must have UUID syntax. Invalid identifiers fail with `400`
 before the database port is called. A valid but unknown UUID returns `404` with
-the stable code `service_point_not_found` and the request ID. The complete error
-envelope is consolidated by `P3-API-07`.
+the stable code `service_point_not_found` and the request ID. `P3-API-07`
+consolidates these responses into the same `{ requestId, code, message,
+retryable }` envelope used by every API failure.
 
 The database mapper rejects invalid coordinates, country/service enums,
 addresses, opening state, lifecycle combinations and timestamps instead of

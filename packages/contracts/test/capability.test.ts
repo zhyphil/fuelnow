@@ -19,8 +19,10 @@ describe("decision capability contract", () => {
   });
 
   it("includes localizable price capability reasons", () => {
+    expect(CAPABILITY_REASON_CODES).toContain("fuel_type_required");
     expect(CAPABILITY_REASON_CODES).toContain("price_not_available_for_service");
     expect(CAPABILITY_REASON_CODES).toContain("no_eligible_fuel_price");
+    expect(CAPABILITY_REASON_CODES).toContain("decision_evidence_unavailable");
   });
 
   it("validates enabled and unavailable capability payloads", () => {

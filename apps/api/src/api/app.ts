@@ -3,6 +3,7 @@ import Fastify, { type FastifyInstance, type FastifyServerOptions } from "fastif
 import type { ServicePointDetailPort } from "../detail/PostgresServicePointDetail.js";
 import type { ServicePointEvidencePort } from "../evidence/PostgresServicePointEvidence.js";
 import type { CandidateSearchPort } from "../search/expandingCandidateSearch.js";
+import { registerApiErrorHandling } from "./errors.js";
 import { registerNearbyRoute } from "./nearby.js";
 import { registerServicePointDetailRoute } from "./servicePointDetail.js";
 
@@ -23,6 +24,7 @@ export function createApiApp({
     logger,
     ajv: { customOptions: { removeAdditional: false } },
   });
+  registerApiErrorHandling(app);
   registerNearbyRoute(app, candidateSearch, servicePointEvidence);
   registerServicePointDetailRoute(app, servicePointDetails, servicePointEvidence);
   return app;

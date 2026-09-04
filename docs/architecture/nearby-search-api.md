@@ -38,6 +38,13 @@ name/brand, destination coordinates, lifecycle status, precise straight-line
 distance and the evidence block defined by `P3-API-06`: price, opening/service
 status, scoped source attribution, freshness, confidence and service details.
 
+`P3-API-07` adds two complementary decision blocks. `ranking.capability`
+describes whether the requested sort was available, while `ranking.appliedSort`
+and `outcome` describe what was actually returned after any safe fallback. The
+outcome carries candidate/result counts, exact Unknown counts, localizable
+warnings and empty-result/fallback metadata. See
+[API errors and outcomes](./api-errors-and-outcomes.md).
+
 The exact request origin is neither returned nor stored by the API. Candidate
 coordinates are returned because the selected destination must be displayable
 and navigable. Structured logging redacts latitude, longitude, authorization and

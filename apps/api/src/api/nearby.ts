@@ -1,7 +1,11 @@
 import {
+  CAPABILITY_REASON_CODES,
+  CAPABILITY_STATES,
   EV_CONNECTOR_TYPES,
   FuelTypeSchema,
+  SearchOutcomeSchema,
   ServiceTypeSchema,
+  type DecisionCapability,
   type EvConnectorType,
   type FuelType,
   type SearchSort,
@@ -12,6 +16,7 @@ import type { FastifyInstance } from "fastify";
 import type { TypeBoxTypeProvider } from "@fastify/type-provider-typebox";
 
 import { filterOpenNow } from "../decision/filterOpenNow.js";
+import { buildSearchOutcome } from "../decision/buildSearchOutcome.js";
 import { rankCheapest } from "../decision/rankCheapest.js";
 import type {
   ServicePointEvidence,
@@ -30,6 +35,7 @@ import {
   effectiveFuelOffers,
   presentServiceEvidence,
 } from "./serviceEvidence.js";
+import { ApiErrorResponseSchema, ApiRequestError } from "./errors.js";
 
 export const NEARBY_DEFAULT_RADIUS_METRES = 10_000;
 export const NEARBY_MAXIMUM_RADIUS_METRES = 50_000;
@@ -55,6 +61,16 @@ const SortDegradationReasonSchema = Type.Union([
   Type.Literal("no_eligible_fuel_price"),
   Type.Literal("service_hours_unknown"),
 ]);
+const DecisionCapabilityResponseSchema = Type.Object(
+  {
+    state: Type.Union(CAPABILITY_STATES.map((state) => Type.Literal(state))),
+    reason: Type.Union([
+      Type.Union(CAPABILITY_REASON_CODES.map((reason) => Type.Literal(reason))),
+      Type.Null(),
+    ]),
+  },
+  { additionalProperties: false },
+);
 
 export const NearbyQuerySchema = Type.Object(
   {
@@ -132,11 +148,13 @@ export const NearbyResponseSchema = Type.Object(
       {
         requestedSort: SearchSortSchema,
         appliedSort: SearchSortSchema,
+        capability: DecisionCapabilityResponseSchema,
         degraded: Type.Boolean(),
         reason: Type.Union([SortDegradationReasonSchema, Type.Null()]),
       },
       { additionalProperties: false },
     ),
+    outcome: SearchOutcomeSchema,
     resultCount: Type.Integer({ minimum: 0 }),
     results: Type.Array(NearbyServicePointSchema, { maxItems: NEARBY_RESULT_LIMIT }),
   },
@@ -171,21 +189,19 @@ function searchRequest(query: NearbyQuery): ExpandingCandidateSearchRequest {
 
 function assertCompatibleFilters(query: NearbyQuery): void {
   if (query.fuelType !== undefined && query.service !== "fuel") {
-    const error = new Error("fuelType is only valid for fuel service") as Error & {
-      statusCode: number;
-    };
-    error.statusCode = 400;
-    throw error;
+    throw new ApiRequestError(
+      "invalid_filter_combination",
+      "fuelType is only valid for fuel service",
+    );
   }
   if (
     (query.connectorType !== undefined || query.minimumPowerKw !== undefined) &&
     query.service !== "charging"
   ) {
-    const error = new Error(
+    throw new ApiRequestError(
+      "invalid_filter_combination",
       "connectorType and minimumPowerKw are only valid for charging service",
-    ) as Error & { statusCode: number };
-    error.statusCode = 400;
-    throw error;
+    );
   }
 }
 
@@ -195,6 +211,8 @@ interface NearbySortResult {
   candidates: ServicePointCandidate[];
   requestedSort: SearchSort;
   appliedSort: SearchSort;
+  capability: DecisionCapability;
+  appliedCapability: DecisionCapability;
   degraded: boolean;
   reason: NearbySortDegradationReason | null;
 }
@@ -212,6 +230,12 @@ function nearest(candidates: ServicePointCandidate[]): ServicePointCandidate[] {
   return rankNearestCandidates(withoutRoutes(candidates));
 }
 
+function nearestCapability(candidateCount: number): DecisionCapability {
+  return candidateCount === 0
+    ? { state: "enabled", reason: null }
+    : { state: "conditional", reason: null };
+}
+
 function sortCandidates(
   candidates: ServicePointCandidate[],
   evidenceById: ReadonlyMap<string, ServicePointEvidence>,
@@ -221,10 +245,13 @@ function sortCandidates(
   requestedSort: SearchSort,
 ): NearbySortResult {
   if (requestedSort === "nearest") {
+    const capability = nearestCapability(candidates.length);
     return {
       candidates: nearest(candidates),
       requestedSort,
       appliedSort: "nearest",
+      capability,
+      appliedCapability: capability,
       degraded: false,
       reason: null,
     };
@@ -240,6 +267,8 @@ function sortCandidates(
         candidates: result.candidates,
         requestedSort,
         appliedSort: "open_now",
+        capability: result.capability,
+        appliedCapability: result.capability,
         degraded: false,
         reason: null,
       };
@@ -248,6 +277,8 @@ function sortCandidates(
       candidates: nearest(candidates),
       requestedSort,
       appliedSort: "nearest",
+      capability: result.capability,
+      appliedCapability: nearestCapability(candidates.length),
       degraded: true,
       reason: "service_hours_unknown",
     };
@@ -277,6 +308,8 @@ function sortCandidates(
         candidates: result.candidates.map(({ id }) => candidateById.get(id)!),
         requestedSort,
         appliedSort: "cheapest",
+        capability: result.capability,
+        appliedCapability: result.capability,
         degraded: false,
         reason: null,
       };
@@ -285,24 +318,29 @@ function sortCandidates(
       candidates: nearest(candidates),
       requestedSort,
       appliedSort: "nearest",
+      capability: result.capability,
+      appliedCapability: nearestCapability(candidates.length),
       degraded: true,
       reason: "no_eligible_fuel_price",
     };
   }
 
+  const reason: NearbySortDegradationReason =
+    requestedSort === "cheapest"
+      ? serviceType === "fuel"
+        ? fuelType === undefined
+          ? "fuel_type_required"
+          : "decision_evidence_unavailable"
+        : "price_not_available_for_service"
+      : "decision_evidence_unavailable";
   return {
     candidates: nearest(candidates),
     requestedSort,
     appliedSort: "nearest",
+    capability: { state: "unavailable", reason },
+    appliedCapability: nearestCapability(candidates.length),
     degraded: true,
-    reason:
-      requestedSort === "cheapest"
-        ? serviceType === "fuel"
-          ? fuelType === undefined
-            ? "fuel_type_required"
-            : "decision_evidence_unavailable"
-          : "price_not_available_for_service"
-        : "decision_evidence_unavailable",
+    reason,
   };
 }
 
@@ -316,7 +354,11 @@ export function registerNearbyRoute(
     {
       schema: {
         querystring: NearbyQuerySchema,
-        response: { 200: NearbyResponseSchema },
+        response: {
+          200: NearbyResponseSchema,
+          400: ApiErrorResponseSchema,
+          500: ApiErrorResponseSchema,
+        },
       },
     },
     async (request): Promise<NearbyResponse> => {
@@ -344,6 +386,22 @@ export function registerNearbyRoute(
       }
       const sort = request.query.sort ?? "nearest";
       const evaluatedAt = new Date().toISOString();
+      const presentedEvidenceById = new Map(
+        result.candidates.map((candidate) => {
+          const candidateEvidence = evidenceById.get(candidate.id)!;
+          return [
+            candidate.id,
+            presentServiceEvidence(candidateEvidence, {
+              ...(request.query.fuelType === undefined
+                ? {}
+                : { requestedFuelType: request.query.fuelType }),
+              siteOpeningStatus: candidate.openingStatus,
+              siteOpeningStatusEvaluatedAt: candidate.openingStatusEvaluatedAt,
+              evaluatedAt,
+            }),
+          ] as const;
+        }),
+      );
       const sorted = sortCandidates(
         result.candidates,
         evidenceById,
@@ -353,7 +411,6 @@ export function registerNearbyRoute(
         sort,
       );
       const results: NearbyServicePoint[] = sorted.candidates.map((candidate) => {
-        const candidateEvidence = evidenceById.get(candidate.id)!;
         return {
           id: candidate.id,
           country: candidate.country,
@@ -365,15 +422,28 @@ export function registerNearbyRoute(
           },
           lifecycleStatus: candidate.lifecycleStatus,
           straightLineDistanceM: candidate.straightLineDistanceM,
-          evidence: presentServiceEvidence(candidateEvidence, {
-            ...(request.query.fuelType === undefined
-              ? {}
-              : { requestedFuelType: request.query.fuelType }),
-            siteOpeningStatus: candidate.openingStatus,
-            siteOpeningStatusEvaluatedAt: candidate.openingStatusEvaluatedAt,
-            evaluatedAt,
-          }),
+          evidence: presentedEvidenceById.get(candidate.id)!,
         };
+      });
+      const allPresentedEvidence = [...presentedEvidenceById.values()];
+      const outcome = buildSearchOutcome({
+        sort: sorted.appliedSort,
+        capability: sorted.appliedCapability,
+        candidateCount: result.candidates.length,
+        resultCount: results.length,
+        priceUnknownCount: allPresentedEvidence.filter(({ price }) => price === null)
+          .length,
+        openingStatusUnknownCount: allPresentedEvidence.filter(
+          ({ status }) => status.opening.state === "unknown",
+        ).length,
+        equipmentStatusUnknownCount:
+          request.query.service === "fuel"
+            ? 0
+            : allPresentedEvidence.filter(
+                ({ status }) => status.availability.state === "unknown",
+              ).length,
+        routeEtaUnavailableCount:
+          sorted.appliedSort === "nearest" ? result.candidates.length : 0,
       });
       return {
         requestId: request.id,
@@ -394,9 +464,11 @@ export function registerNearbyRoute(
         ranking: {
           requestedSort: sorted.requestedSort,
           appliedSort: sorted.appliedSort,
+          capability: sorted.capability,
           degraded: sorted.degraded,
           reason: sorted.reason,
         },
+        outcome,
         resultCount: results.length,
         results,
       };

@@ -177,8 +177,23 @@ describe("GET /v1/nearby", () => {
       ranking: {
         requestedSort: "nearest",
         appliedSort: "nearest",
+        capability: { state: "conditional", reason: null },
         degraded: false,
         reason: null,
+      },
+      outcome: {
+        state: "results",
+        sort: "nearest",
+        capability: { state: "conditional", reason: null },
+        candidateCount: 10,
+        resultCount: 10,
+        priceUnknownCount: 10,
+        openingStatusUnknownCount: 10,
+        equipmentStatusUnknownCount: 0,
+        routeEtaUnavailableCount: 10,
+        warnings: ["price_unknown", "opening_status_unknown", "route_eta_unavailable"],
+        emptyReason: null,
+        fallbackAction: null,
       },
       resultCount: 10,
     });
@@ -239,6 +254,14 @@ describe("GET /v1/nearby", () => {
         expanded: true,
         minimumCandidatesMet: false,
         stopReason: "maximum_radius_reached",
+      },
+      outcome: {
+        state: "empty",
+        sort: "nearest",
+        candidateCount: 0,
+        resultCount: 0,
+        emptyReason: "no_service_points_in_radius",
+        fallbackAction: "expand_radius",
       },
       resultCount: 0,
       results: [],
@@ -320,8 +343,16 @@ describe("GET /v1/nearby", () => {
       ranking: {
         requestedSort: "open_now",
         appliedSort: "open_now",
+        capability: { state: "enabled", reason: null },
         degraded: false,
         reason: null,
+      },
+      outcome: {
+        state: "results",
+        sort: "open_now",
+        candidateCount: 3,
+        resultCount: 1,
+        openingStatusUnknownCount: 1,
       },
       resultCount: 1,
       results: [{ id: "point-0" }],
@@ -352,8 +383,15 @@ describe("GET /v1/nearby", () => {
         ranking: {
           requestedSort: sort,
           appliedSort: "nearest",
+          capability: { state: "unavailable", reason },
           degraded: true,
           reason,
+        },
+        outcome: {
+          state: "results",
+          sort: "nearest",
+          capability: { state: "conditional", reason: null },
+          fallbackAction: null,
         },
         resultCount: 1,
       });
@@ -381,8 +419,16 @@ describe("GET /v1/nearby", () => {
       ranking: {
         requestedSort: "cheapest",
         appliedSort: "cheapest",
+        capability: { state: "enabled", reason: null },
         degraded: false,
         reason: null,
+      },
+      outcome: {
+        state: "results",
+        sort: "cheapest",
+        capability: { state: "enabled", reason: null },
+        priceUnknownCount: 0,
+        routeEtaUnavailableCount: 0,
       },
     });
     expect(search.requests).toEqual([
@@ -484,8 +530,19 @@ describe("GET /v1/nearby", () => {
       ranking: {
         requestedSort: "cheapest",
         appliedSort: "nearest",
+        capability: {
+          state: "unavailable",
+          reason: "no_eligible_fuel_price",
+        },
         degraded: true,
         reason: "no_eligible_fuel_price",
+      },
+      outcome: {
+        state: "results",
+        sort: "nearest",
+        priceUnknownCount: 1,
+        routeEtaUnavailableCount: 1,
+        warnings: ["price_unknown", "opening_status_unknown", "route_eta_unavailable"],
       },
       results: [{ evidence: { price: null, freshness: "unknown" } }],
     });
@@ -500,12 +557,26 @@ describe("GET /v1/nearby", () => {
     });
     apps.push(app);
 
-    for (const url of [
-      "/v1/nearby?latitude=43&longitude=1&service=fuel&fuelType=hydrogen",
-      "/v1/nearby?latitude=43&longitude=1&service=charging&fuelType=diesel",
-    ]) {
+    for (const [url, code, message] of [
+      [
+        "/v1/nearby?latitude=43&longitude=1&service=fuel&fuelType=hydrogen",
+        "invalid_request",
+        "Request validation failed",
+      ],
+      [
+        "/v1/nearby?latitude=43&longitude=1&service=charging&fuelType=diesel",
+        "invalid_filter_combination",
+        "fuelType is only valid for fuel service",
+      ],
+    ] as const) {
       const response = await app.inject({ method: "GET", url });
       expect(response.statusCode).toBe(400);
+      expect(response.json()).toMatchObject({
+        requestId: expect.any(String),
+        code,
+        message,
+        retryable: false,
+      });
     }
     expect(search.requests).toEqual([]);
   });

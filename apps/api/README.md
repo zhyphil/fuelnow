@@ -41,6 +41,19 @@ Fuel prices are aged again at response time; values older than seven days are
 hidden from the primary price and cannot win Cheapest. Charge price and live
 availability remain Unknown under the current V1 source-policy gates.
 
+Every nearby response also contains a unified decision outcome. `ranking`
+records the requested capability, any fallback reason and the actually applied
+sort; `outcome` describes the returned result set with bounded Unknown counts,
+localizable warnings and an empty-result action. A fallback therefore never
+pretends that the requested mode succeeded. Until route enrichment is connected
+to the public endpoint, straight-line Nearest results are conditional and report
+`route_eta_unavailable`.
+
+All API failures use `{ requestId, code, message, retryable }`. Schema failures,
+incompatible filters, missing routes or points, and unexpected server failures
+have stable codes. Validation responses do not echo input, and unexpected error
+details are not exposed to the client.
+
 `GET /v1/service-points/:id` resolves one canonical UUID and returns its stable
 location, address, opening and lifecycle detail. Invalid identifiers are rejected
 before data access, while an unknown canonical point returns a traceable 404.

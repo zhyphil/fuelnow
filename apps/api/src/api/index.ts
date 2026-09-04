@@ -3,6 +3,15 @@ export type { CreateApiAppOptions } from "./app.js";
 export { resolveApiRuntimeConfig } from "./config.js";
 export type { ApiRuntimeConfig } from "./config.js";
 export {
+  API_ERROR_CODES,
+  ApiErrorCodeSchema,
+  ApiErrorResponseSchema,
+  ApiRequestError,
+  apiErrorResponse,
+  registerApiErrorHandling,
+} from "./errors.js";
+export type { ApiErrorCode, ApiErrorResponse } from "./errors.js";
+export {
   NEARBY_DEFAULT_RADIUS_METRES,
   NEARBY_MAXIMUM_RADIUS_METRES,
   NEARBY_MINIMUM_CANDIDATES,
