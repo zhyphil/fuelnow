@@ -56,3 +56,8 @@ bounded by a one-hour database TTL ceiling.
 integration tests across all four service types. `db:verify` loads it twice,
 asserts exact scenarios and row counts, then rolls back; it never contacts a live
 provider or persists fixture rows in the development database.
+
+`PostgresCandidateSearch` coarse-filters canonical points by origin, bounded
+radius and service type through the indexed PostGIS geography column. It returns
+exact metre distances and deterministic ordering while excluding only permanent
+closures; later decision tasks handle temporary closure and Unknown states.

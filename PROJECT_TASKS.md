@@ -4,7 +4,7 @@
 > 需求来源：[france_spain_driver_decision_engine_project.md](./france_spain_driver_decision_engine_project.md)  
 > 当前状态：进行中  
 > 当前阶段：Phase 3 — 搜索、路线与决策引擎
-> 下一项任务：`P3-SEA-01` 根据经纬度和半径粗筛候选点
+> 下一项任务：`P3-SEA-02` 候选不足时自动扩大搜索半径
 > 最后更新：2026-09-04
 
 ## 使用方法
@@ -219,7 +219,7 @@ V1 的核心验收结果是：
 
 ## 3.1 搜索与路线
 
-- [ ] `P3-SEA-01` 根据经纬度和半径粗筛候选点
+- [x] `P3-SEA-01` 使用 PostGIS geography + GiST 按经纬度、1 m–100 km 半径和 canonical service 粗筛候选，返回精确米制直线距离与目标坐标并稳定排序；默认/最大候选 200/500，排除永久关闭但保留临时关闭与 Unknown 给后续决策，应用和数据库双重校验且不持久化 origin（2026-09-04；241 tests；[候选搜索说明](./docs/architecture/service-point-candidate-search.md)）
 - [ ] `P3-SEA-02` 候选不足时自动扩大搜索半径
 - [ ] `P3-SEA-03` 对 Top N 调用路线服务计算驾车距离和 ETA
 - [ ] `P3-SEA-04` 缓存路线结果并控制第三方接口成本
@@ -587,3 +587,4 @@ V1 的核心验收结果是：
 | 2026-09-04 | 建立查询缓存与失效规则 | 以国家+服务 generation 保证来源变化后旧缓存不可读，拒绝竞态产生的过时代际写入，只持久化哈希 key 并限制 TTL；完整质量门槛 229 项测试通过；见 `docs/architecture/query-cache-invalidation.md` |
 | 2026-09-04 | 建立可重复数据库测试数据集 | 全合成固定 fixture 覆盖两国四服务及关闭、缺货、Unknown、EVSE、新旧价格和跨境场景；空库连续加载两次精确一致并回滚；完整质量门槛 233 项测试通过；见 `docs/testing/database-integration-fixture.md` |
 | 2026-09-04 | 完成 Phase 2 工程与统一数据层 | 工程基础、统一契约、PostGIS、幂等导入、生命周期、同步审计、重试告警、缓存和 fixture 全部完成；四项 Phase 2 验收门槛通过，进入 Phase 3 |
+| 2026-09-04 | 实现 PostGIS 服务候选粗筛 | 按经纬度、服务和有界半径使用 GiST/ST_DWithin 粗筛，返回精确米制距离并稳定排序，跨境结果与关闭状态边界经真实数据库验证；完整质量门槛 241 项测试通过；见 `docs/architecture/service-point-candidate-search.md` |

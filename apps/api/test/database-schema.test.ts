@@ -40,6 +40,10 @@ const queryCacheMigrationUrl = new URL(
   "../db/migrations/0009_query_cache.sql",
   import.meta.url,
 );
+const candidateSearchMigrationUrl = new URL(
+  "../db/migrations/0010_service_point_candidate_search.sql",
+  import.meta.url,
+);
 
 describe("initial PostgreSQL/PostGIS schema", () => {
   it("enables PostGIS and uses WGS84 geography points", async () => {
@@ -291,5 +295,32 @@ describe("initial PostgreSQL/PostGIS schema", () => {
     expect(migration).toContain("FUNCTION invalidate_source_query_cache");
     expect(migration).toContain("FUNCTION upsert_source_record_with_change");
     expect(migration).toContain("FUNCTION prune_query_cache");
+  });
+
+  it("coarse-filters service candidates with indexed geography distance", async () => {
+    const migration = await readFile(candidateSearchMigrationUrl, "utf8");
+
+    expect(migration).toContain("FUNCTION search_service_point_candidates");
+    expect(migration).toContain("ST_DWithin(point.location, origin, p_radius_metres)");
+    expect(migration).toContain("ST_Distance(point.location, origin)");
+    expect(migration).toContain("service.service_type = p_service_type");
+  });
+
+  it("excludes permanent closure while preserving later decision states", async () => {
+    const migration = await readFile(candidateSearchMigrationUrl, "utf8");
+
+    expect(migration).toContain("lifecycle_status <> 'permanently_closed'");
+    expect(migration).toContain("point.opening_status");
+    expect(migration).toContain("point.temporary_closure");
+  });
+
+  it("bounds radius and candidate count at the database boundary", async () => {
+    const migration = await readFile(candidateSearchMigrationUrl, "utf8");
+
+    expect(migration).toContain("p_radius_metres NOT BETWEEN 1 AND 100000");
+    expect(migration).toContain("p_limit NOT BETWEEN 1 AND 500");
+    expect(migration).toContain(
+      "ORDER BY ST_Distance(point.location, origin), point.id",
+    );
   });
 });

@@ -1,0 +1,118 @@
+import type { CountryCode, ServiceType } from "@fuel-now/contracts";
+import type { Pool, QueryResultRow } from "pg";
+
+export type ServicePointLifecycleStatus =
+  "active" | "permanently_closed" | "temporarily_closed" | "unverified";
+
+export type CandidateOpeningStatus =
+  "closed" | "closing_soon" | "open" | "opening_soon" | "unknown";
+
+export interface CandidateSearchRequest {
+  longitude: number;
+  latitude: number;
+  radiusMetres: number;
+  serviceType: ServiceType;
+  limit?: number;
+}
+
+export interface ServicePointCandidate {
+  id: string;
+  country: CountryCode;
+  name: string | null;
+  brand: string | null;
+  longitude: number;
+  latitude: number;
+  lifecycleStatus: ServicePointLifecycleStatus;
+  openingStatus: CandidateOpeningStatus;
+  temporaryClosure: boolean | null;
+  straightLineDistanceM: number;
+}
+
+interface CandidateRow extends QueryResultRow {
+  id: string;
+  country: CountryCode;
+  name: string | null;
+  brand: string | null;
+  longitude: number | string;
+  latitude: number | string;
+  lifecycle_status: ServicePointLifecycleStatus;
+  opening_status: CandidateOpeningStatus;
+  temporary_closure: boolean | null;
+  straight_line_distance_m: number | string;
+}
+
+type CandidateSearchPool = Pick<Pool, "query">;
+
+function assertFiniteRange(
+  label: string,
+  value: number,
+  minimum: number,
+  maximum: number,
+): void {
+  if (!Number.isFinite(value) || value < minimum || value > maximum) {
+    throw new Error(`${label} must be between ${minimum} and ${maximum}`);
+  }
+}
+
+function assertPositiveInteger(label: string, value: number, maximum: number): void {
+  if (!Number.isSafeInteger(value) || value < 1 || value > maximum) {
+    throw new Error(`${label} must be an integer between 1 and ${maximum}`);
+  }
+}
+
+function finiteDatabaseNumber(value: number | string, label: string): number {
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed)) {
+    throw new Error(`Database returned an invalid ${label}`);
+  }
+  return parsed;
+}
+
+export class PostgresCandidateSearch {
+  public constructor(private readonly pool: CandidateSearchPool) {}
+
+  public async findCandidates({
+    longitude,
+    latitude,
+    radiusMetres,
+    serviceType,
+    limit = 200,
+  }: CandidateSearchRequest): Promise<ServicePointCandidate[]> {
+    assertFiniteRange("longitude", longitude, -180, 180);
+    assertFiniteRange("latitude", latitude, -90, 90);
+    assertPositiveInteger("radiusMetres", radiusMetres, 100_000);
+    assertPositiveInteger("limit", limit, 500);
+
+    const result = await this.pool.query<CandidateRow>(
+      `SELECT
+         id,
+         country,
+         name,
+         brand,
+         longitude,
+         latitude,
+         lifecycle_status,
+         opening_status,
+         temporary_closure,
+         straight_line_distance_m
+       FROM search_service_point_candidates($1, $2, $3, $4, $5)`,
+      [longitude, latitude, radiusMetres, serviceType, limit],
+    );
+
+    return result.rows.map((row) => ({
+      id: row.id,
+      country: row.country,
+      name: row.name,
+      brand: row.brand,
+      longitude: finiteDatabaseNumber(row.longitude, "longitude"),
+      latitude: finiteDatabaseNumber(row.latitude, "latitude"),
+      lifecycleStatus: row.lifecycle_status,
+      openingStatus: row.opening_status,
+      temporaryClosure: row.temporary_closure,
+      straightLineDistanceM: finiteDatabaseNumber(
+        row.straight_line_distance_m,
+        "straight-line distance",
+      ),
+    }));
+  }
+}
