@@ -1,6 +1,17 @@
 import { Type, type Static } from "@sinclair/typebox";
 import { Value } from "@sinclair/typebox/value";
 
+import {
+  COUNTRY_TIMEZONES,
+  CountryCodeSchema,
+  LatitudeSchema,
+  LongitudeSchema,
+  StructuredAddressSchema,
+  isCoordinates,
+  isStructuredAddress,
+  type CountryCode,
+  type StructuredAddress,
+} from "./geography.js";
 import { NonBlankStringSchema, UtcTimestampSchema } from "./primitives.js";
 import {
   FieldProvenanceSchema,
@@ -9,13 +20,7 @@ import {
   isSourceSummary,
 } from "./source.js";
 
-export const COUNTRY_CODES = ["FR", "ES"] as const;
 export const SERVICE_TYPES = ["fuel", "charging", "air", "wash"] as const;
-
-export const CountryCodeSchema = Type.Union(
-  COUNTRY_CODES.map((countryCode) => Type.Literal(countryCode)),
-  { $id: "CountryCode" },
-);
 
 export const ServiceTypeSchema = Type.Union(
   SERVICE_TYPES.map((serviceType) => Type.Literal(serviceType)),
@@ -23,22 +28,6 @@ export const ServiceTypeSchema = Type.Union(
 );
 
 const NullableTextSchema = Type.Union([NonBlankStringSchema, Type.Null()]);
-
-export const StructuredAddressSchema = Type.Object(
-  {
-    street: NullableTextSchema,
-    houseNumber: NullableTextSchema,
-    postalCode: NullableTextSchema,
-    locality: NullableTextSchema,
-    administrativeArea: NullableTextSchema,
-    countryCode: CountryCodeSchema,
-    formatted: NullableTextSchema,
-  },
-  {
-    $id: "StructuredAddress",
-    additionalProperties: false,
-  },
-);
 
 export const ServicePointSchema = Type.Object(
   {
@@ -51,8 +40,8 @@ export const ServicePointSchema = Type.Object(
     }),
     name: NullableTextSchema,
     brand: NullableTextSchema,
-    latitude: Type.Number({ minimum: -90, maximum: 90 }),
-    longitude: Type.Number({ minimum: -180, maximum: 180 }),
+    latitude: LatitudeSchema,
+    longitude: LongitudeSchema,
     address: Type.Union([StructuredAddressSchema, Type.Null()]),
     timezone: Type.Union([
       Type.String({ minLength: 1, maxLength: 100, pattern: ".+/.+" }),
@@ -69,10 +58,33 @@ export const ServicePointSchema = Type.Object(
   },
 );
 
-export type CountryCode = Static<typeof CountryCodeSchema>;
 export type ServiceType = Static<typeof ServiceTypeSchema>;
-export type StructuredAddress = Static<typeof StructuredAddressSchema>;
 export type ServicePoint = Static<typeof ServicePointSchema>;
+
+export interface ServicePointLocation {
+  country: CountryCode;
+  latitude: number;
+  longitude: number;
+  address: StructuredAddress | null;
+  timezone: string | null;
+}
+
+export function hasValidServicePointLocation(value: ServicePointLocation): boolean {
+  if (!isCoordinates({ latitude: value.latitude, longitude: value.longitude })) {
+    return false;
+  }
+
+  if (value.address !== null) {
+    if (
+      !isStructuredAddress(value.address) ||
+      value.address.countryCode !== value.country
+    ) {
+      return false;
+    }
+  }
+
+  return value.timezone === null || value.timezone === COUNTRY_TIMEZONES[value.country];
+}
 
 export function hasValidServicePointProvenance(
   value: Pick<ServicePoint, "sourceSummary" | "fieldProvenance">,
@@ -89,5 +101,5 @@ export function isServicePoint(value: unknown): value is ServicePoint {
     return false;
   }
 
-  return hasValidServicePointProvenance(value);
+  return hasValidServicePointLocation(value) && hasValidServicePointProvenance(value);
 }

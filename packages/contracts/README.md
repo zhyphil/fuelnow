@@ -17,3 +17,5 @@ Service-specific fields are added by the remaining Phase 2 model tasks. Source, 
 `WashServicePointSchema` keeps equipment condition, normalized types, programs and starting price separate. Its semantic predicate validates source evidence, type consistency and minimum-price summaries.
 
 Every point includes `SourceSummarySchema`; optional `FieldProvenanceSchema` entries retain origins for merged/conflicting fields. All service prices share one freshness/confidence vocabulary and semantic score bands.
+
+Country, EUR currency, WGS84 coordinates and structured address schemas live in `geography.ts`. Service-level semantic predicates also verify address-country and country-timezone consistency.

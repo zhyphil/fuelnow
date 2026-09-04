@@ -1,8 +1,13 @@
 import { Type, type Static } from "@sinclair/typebox";
 import { Value } from "@sinclair/typebox/value";
 
+import { CurrencyCodeSchema } from "./geography.js";
 import { NonBlankStringSchema, UtcTimestampSchema } from "./primitives.js";
-import { ServicePointSchema, hasValidServicePointProvenance } from "./service-point.js";
+import {
+  ServicePointSchema,
+  hasValidServicePointLocation,
+  hasValidServicePointProvenance,
+} from "./service-point.js";
 import { ConfidenceSchema, FreshnessSchema } from "./source.js";
 
 export const EV_CONNECTOR_TYPES = [
@@ -37,7 +42,7 @@ export const EvseStatusSchema = Type.Union(
 export const ChargingPriceSchema = Type.Object(
   {
     amount: Type.Number({ minimum: 0 }),
-    currency: Type.Literal("EUR"),
+    currency: CurrencyCodeSchema,
     unit: Type.Union(CHARGING_PRICE_UNITS.map((unit) => Type.Literal(unit))),
     taxIncluded: Type.Union([Type.Boolean(), Type.Null()]),
     membershipRequired: Type.Union([Type.Boolean(), Type.Null()]),
@@ -127,6 +132,7 @@ function hasUniqueKnownIds(items: ReadonlyArray<{ id: string | null }>): boolean
 export function isChargingServicePoint(value: unknown): value is ChargingServicePoint {
   if (
     !Value.Check(ChargingServicePointSchema, value) ||
+    !hasValidServicePointLocation(value) ||
     !hasValidServicePointProvenance(value)
   ) {
     return false;

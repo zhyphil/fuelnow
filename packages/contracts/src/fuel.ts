@@ -1,8 +1,13 @@
 import { Type, type Static } from "@sinclair/typebox";
 import { Value } from "@sinclair/typebox/value";
 
+import { CurrencyCodeSchema } from "./geography.js";
 import { NonBlankStringSchema, UtcTimestampSchema } from "./primitives.js";
-import { ServicePointSchema, hasValidServicePointProvenance } from "./service-point.js";
+import {
+  ServicePointSchema,
+  hasValidServicePointLocation,
+  hasValidServicePointProvenance,
+} from "./service-point.js";
 import { ConfidenceSchema, FreshnessSchema } from "./source.js";
 
 export const FUEL_TYPES = [
@@ -25,7 +30,7 @@ export const FuelTypeSchema = Type.Union(
 export const FuelPriceSchema = Type.Object(
   {
     amount: Type.Number({ minimum: 0 }),
-    currency: Type.Literal("EUR"),
+    currency: CurrencyCodeSchema,
     unit: Type.Union([Type.Literal("liter"), Type.Literal("kilogram")]),
     taxIncluded: Type.Union([Type.Boolean(), Type.Null()]),
     membershipRequired: Type.Union([Type.Boolean(), Type.Null()]),
@@ -88,6 +93,7 @@ const KILOGRAM_FUELS: ReadonlySet<FuelType> = new Set(["cng", "lng"]);
 export function isFuelServicePoint(value: unknown): value is FuelServicePoint {
   if (
     !Value.Check(FuelServicePointSchema, value) ||
+    !hasValidServicePointLocation(value) ||
     !hasValidServicePointProvenance(value)
   ) {
     return false;

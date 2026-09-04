@@ -1,8 +1,13 @@
 import { Type, type Static } from "@sinclair/typebox";
 import { Value } from "@sinclair/typebox/value";
 
+import { CurrencyCodeSchema } from "./geography.js";
 import { NonBlankStringSchema, UtcTimestampSchema } from "./primitives.js";
-import { ServicePointSchema, hasValidServicePointProvenance } from "./service-point.js";
+import {
+  ServicePointSchema,
+  hasValidServicePointLocation,
+  hasValidServicePointProvenance,
+} from "./service-point.js";
 import { ConfidenceSchema, FreshnessSchema } from "./source.js";
 
 export const WASH_TYPES = [
@@ -35,7 +40,7 @@ export const WashWorkingStatusSchema = Type.Union(
 export const WashPriceSchema = Type.Object(
   {
     amount: Type.Number({ minimum: 0 }),
-    currency: Type.Literal("EUR"),
+    currency: CurrencyCodeSchema,
     unit: Type.Literal("wash_program"),
     taxIncluded: Type.Union([Type.Boolean(), Type.Null()]),
     membershipRequired: Type.Union([Type.Boolean(), Type.Null()]),
@@ -96,6 +101,7 @@ export type WashServicePoint = Static<typeof WashServicePointSchema>;
 export function isWashServicePoint(value: unknown): value is WashServicePoint {
   if (
     !Value.Check(WashServicePointSchema, value) ||
+    !hasValidServicePointLocation(value) ||
     !hasValidServicePointProvenance(value)
   ) {
     return false;

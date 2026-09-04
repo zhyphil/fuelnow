@@ -1,8 +1,13 @@
 import { Type, type Static } from "@sinclair/typebox";
 import { Value } from "@sinclair/typebox/value";
 
+import { CurrencyCodeSchema } from "./geography.js";
 import { NonBlankStringSchema, UtcTimestampSchema } from "./primitives.js";
-import { ServicePointSchema, hasValidServicePointProvenance } from "./service-point.js";
+import {
+  ServicePointSchema,
+  hasValidServicePointLocation,
+  hasValidServicePointProvenance,
+} from "./service-point.js";
 import { ConfidenceSchema, FreshnessSchema } from "./source.js";
 
 export const AIR_WORKING_STATUSES = [
@@ -26,7 +31,7 @@ export const AirAccessSchema = Type.Union(
 export const AirPriceSchema = Type.Object(
   {
     amount: Type.Number({ minimum: 0 }),
-    currency: Type.Literal("EUR"),
+    currency: CurrencyCodeSchema,
     unit: Type.Literal("use"),
     taxIncluded: Type.Union([Type.Boolean(), Type.Null()]),
     membershipRequired: Type.Union([Type.Boolean(), Type.Null()]),
@@ -71,6 +76,7 @@ export type AirServicePoint = Static<typeof AirServicePointSchema>;
 export function isAirServicePoint(value: unknown): value is AirServicePoint {
   if (
     !Value.Check(AirServicePointSchema, value) ||
+    !hasValidServicePointLocation(value) ||
     !hasValidServicePointProvenance(value)
   ) {
     return false;

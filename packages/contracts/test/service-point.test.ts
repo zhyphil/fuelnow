@@ -1,7 +1,7 @@
 import { Value } from "@sinclair/typebox/value";
 import { describe, expect, it } from "vitest";
 
-import { ServicePointSchema, type ServicePoint } from "../src/index.js";
+import { ServicePointSchema, isServicePoint, type ServicePoint } from "../src/index.js";
 import { franceSourceSummary } from "./fixtures.js";
 
 const validServicePoint: ServicePoint = {
@@ -30,6 +30,7 @@ const validServicePoint: ServicePoint = {
 describe("ServicePointSchema", () => {
   it("accepts a complete base service point", () => {
     expect(Value.Check(ServicePointSchema, validServicePoint)).toBe(true);
+    expect(isServicePoint(validServicePoint)).toBe(true);
   });
 
   it("keeps display and address values honestly nullable", () => {

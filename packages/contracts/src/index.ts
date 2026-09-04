@@ -56,15 +56,33 @@ export type {
   FuelType,
 } from "./fuel.js";
 export {
-  COUNTRY_CODES,
-  CountryCodeSchema,
   SERVICE_TYPES,
   ServicePointSchema,
   ServiceTypeSchema,
-  StructuredAddressSchema,
+  hasValidServicePointLocation,
   hasValidServicePointProvenance,
   isServicePoint,
 } from "./service-point.js";
+export type { ServicePointLocation } from "./service-point.js";
+export {
+  COUNTRY_CODES,
+  COUNTRY_TIMEZONES,
+  CURRENCY_CODES,
+  CoordinatesSchema,
+  CountryCodeSchema,
+  CurrencyCodeSchema,
+  LatitudeSchema,
+  LongitudeSchema,
+  StructuredAddressSchema,
+  isCoordinates,
+  isStructuredAddress,
+} from "./geography.js";
+export type {
+  Coordinates,
+  CountryCode,
+  CurrencyCode,
+  StructuredAddress,
+} from "./geography.js";
 export { NonBlankStringSchema, UtcTimestampSchema, nullable } from "./primitives.js";
 export {
   CONFIDENCE_LEVELS,
@@ -104,9 +122,4 @@ export type {
   WashType,
   WashWorkingStatus,
 } from "./wash.js";
-export type {
-  CountryCode,
-  ServicePoint,
-  ServiceType,
-  StructuredAddress,
-} from "./service-point.js";
+export type { ServicePoint, ServiceType } from "./service-point.js";
