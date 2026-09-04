@@ -1,18 +1,16 @@
-import { Type, type Static, type TSchema } from "@sinclair/typebox";
+import { Type, type Static } from "@sinclair/typebox";
+import { Value } from "@sinclair/typebox/value";
+
+import { NonBlankStringSchema, UtcTimestampSchema } from "./primitives.js";
+import {
+  FieldProvenanceSchema,
+  SourceSummarySchema,
+  isFieldProvenance,
+  isSourceSummary,
+} from "./source.js";
 
 export const COUNTRY_CODES = ["FR", "ES"] as const;
 export const SERVICE_TYPES = ["fuel", "charging", "air", "wash"] as const;
-
-export const NonBlankStringSchema = Type.String({
-  minLength: 1,
-  maxLength: 500,
-  pattern: ".*\\S.*",
-});
-
-export const UtcTimestampSchema = Type.String({
-  description: "ISO 8601 timestamp normalized to UTC",
-  pattern: "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d{1,3})?Z$",
-});
 
 export const CountryCodeSchema = Type.Union(
   COUNTRY_CODES.map((countryCode) => Type.Literal(countryCode)),
@@ -60,6 +58,8 @@ export const ServicePointSchema = Type.Object(
       Type.String({ minLength: 1, maxLength: 100, pattern: ".+/.+" }),
       Type.Null(),
     ]),
+    sourceSummary: SourceSummarySchema,
+    fieldProvenance: Type.Optional(Type.Array(FieldProvenanceSchema, { minItems: 1 })),
     createdAt: UtcTimestampSchema,
     updatedAt: UtcTimestampSchema,
   },
@@ -74,6 +74,20 @@ export type ServiceType = Static<typeof ServiceTypeSchema>;
 export type StructuredAddress = Static<typeof StructuredAddressSchema>;
 export type ServicePoint = Static<typeof ServicePointSchema>;
 
-export function nullable<T extends TSchema>(schema: T) {
-  return Type.Union([schema, Type.Null()]);
+export function hasValidServicePointProvenance(
+  value: Pick<ServicePoint, "sourceSummary" | "fieldProvenance">,
+): boolean {
+  if (!isSourceSummary(value.sourceSummary)) {
+    return false;
+  }
+
+  return (value.fieldProvenance ?? []).every((entry) => isFieldProvenance(entry));
+}
+
+export function isServicePoint(value: unknown): value is ServicePoint {
+  if (!Value.Check(ServicePointSchema, value)) {
+    return false;
+  }
+
+  return hasValidServicePointProvenance(value);
 }

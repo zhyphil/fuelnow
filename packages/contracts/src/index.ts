@@ -16,8 +16,6 @@ export type {
   AirWorkingStatus,
 } from "./air.js";
 export {
-  CHARGING_CONFIDENCE_LEVELS,
-  CHARGING_FRESHNESS_LEVELS,
   CHARGING_PRICE_UNITS,
   ChargingCapabilitySchema,
   ChargingPriceSchema,
@@ -42,8 +40,6 @@ export type {
   EvseStatus,
 } from "./ev.js";
 export {
-  FUEL_CONFIDENCE_LEVELS,
-  FUEL_FRESHNESS_LEVELS,
   FUEL_TYPES,
   FuelDiscountProgramSchema,
   FuelOfferSchema,
@@ -62,14 +58,33 @@ export type {
 export {
   COUNTRY_CODES,
   CountryCodeSchema,
-  NonBlankStringSchema,
-  nullable,
   SERVICE_TYPES,
   ServicePointSchema,
   ServiceTypeSchema,
   StructuredAddressSchema,
-  UtcTimestampSchema,
+  hasValidServicePointProvenance,
+  isServicePoint,
 } from "./service-point.js";
+export { NonBlankStringSchema, UtcTimestampSchema, nullable } from "./primitives.js";
+export {
+  CONFIDENCE_LEVELS,
+  ConfidenceSchema,
+  FRESHNESS_LEVELS,
+  FieldProvenanceSchema,
+  FreshnessSchema,
+  SOURCE_UPDATED_AT_BASES,
+  SourceSummarySchema,
+  SourceUpdatedAtBasisSchema,
+  isFieldProvenance,
+  isSourceSummary,
+} from "./source.js";
+export type {
+  Confidence,
+  FieldProvenance,
+  Freshness,
+  SourceSummary,
+  SourceUpdatedAtBasis,
+} from "./source.js";
 export {
   WASH_TYPES,
   WASH_WORKING_STATUSES,

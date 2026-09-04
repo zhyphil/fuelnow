@@ -6,6 +6,7 @@ import {
   isChargingServicePoint,
   type ChargingServicePoint,
 } from "../src/index.js";
+import { franceSourceSummary } from "./fixtures.js";
 
 const validStaticChargingPoint: ChargingServicePoint = {
   id: "service-point:fr:irve:FR*S31*P12345",
@@ -17,6 +18,7 @@ const validStaticChargingPoint: ChargingServicePoint = {
   longitude: 1.444,
   address: null,
   timezone: "Europe/Paris",
+  sourceSummary: franceSourceSummary,
   createdAt: "2026-09-03T20:25:48Z",
   updatedAt: "2026-09-04T00:15:00Z",
   charging: {

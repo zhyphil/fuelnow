@@ -1,11 +1,9 @@
 import { Type, type Static } from "@sinclair/typebox";
 import { Value } from "@sinclair/typebox/value";
 
-import {
-  NonBlankStringSchema,
-  ServicePointSchema,
-  UtcTimestampSchema,
-} from "./service-point.js";
+import { NonBlankStringSchema, UtcTimestampSchema } from "./primitives.js";
+import { ServicePointSchema, hasValidServicePointProvenance } from "./service-point.js";
+import { ConfidenceSchema, FreshnessSchema } from "./source.js";
 
 export const EV_CONNECTOR_TYPES = [
   "ccs_combo_2",
@@ -26,14 +24,6 @@ export const EVSE_STATUSES = [
 ] as const;
 
 export const CHARGING_PRICE_UNITS = ["kwh", "minute", "session"] as const;
-export const CHARGING_FRESHNESS_LEVELS = [
-  "live",
-  "recent",
-  "stale",
-  "unknown",
-] as const;
-export const CHARGING_CONFIDENCE_LEVELS = ["high", "medium", "low"] as const;
-
 export const EvConnectorTypeSchema = Type.Union(
   EV_CONNECTOR_TYPES.map((connectorType) => Type.Literal(connectorType)),
   { $id: "EvConnectorType" },
@@ -52,12 +42,8 @@ export const ChargingPriceSchema = Type.Object(
     taxIncluded: Type.Union([Type.Boolean(), Type.Null()]),
     membershipRequired: Type.Union([Type.Boolean(), Type.Null()]),
     sourceObservedAt: Type.Union([UtcTimestampSchema, Type.Null()]),
-    freshness: Type.Union(
-      CHARGING_FRESHNESS_LEVELS.map((freshness) => Type.Literal(freshness)),
-    ),
-    confidence: Type.Union(
-      CHARGING_CONFIDENCE_LEVELS.map((confidence) => Type.Literal(confidence)),
-    ),
+    freshness: FreshnessSchema,
+    confidence: ConfidenceSchema,
   },
   { $id: "ChargingPrice", additionalProperties: false },
 );
@@ -139,7 +125,10 @@ function hasUniqueKnownIds(items: ReadonlyArray<{ id: string | null }>): boolean
 }
 
 export function isChargingServicePoint(value: unknown): value is ChargingServicePoint {
-  if (!Value.Check(ChargingServicePointSchema, value)) {
+  if (
+    !Value.Check(ChargingServicePointSchema, value) ||
+    !hasValidServicePointProvenance(value)
+  ) {
     return false;
   }
 

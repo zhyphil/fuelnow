@@ -6,6 +6,7 @@ import {
   isAirServicePoint,
   type AirServicePoint,
 } from "../src/index.js";
+import { franceSourceSummary } from "./fixtures.js";
 
 const validUnknownAirPoint: AirServicePoint = {
   id: "service-point:fr:air:31000001",
@@ -17,6 +18,7 @@ const validUnknownAirPoint: AirServicePoint = {
   longitude: 1.444,
   address: null,
   timezone: "Europe/Paris",
+  sourceSummary: franceSourceSummary,
   createdAt: "2026-09-03T20:25:48Z",
   updatedAt: "2026-09-04T00:15:00Z",
   air: {

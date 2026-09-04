@@ -1,11 +1,9 @@
 import { Type, type Static } from "@sinclair/typebox";
 import { Value } from "@sinclair/typebox/value";
 
-import {
-  NonBlankStringSchema,
-  ServicePointSchema,
-  UtcTimestampSchema,
-} from "./service-point.js";
+import { NonBlankStringSchema, UtcTimestampSchema } from "./primitives.js";
+import { ServicePointSchema, hasValidServicePointProvenance } from "./service-point.js";
+import { ConfidenceSchema, FreshnessSchema } from "./source.js";
 
 export const FUEL_TYPES = [
   "sp95",
@@ -18,9 +16,6 @@ export const FUEL_TYPES = [
   "cng",
   "lng",
 ] as const;
-
-export const FUEL_FRESHNESS_LEVELS = ["live", "recent", "stale", "unknown"] as const;
-export const FUEL_CONFIDENCE_LEVELS = ["high", "medium", "low"] as const;
 
 export const FuelTypeSchema = Type.Union(
   FUEL_TYPES.map((fuelType) => Type.Literal(fuelType)),
@@ -35,12 +30,8 @@ export const FuelPriceSchema = Type.Object(
     taxIncluded: Type.Union([Type.Boolean(), Type.Null()]),
     membershipRequired: Type.Union([Type.Boolean(), Type.Null()]),
     sourceObservedAt: Type.Union([UtcTimestampSchema, Type.Null()]),
-    freshness: Type.Union(
-      FUEL_FRESHNESS_LEVELS.map((freshness) => Type.Literal(freshness)),
-    ),
-    confidence: Type.Union(
-      FUEL_CONFIDENCE_LEVELS.map((confidence) => Type.Literal(confidence)),
-    ),
+    freshness: FreshnessSchema,
+    confidence: ConfidenceSchema,
   },
   { $id: "FuelPrice", additionalProperties: false },
 );
@@ -95,7 +86,10 @@ export type FuelServicePoint = Static<typeof FuelServicePointSchema>;
 const KILOGRAM_FUELS: ReadonlySet<FuelType> = new Set(["cng", "lng"]);
 
 export function isFuelServicePoint(value: unknown): value is FuelServicePoint {
-  if (!Value.Check(FuelServicePointSchema, value)) {
+  if (
+    !Value.Check(FuelServicePointSchema, value) ||
+    !hasValidServicePointProvenance(value)
+  ) {
     return false;
   }
 

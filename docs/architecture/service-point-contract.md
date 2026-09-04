@@ -31,7 +31,7 @@ The TypeScript `ServicePoint` type is derived from TypeBox's `ServicePointSchema
 This task does not prematurely encode service-specific structures. The checklist adds them independently:
 
 - Fuel, EV, Air and Wash capabilities: `P2-MOD-02` through `P2-MOD-05`;
-- source/freshness/confidence: `P2-MOD-06`;
+- source/freshness/confidence: implemented by `P2-MOD-06` as a required `sourceSummary` plus optional field-level provenance;
 - consolidated geography/address primitives: `P2-MOD-07`;
 - fuel/connector/service enums: `P2-MOD-08`;
 - opening, availability and unknown-value semantics: `P2-MOD-09`.

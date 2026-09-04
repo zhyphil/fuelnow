@@ -1,11 +1,9 @@
 import { Type, type Static } from "@sinclair/typebox";
 import { Value } from "@sinclair/typebox/value";
 
-import {
-  NonBlankStringSchema,
-  ServicePointSchema,
-  UtcTimestampSchema,
-} from "./service-point.js";
+import { NonBlankStringSchema, UtcTimestampSchema } from "./primitives.js";
+import { ServicePointSchema, hasValidServicePointProvenance } from "./service-point.js";
+import { ConfidenceSchema, FreshnessSchema } from "./source.js";
 
 export const WASH_TYPES = [
   "automatic_rollers",
@@ -42,17 +40,8 @@ export const WashPriceSchema = Type.Object(
     taxIncluded: Type.Union([Type.Boolean(), Type.Null()]),
     membershipRequired: Type.Union([Type.Boolean(), Type.Null()]),
     sourceObservedAt: Type.Union([UtcTimestampSchema, Type.Null()]),
-    freshness: Type.Union([
-      Type.Literal("live"),
-      Type.Literal("recent"),
-      Type.Literal("stale"),
-      Type.Literal("unknown"),
-    ]),
-    confidence: Type.Union([
-      Type.Literal("high"),
-      Type.Literal("medium"),
-      Type.Literal("low"),
-    ]),
+    freshness: FreshnessSchema,
+    confidence: ConfidenceSchema,
   },
   { $id: "WashPrice", additionalProperties: false },
 );
@@ -105,7 +94,10 @@ export type WashCapability = Static<typeof WashCapabilitySchema>;
 export type WashServicePoint = Static<typeof WashServicePointSchema>;
 
 export function isWashServicePoint(value: unknown): value is WashServicePoint {
-  if (!Value.Check(WashServicePointSchema, value)) {
+  if (
+    !Value.Check(WashServicePointSchema, value) ||
+    !hasValidServicePointProvenance(value)
+  ) {
     return false;
   }
 

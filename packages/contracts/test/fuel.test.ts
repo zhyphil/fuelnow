@@ -6,6 +6,7 @@ import {
   isFuelServicePoint,
   type FuelServicePoint,
 } from "../src/index.js";
+import { spainSourceSummary } from "./fixtures.js";
 
 const validFuelPoint: FuelServicePoint = {
   id: "service-point:es:13781",
@@ -17,6 +18,7 @@ const validFuelPoint: FuelServicePoint = {
   longitude: -3.699,
   address: null,
   timezone: "Europe/Madrid",
+  sourceSummary: spainSourceSummary,
   createdAt: "2026-09-03T20:52:20Z",
   updatedAt: "2026-09-03T20:52:20Z",
   fuels: [

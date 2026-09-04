@@ -6,6 +6,7 @@ import {
   isWashServicePoint,
   type WashServicePoint,
 } from "../src/index.js";
+import { franceSourceSummary } from "./fixtures.js";
 
 const validUnknownWashPoint: WashServicePoint = {
   id: "service-point:fr:wash:31000001",
@@ -17,6 +18,7 @@ const validUnknownWashPoint: WashServicePoint = {
   longitude: 1.444,
   address: null,
   timezone: "Europe/Paris",
+  sourceSummary: franceSourceSummary,
   createdAt: "2026-09-03T20:25:48Z",
   updatedAt: "2026-09-04T00:15:00Z",
   wash: {

@@ -15,3 +15,5 @@ Service-specific fields are added by the remaining Phase 2 model tasks. Source, 
 `AirServicePointSchema` keeps equipment presence, operation, access, free/paid state and price independent. Its semantic predicate requires positive source evidence and rejects unverifiable or contradictory known states.
 
 `WashServicePointSchema` keeps equipment condition, normalized types, programs and starting price separate. Its semantic predicate validates source evidence, type consistency and minimum-price summaries.
+
+Every point includes `SourceSummarySchema`; optional `FieldProvenanceSchema` entries retain origins for merged/conflicting fields. All service prices share one freshness/confidence vocabulary and semantic score bands.

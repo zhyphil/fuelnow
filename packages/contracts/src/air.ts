@@ -1,11 +1,9 @@
 import { Type, type Static } from "@sinclair/typebox";
 import { Value } from "@sinclair/typebox/value";
 
-import {
-  NonBlankStringSchema,
-  ServicePointSchema,
-  UtcTimestampSchema,
-} from "./service-point.js";
+import { NonBlankStringSchema, UtcTimestampSchema } from "./primitives.js";
+import { ServicePointSchema, hasValidServicePointProvenance } from "./service-point.js";
+import { ConfidenceSchema, FreshnessSchema } from "./source.js";
 
 export const AIR_WORKING_STATUSES = [
   "working",
@@ -33,17 +31,8 @@ export const AirPriceSchema = Type.Object(
     taxIncluded: Type.Union([Type.Boolean(), Type.Null()]),
     membershipRequired: Type.Union([Type.Boolean(), Type.Null()]),
     sourceObservedAt: Type.Union([UtcTimestampSchema, Type.Null()]),
-    freshness: Type.Union([
-      Type.Literal("live"),
-      Type.Literal("recent"),
-      Type.Literal("stale"),
-      Type.Literal("unknown"),
-    ]),
-    confidence: Type.Union([
-      Type.Literal("high"),
-      Type.Literal("medium"),
-      Type.Literal("low"),
-    ]),
+    freshness: FreshnessSchema,
+    confidence: ConfidenceSchema,
   },
   { $id: "AirPrice", additionalProperties: false },
 );
@@ -80,7 +69,10 @@ export type AirCapability = Static<typeof AirCapabilitySchema>;
 export type AirServicePoint = Static<typeof AirServicePointSchema>;
 
 export function isAirServicePoint(value: unknown): value is AirServicePoint {
-  if (!Value.Check(AirServicePointSchema, value)) {
+  if (
+    !Value.Check(AirServicePointSchema, value) ||
+    !hasValidServicePointProvenance(value)
+  ) {
     return false;
   }
 

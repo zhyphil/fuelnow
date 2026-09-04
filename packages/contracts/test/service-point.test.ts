@@ -2,6 +2,7 @@ import { Value } from "@sinclair/typebox/value";
 import { describe, expect, it } from "vitest";
 
 import { ServicePointSchema, type ServicePoint } from "../src/index.js";
+import { franceSourceSummary } from "./fixtures.js";
 
 const validServicePoint: ServicePoint = {
   id: "service-point:fr:31000001",
@@ -21,6 +22,7 @@ const validServicePoint: ServicePoint = {
     formatted: "Rue Exemple, 31000 Toulouse",
   },
   timezone: "Europe/Paris",
+  sourceSummary: franceSourceSummary,
   createdAt: "2026-09-03T20:25:48Z",
   updatedAt: "2026-09-04T00:15:00.123Z",
 };
