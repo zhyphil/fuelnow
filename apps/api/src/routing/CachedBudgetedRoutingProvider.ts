@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 
 import { createRouteCacheKeyHash } from "./cacheKey.js";
-import { RouteBudgetExceededError } from "./errors.js";
+import { RouteBudgetExceededError, RoutingProviderError } from "./errors.js";
 import { type CachedRouteValue, type RouteCacheStore } from "./routeCache.js";
 import type {
   RouteDestination,
@@ -98,6 +98,7 @@ export class CachedBudgetedRoutingProvider implements RoutingProvider {
     assertIntegerRange("monthlyElementBudget", monthlyElementBudget, 0, 1_000_000_000);
     assertIntegerRange("elementsPerSearchMax", elementsPerSearchMax, 1, 9);
     assertIntegerRange("cacheTtlSeconds", cacheTtlSeconds, 1, 900);
+    assertIntegerRange("minimumDestinations", provider.minimumDestinations ?? 1, 1, 24);
 
     this.provider = provider;
     this.store = store;
@@ -136,6 +137,9 @@ export class CachedBudgetedRoutingProvider implements RoutingProvider {
 
     let freshByDestination = new Map<string, RouteEstimate>();
     if (misses.length > 0) {
+      if (misses.length < (this.provider.minimumDestinations ?? 1)) {
+        throw new RoutingProviderError("provider_unavailable", false, null, 0);
+      }
       const reservationId = this.createReservationId();
       const reserved = await this.store.reserveElements({
         reservationId,

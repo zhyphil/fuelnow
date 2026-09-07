@@ -172,6 +172,24 @@ describe("routeTopCandidates", () => {
 });
 
 describe("MapboxMatrixRoutingProvider", () => {
+  it("does not send or bill an unsupported single-element request", async () => {
+    const fetchImplementation = vi.fn();
+    const provider = new MapboxMatrixRoutingProvider({
+      accessToken: "test-token",
+      fetchImplementation,
+    });
+    const result = await routeTopCandidates(provider, {
+      origin: { longitude: 1, latitude: 43 },
+      candidates: [candidate("only", 100)],
+    });
+    expect(result).toMatchObject({
+      routingStatus: "unavailable",
+      routeUnavailableReason: "provider_unavailable",
+      billableElementCount: 0,
+    });
+    expect(result.candidates[0]?.route).toBeNull();
+    expect(fetchImplementation).not.toHaveBeenCalled();
+  });
   it("makes a one-to-many matrix request and maps distance and ETA", async () => {
     const fetchImplementation = vi.fn().mockResolvedValue(
       new Response(
@@ -241,7 +259,10 @@ describe("MapboxMatrixRoutingProvider", () => {
 
     const result = provider.calculateMatrix({
       origin: { longitude: 1, latitude: 43 },
-      destinations: [{ id: "one", longitude: 1.1, latitude: 43.1 }],
+      destinations: [
+        { id: "one", longitude: 1.1, latitude: 43.1 },
+        { id: "two", longitude: 1.2, latitude: 43.2 },
+      ],
       profile: "driving-traffic",
     });
     await expect(result).rejects.toMatchObject({ reason: "invalid_response" });
@@ -286,7 +307,10 @@ describe("MapboxMatrixRoutingProvider", () => {
     });
     const routeRequest = {
       origin: { longitude: 1, latitude: 43 },
-      destinations: [{ id: "one", longitude: 1.1, latitude: 43.1 }],
+      destinations: [
+        { id: "one", longitude: 1.1, latitude: 43.1 },
+        { id: "two", longitude: 1.2, latitude: 43.2 },
+      ],
       profile: "driving-traffic" as const,
     };
 

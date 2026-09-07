@@ -2,7 +2,7 @@
 
 > 项目：France + Spain Driver Decision Engine  
 > 需求来源：[france_spain_driver_decision_engine_project.md](./france_spain_driver_decision_engine_project.md)  
-> 当前状态：Phase 5 已完成 10/21 主任务及 12 个工程子项（含 EV/OSM 四个细项）；按用户要求暂停每小时自动任务，当前任务直接连续迭代；运营/部署/分发留待单独决定
+> 当前状态：Phase 5 已完成 10/21 主任务及 13 个工程子项（含 EV/OSM 四个细项）；按用户要求暂停每小时自动任务，当前任务直接连续迭代；运营/部署/分发留待单独决定
 > 当前阶段：Phase 5 测试、合规与发布准备
 > 下一项任务：继续 Beta 测试材料与本地备份恢复演练；QA-10f 等待实际设备/人工证据，外部决定继续待办，见 [发布前置条件](./docs/testing/phase5-release-prerequisites.md)
 > 最后更新：2026-09-07
@@ -358,6 +358,7 @@ V1 的核心验收结果是：
 - [ ] `P5-LEG-04` 检查所有数据源署名和许可证要求
   - [x] `P5-LEG-04a` 增加三语来源许可目录及结果卡默认可见署名/许可链接（2026-09-07；目录、链接失败与三语导航回归；不代表 OSM 合库或 MITECO 最终法律复核通过；见 docs/testing/phase5-source-notices.md）
 - [ ] `P5-LEG-05` 检查第三方地图与路线服务展示条款
+  - [x] `P5-LEG-05a` 核对当前地图/外部导航技术边界并修复不受支持的单元素路线请求（2026-09-07；3 项新增回归，网络与预算预留前降级，账户条款/缓存许可/真机署名仍待最终验证；见 docs/testing/phase5-map-provider-review.md）
 - [x] `P5-LEG-06` 确认监控与分析不记录不必要的精确位置 — 2026-09-07：当前应用范围通过；移除任意异常文本/名称，SQL reporter 二次白名单过滤，9 项隐私回归及 337 API tests 通过；部署网关/未来 SDK 须在 REL-02 重验，见 docs/testing/phase5-log-privacy.md
 
 ## 5.3 发布准备

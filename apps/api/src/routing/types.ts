@@ -33,6 +33,7 @@ export interface RouteMatrixRequest {
 }
 
 export interface RoutingProvider {
+  readonly minimumDestinations?: number;
   calculateMatrix(request: RouteMatrixRequest): Promise<RouteEstimate[]>;
 }
 

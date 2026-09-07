@@ -104,6 +104,44 @@ describe("route cache key", () => {
 });
 
 describe("CachedBudgetedRoutingProvider", () => {
+  it.each([false, true])(
+    "rejects one cache miss before budget reservation (mixed cache: %s)",
+    async (mixed) => {
+      const hit = destination("hit", 1.45),
+        miss = destination("miss", 1.46);
+      const hash = createRouteCacheKeyHash({
+        provider: "mapbox",
+        profile: "driving-traffic",
+        origin,
+        destination: hit,
+      });
+      const cacheStore = store({
+        getMany: vi
+          .fn()
+          .mockResolvedValue(new Map(mixed ? [[hash, cachedValue(hash, hit)]] : [])),
+      });
+      const provider: RoutingProvider = {
+        minimumDestinations: 2,
+        calculateMatrix: vi.fn(),
+      };
+      const wrapper = new CachedBudgetedRoutingProvider({
+        provider,
+        store: cacheStore,
+        providerName: "mapbox",
+        monthlyElementBudget: 100,
+        now: () => now,
+      });
+      await expect(
+        wrapper.calculateMatrix(request(mixed ? [hit, miss] : [miss])),
+      ).rejects.toMatchObject({
+        reason: "provider_unavailable",
+        requestSent: false,
+        billableElementCount: 0,
+      });
+      expect(cacheStore.reserveElements).not.toHaveBeenCalled();
+      expect(provider.calculateMatrix).not.toHaveBeenCalled();
+    },
+  );
   it("serves complete cache hits without budget use or a provider call", async () => {
     const target = destination("cached", 1.45);
     const hash = createRouteCacheKeyHash({
@@ -115,7 +153,10 @@ describe("CachedBudgetedRoutingProvider", () => {
     const cacheStore = store({
       getMany: vi.fn().mockResolvedValue(new Map([[hash, cachedValue(hash, target)]])),
     });
-    const provider: RoutingProvider = { calculateMatrix: vi.fn() };
+    const provider: RoutingProvider = {
+      minimumDestinations: 2,
+      calculateMatrix: vi.fn(),
+    };
     const cachedProvider = new CachedBudgetedRoutingProvider({
       provider,
       store: cacheStore,

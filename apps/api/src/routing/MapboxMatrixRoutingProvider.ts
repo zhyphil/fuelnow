@@ -87,6 +87,7 @@ function singleMatrixRow(value: unknown, label: string, length: number): unknown
 }
 
 export class MapboxMatrixRoutingProvider implements RoutingProvider {
+  public readonly minimumDestinations = 2;
   private readonly accessToken: string;
   private readonly fetchImplementation: typeof fetch;
   private readonly endpoint: string;
@@ -138,6 +139,11 @@ export class MapboxMatrixRoutingProvider implements RoutingProvider {
       }
       destinationIds.add(destination.id);
     });
+
+    // Matrix requires at least two elements; never pad a request or invent an ETA.
+    if (destinations.length < this.minimumDestinations) {
+      throw new RoutingProviderError("provider_unavailable", false, null, 0);
+    }
 
     const coordinates = [origin, ...destinations].map(coordinatePath).join(";");
     const url = new URL(`${this.endpoint}/${profile}/${coordinates}`);
