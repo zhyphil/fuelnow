@@ -4,7 +4,7 @@
 > 需求来源：[france_spain_driver_decision_engine_project.md](./france_spain_driver_decision_engine_project.md)  
 > 当前状态：开发已恢复；按任务完成、验收、commit、push 顺序继续
 > 当前阶段：Phase 4 客户端开发
-> 下一项任务：`P4-APP-02` 实现首次启动和位置授权
+> 下一项任务：`P4-APP-03` 实现手动选择位置的降级方式
 > 最后更新：2026-09-07
 
 ## 使用方法
@@ -281,7 +281,7 @@ V1 的核心验收结果是：
 ## 4.1 基础体验
 
 - [x] `P4-APP-01` 建立 Expo SDK 57 + React Native 0.86 + Expo Router 客户端骨架，固定兼容依赖；提供公开环境配置、生产 HTTPS 校验、从 OpenAPI 自动生成的请求/响应类型及超时/取消/脱敏错误通信层；CI 纳入生成契约漂移检查、客户端测试和双平台 bundle 导出（2026-09-07；Node.js 24 全量 548 tests、Expo 依赖检查和 iOS/Android bundle 导出通过；[客户端说明](./apps/mobile/README.md)、[ADR 0014](./docs/decisions/0014-mobile-foundation.md)）
-- [ ] `P4-APP-02` 实现首次启动和位置授权
+- [x] `P4-APP-02` 实现用户主动触发的前台位置授权和内存会话，接受近似定位，覆盖拒绝/永久拒绝/系统关闭/超时/取消；退出后台清除位置并忽略迟到响应，原生声明不含后台/Always/运动权限（2026-09-07；全量 563 tests、双平台 bundle、原生权限配置检查通过；[验收记录](./docs/testing/mobile-location.md)）
 - [ ] `P4-APP-03` 实现手动选择位置的降级方式
 - [ ] `P4-APP-04` 实现语言选择及 FR/ES/EN 文案结构
 - [ ] `P4-APP-05` 实现首页 Fuel、Charge、Air、Wash 四个入口
@@ -625,3 +625,4 @@ V1 的核心验收结果是：
 | 2026-09-07 | 完成 API 集成与性能测试                        | 统一附近接口并行连接批量证据和 Top N 路线，返回安全路线字段及四服务可解释 Best；验证 provider 失败降级、50 候选无 N+1/最多 9 路线元素及 500 ms p95 回归上限；干净 PostgreSQL/PostGIS 验证通过，完整质量门槛 530 项测试通过；见 `docs/testing/api-integration-performance.md` |
 | 2026-09-07 | 完成 Phase 3 搜索、路线与决策引擎 | 从暂停点修复充电内部功率字段泄漏导致的响应 500、纠正所选接口功率断言并固定燃油测试时钟；Node.js 24 全量 530 tests、15 项迁移和四服务真实 PostgreSQL 证据读取通过；下一项 P4-APP-01 |
 | 2026-09-07 | 建立客户端工程、环境配置与 API 层 | Expo SDK 57、React Native 0.86 和 Expo Router 已固定并通过依赖检查；自动生成 OpenAPI 类型、加入类型漂移 CI 和 18 项通信/环境测试；全量 548 tests、iOS/Android bundle 导出通过；下一项 P4-APP-02（首次启动和位置授权），真机与签名验收留在后续发布门槛 |
+| 2026-09-07 | 完成首次启动与前台位置授权 | P4-APP-02：无自动权限弹窗、近似定位、拒绝降级、10 秒定位超时及监听清理；全量 563 tests 与双平台 bundle 通过，原生配置确认无后台权限；真机权限对话框回归保留为发布门槛 |

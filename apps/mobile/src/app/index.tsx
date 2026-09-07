@@ -1,20 +1,24 @@
-import { StyleSheet, Text, View } from "react-native";
+import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { messages } from "../content/messages";
+import { LocationPanel } from "../components/LocationPanel";
 
 export default function WelcomeScreen() {
   const copy = messages.en;
   return (
     <SafeAreaView style={styles.screen}>
-      <Text style={styles.brand}>{copy.appName}</Text>
-      <View style={styles.hero}>
-        <Text style={styles.eyebrow}>{copy.eyebrow}</Text>
-        <Text accessibilityRole="header" style={styles.title}>
-          {copy.title}
-        </Text>
-        <Text style={styles.body}>{copy.introduction}</Text>
-      </View>
-      <Text style={styles.coverage}>{copy.coverage}</Text>
+      <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+        <Text style={styles.brand}>{copy.appName}</Text>
+        <View style={styles.hero}>
+          <Text style={styles.eyebrow}>{copy.eyebrow}</Text>
+          <Text accessibilityRole="header" style={styles.title}>
+            {copy.title}
+          </Text>
+          <Text style={styles.body}>{copy.introduction}</Text>
+        </View>
+        <LocationPanel />
+        <Text style={styles.coverage}>{copy.coverage}</Text>
+      </ScrollView>
     </SafeAreaView>
   );
 }

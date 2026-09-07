@@ -8,7 +8,23 @@ const config: ExpoConfig = {
   orientation: "portrait",
   userInterfaceStyle: "light",
   platforms: ["ios", "android"],
-  plugins: ["expo-router"],
+  plugins: [
+    "expo-router",
+    [
+      "expo-location",
+      {
+        locationWhenInUsePermission:
+          "Fuel Now uses your location to find nearby services and estimate routes without saving a location history.",
+        locationAlwaysPermission: false,
+        motionUsagePermission: false,
+        isAndroidMotionActivityEnabled: false,
+        locationAlwaysAndWhenInUsePermission: false,
+        isIosBackgroundLocationEnabled: false,
+        isAndroidBackgroundLocationEnabled: false,
+        isAndroidForegroundServiceEnabled: false,
+      },
+    ],
+  ],
   ios: { supportsTablet: false },
   android: {},
 };
