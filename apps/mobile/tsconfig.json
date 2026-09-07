@@ -9,5 +9,12 @@
     "noUnusedParameters": true,
     "types": ["react", "node"]
   },
-  "include": ["src/**/*.ts", "src/**/*.tsx", "test/**/*.ts", "app.config.ts"]
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "test/**/*.ts",
+    "test/**/*.tsx",
+    "app.config.ts",
+    "vitest.config.ts"
+  ]
 }

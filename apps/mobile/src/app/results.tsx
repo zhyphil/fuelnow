@@ -10,7 +10,7 @@ import { useLocation } from "../location/context";
 import { useSearchSelection } from "../search/context";
 import { buildInitialSearch } from "../search/selection";
 import { resultTitle, SearchController } from "../search/results";
-import { SortPicker } from "../components/SortPicker";
+import { SortControl } from "../components/SortControl";
 import { PointSummary } from "../components/PointSummary";
 import { EvidenceSummary } from "../components/EvidenceSummary";
 import { RecommendationSummary } from "../components/RecommendationSummary";
@@ -25,7 +25,7 @@ export default function ResultsScreen() {
   const router = useRouter();
   const {
     language,
-    copy: { results: copy, services, evidence },
+    copy: { results: copy, services, evidence, sorts },
   } = useLanguage();
   const { service } = useSearchSelection();
   const { state: location } = useLocation();
@@ -104,7 +104,7 @@ export default function ResultsScreen() {
               {service ? services.names[service] : copy.title}
             </Text>
             {service && query && (
-              <SortPicker
+              <SortControl
                 service={service}
                 sort={sort}
                 fuelType={fuelType}
@@ -156,21 +156,31 @@ export default function ResultsScreen() {
                       {copy[response.ranking.appliedSort]}
                     </Text>
                     {response.ranking.degraded && (
-                      <Text style={styles.notice}>{copy.degraded}</Text>
+                      <Text style={styles.notice}>
+                        {response.ranking.reason
+                          ? sorts.reasons[response.ranking.reason]
+                          : copy.degraded}
+                      </Text>
                     )}
                     {response.outcome.warnings.length > 0 && (
-                      <Text style={styles.notice}>{copy.warning}</Text>
+                      <Text style={styles.body}>{evidence.dataLimits}</Text>
                     )}
                     {response.search.expanded && (
                       <Text style={styles.body}>{copy.expanded}</Text>
                     )}
-                    <ActionButton label={copy.refresh} secondary onPress={run} />
-                    <ActionButton
-                      label={evidence.map}
-                      secondary
-                      disabled={response.results.length === 0}
-                      onPress={() => setShowMap(true)}
-                    />
+                    <View style={styles.actions}>
+                      <View style={{ flex: 1 }}>
+                        <ActionButton label={copy.refresh} secondary onPress={run} />
+                      </View>
+                      <View style={{ flex: 1 }}>
+                        <ActionButton
+                          label={evidence.map}
+                          secondary
+                          disabled={response.results.length === 0}
+                          onPress={() => setShowMap(true)}
+                        />
+                      </View>
+                    </View>
                   </>
                 )}
               </>
@@ -211,14 +221,18 @@ export default function ResultsScreen() {
               {item.brand?.trim() ? ` · ${item.brand}` : ""}
             </Text>
             <PointSummary point={item} />
-            <NavigationButtons target={item} />
+            <EvidenceSummary
+              compact
+              evidence={item.evidence}
+              country={item.country}
+              actions={<NavigationButtons target={item} />}
+            />
             <ActionButton
               secondary
               label={evidence.details}
               onPress={() => selectPoint(item.id)}
             />
             <RecommendationSummary recommendation={item.recommendation} />
-            <EvidenceSummary evidence={item.evidence} country={item.country} />
           </View>
         )}
       />
@@ -228,7 +242,8 @@ export default function ResultsScreen() {
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: "#F5F4ED" },
   content: { padding: 24, gap: 16, paddingBottom: 40 },
-  header: { gap: 16, paddingBottom: 8 },
+  header: { gap: 10, paddingBottom: 4 },
+  actions: { flexDirection: "row", gap: 10 },
   title: { fontSize: 32, fontWeight: "700", color: "#173E32" },
   name: { fontSize: 20, fontWeight: "600", color: "#173E32" },
   body: { fontSize: 16, lineHeight: 24, color: "#4F5D54" },

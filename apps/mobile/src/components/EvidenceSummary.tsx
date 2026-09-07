@@ -1,4 +1,6 @@
 import { Text, View } from "react-native";
+import { useState, type ReactNode } from "react";
+import { ActionButton } from "./ActionButton";
 import { useLanguage } from "../i18n/context";
 import { evidenceWarnings } from "../search/freshness";
 import { useFreshnessClock } from "./FreshnessClock";
@@ -14,12 +16,17 @@ import {
 export function EvidenceSummary({
   evidence,
   country,
+  compact = false,
+  actions,
 }: {
   evidence: Evidence;
   country?: "FR" | "ES";
+  compact?: boolean;
+  actions?: ReactNode;
 }) {
   const { language, copy } = useLanguage();
   const now = useFreshnessClock();
+  const [expanded, setExpanded] = useState(false);
   const rows = [
     ...statusRows(evidence, language, country, now),
     ...fuelRows(evidence, language),
@@ -30,6 +37,21 @@ export function EvidenceSummary({
   ];
   return (
     <View style={{ gap: 6 }}>
+      {(compact ? rows.slice(0, 3) : rows).map((row) => (
+        <Text
+          key={row.label}
+          style={{ color: "#263E32", fontSize: 16, lineHeight: 23 }}
+        >
+          {row.label}: {row.value}
+        </Text>
+      ))}
+      {actions}
+      {compact && (
+        <Text style={{ color: "#4F5D54", fontSize: 15 }}>
+          {copy.evidence[evidence.freshness]} · {copy.evidence.confidence}:{" "}
+          {copy.evidence[evidence.confidence.level]}
+        </Text>
+      )}
       {evidenceWarnings(evidence, now).map((warning) => (
         <Text
           key={warning}
@@ -38,11 +60,24 @@ export function EvidenceSummary({
           {copy.evidence[warning]}
         </Text>
       ))}
-      {rows.map((row) => (
-        <Text key={row.label}>
-          {row.label}: {row.value}
-        </Text>
-      ))}
+      {compact && (
+        <ActionButton
+          secondary
+          expanded={expanded}
+          label={expanded ? copy.evidence.lessEvidence : copy.evidence.moreEvidence}
+          onPress={() => setExpanded(!expanded)}
+        />
+      )}
+      {compact &&
+        expanded &&
+        rows.slice(3).map((row) => (
+          <Text
+            key={row.label}
+            style={{ fontSize: 16, color: "#263E32", lineHeight: 23 }}
+          >
+            {row.label}: {row.value}
+          </Text>
+        ))}
     </View>
   );
 }

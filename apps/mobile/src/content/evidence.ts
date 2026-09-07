@@ -1,5 +1,17 @@
 import type { Language } from "../i18n/preferences";
 const translations = {
+  filters: ["Sort and filters", "Tri et filtres", "Orden y filtros"],
+  moreEvidence: [
+    "Show service data and sources",
+    "Afficher données et sources",
+    "Mostrar datos y fuentes",
+  ],
+  lessEvidence: ["Hide detailed data", "Masquer les détails", "Ocultar detalles"],
+  dataLimits: [
+    "Some data is unknown; check the result details.",
+    "Certaines données sont inconnues ; consultez les détails.",
+    "Algunos datos son desconocidos; consulta los detalles.",
+  ],
   openingChecked: [
     "Opening evaluated at",
     "Ouverture évaluée à",

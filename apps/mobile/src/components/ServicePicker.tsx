@@ -30,6 +30,7 @@ export function ServicePicker() {
               ]}
             >
               <Text style={[styles.name, selected && styles.light]}>
+                {selected ? "✓ " : ""}
                 {services.names[value]}
               </Text>
               <Text style={[styles.description, selected && styles.light]}>
@@ -57,7 +58,7 @@ const styles = StyleSheet.create({
     minHeight: 112,
     padding: 18,
     borderWidth: 1,
-    borderColor: "#8F9F94",
+    borderColor: "#627369",
     borderRadius: 18,
     gap: 9,
   },
