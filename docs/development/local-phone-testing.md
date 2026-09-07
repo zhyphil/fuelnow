@@ -1,6 +1,6 @@
 # 本机 + iPhone / Android 真机测试
 
-2026-09-07。用户确认：iPhone 15 Pro Max / iOS 26.6.1；华为 Mate 20 HMA-L29 / EMUI 12.0.0，系统页面只显示该 EMUI 版本，不推断为 Android 12，也不要求用户继续查找。底层 Android/API 级别暂留空，若安装报兼容错误再诊断。用户已确认两台手机均可在浏览器打开后端连接检查页并看到 Toulouse / Barcelona / La Jonquera。客户端安装和 App 内连接仍待确认；这不是正式 Beta 发布或现场验收。
+2026-09-07。iPhone 15 Pro Max / iOS 26.6.1；华为 Mate 20 HMA-L29 / EMUI 12.0.0，USB 读取确认 Android 10 / API 29、Expo Go 57.0.9。两台手机的 LAN 浏览器检查已通过；华为已完成基础列表报价、Cheapest 和 Open now 检查，详情油品上下文缺口仍待修复。用户随后授权临时切换到华为 USB 对照测试，当前使用回环地址，LAN 测试暂停；USB 长时间稳定性及 Best 手机验收仍待确认。这不是正式 Beta 发布或现场验收。
 
 ## 启动与停止
 
@@ -27,6 +27,8 @@ pnpm local:start --lan
 
 ## 两台手机如何接入
 
+当前华为正在使用下方的 USB 对照模式。此节为恢复 LAN 后的操作，不能在现有 USB 服务仍运行时双击 `local-test.command` 启动第二份。
+
 1. Mac 与手机连接同一个可信的家庭 Wi-Fi，先不用蜂窝网络/访客 Wi-Fi，不配置公网穿透。
 2. 打开启动终端给出的连接检查地址。手机上的 `127.0.0.1` 指手机自身，不是 Mac；Wi-Fi 变更后重启生成新地址。
 3. 若连接失败，先确认 API 未退出、Mac 未睡眠，再检查路由器客户端隔离、VPN 和 macOS 的本地网络/防火墙允许提示。只允许所需应用在可信局域网连接，不关闭整个防火墙。电脑端自己访问 LAN 地址失败也可能是系统权限问题，不能据此宣称手机已连通。
@@ -47,6 +49,42 @@ pnpm local:start --lan
 若没有 Google Play 服务，Google 地图展示/打开和设备定位可能受限；先使用手动城市完成列表与详情测试，将地图问题单独记录，不当作后端失败。App 没有实现华为专用地图或 HMS 适配。需要本机构建 APK 时还须配置 Android SDK/JDK/USB 调试，这次未自动安装大型工具链或给手机授权。
 
 ## 从哪里开始点
+
+### 华为 USB 对照模式（2026-09-07 已切换）
+
+用户已明确授权重启测试环境、重新生成临时模拟数据，并暂停 Wi-Fi 手机访问。已正常停止原 LAN 运行，输出确认只删除其临时库；原 `fuel_now` 库站点数仍为 0。随后用现有 `pnpm local:start` 启动新的隔离库，未改 `.env`、源码、权限或防火墙。
+
+USB 工具采用 [Google 官方 Platform-Tools](https://developer.android.com/tools/releases/platform-tools)，本次为 37.0.1，放在 Mac 临时目录中，没有安装 Android Studio 或修改全局 PATH。以下 `adb` 应替换为该工具的完整路径；临时目录被清理后需重新定位/准备工具。`-d` 限定唯一 USB Android 设备，多台时停止并显式选择目标，不能批量设置。
+
+在已停止旧测试服务、确认手机授权且目标端口无其他用途后：
+
+```sh
+# 在项目根目录启动，保持此终端运行；不要加 --lan。
+pnpm local:start
+
+# 另一终端：先检查已有转发，不覆盖其他任务占用的映射。
+adb -d reverse --list
+adb -d reverse --no-rebind tcp:3001 tcp:3001
+adb -d reverse --no-rebind tcp:8081 tcp:8081
+```
+
+华为 Expo Go 使用 `exp://127.0.0.1:8081`，手机浏览器后端检查使用 `http://127.0.0.1:3001/`。这里的手机回环端口由 USB 转发到 Mac，不再依赖原 LAN IP。数据线须保持连接、手机授权有效、Mac 不睡眠；断线或撤销授权后先检查并恢复这两个映射。不要使用旧的 `exp://192.168.1.63:8081` 历史项目。
+
+本轮验证：API 仅监听 `127.0.0.1:3001`，Metro 仅监听 `[::1]:8081`。Mac 上的 `localhost` 当前解析为 IPv6，因此 `127.0.0.1:8081` 本机直连失败不代表 Metro 停止；Mac 检查用 `http://[::1]:8081/status`。当前 ADB 转发实际能够连接此 Metro，手机 Expo 的新 main 启动日志已确认其项目地址为 `127.0.0.1:8081`。开发包含 `http://127.0.0.1:3001`，不含旧 LAN API 地址；本机实际移动请求代码验证四服务/详情与 Best（1 个主站，1.659 EUR/liter）通过。近期限定 Expo JS 日志未见同一 CLI 警告，但不足以证明长时间稳定或原故障根因已解决，手机页面与操作仍由用户确认。
+
+退出 USB 或恢复 Wi-Fi：先在启动终端 Ctrl+C，确认新临时库被正常清理。只移除本次为 Fuel Now 创建且仍匹配的两个映射，不用 `--remove-all`：
+
+```sh
+adb -d reverse --list
+adb -d reverse --remove tcp:3001
+adb -d reverse --remove tcp:8081
+# 如需恢复 LAN，再启动：
+pnpm local:start --lan
+```
+
+重启会再次重建模拟数据；切回 LAN 要用新启动终端给出的地址。测试结束可关闭 USB 调试/撤销本次授权，不必启用华为分享、文件共享或“始终允许”授权。iPhone 未通过此 Android USB 方案接入。
+
+### 手动城市与服务
 
 | 手动城市 | 服务 | 预期 |
 | --- | --- | --- |
