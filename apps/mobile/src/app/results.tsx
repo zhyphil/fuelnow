@@ -125,7 +125,7 @@ export default function ResultsScreen() {
               {item.brand?.trim() ? ` · ${item.brand}` : ""}
             </Text>
             <PointSummary point={item} />
-            <EvidenceSummary evidence={item.evidence} />
+            <EvidenceSummary evidence={item.evidence} country={item.country} />
           </View>
         )}
       />

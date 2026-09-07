@@ -4,6 +4,64 @@ import { evidenceCopy } from "../content/evidence";
 import { sortMessages } from "../content/sorts";
 export type Evidence = NearbyPoint["evidence"];
 export type EvidenceRow = { label: string; value: string };
+function evLiveEligible(
+  evidence: Evidence,
+  country: "FR" | "ES" | undefined,
+  now: number,
+) {
+  const status = evidence.status.availability;
+  const age = now - Date.parse(status.observedAt ?? "");
+  return (
+    country === "FR" &&
+    evidence.freshness === "live" &&
+    status.state !== "unknown" &&
+    age >= 0 &&
+    age <= 300_000 &&
+    Number.isSafeInteger(status.availableUnits) &&
+    Number.isSafeInteger(status.totalUnits) &&
+    status.availableUnits! >= 0 &&
+    status.totalUnits! >= status.availableUnits! &&
+    (status.state === "available"
+      ? status.availableUnits! > 0
+      : status.availableUnits === 0)
+  );
+}
+export function chargingRows(
+  evidence: Evidence,
+  country: "FR" | "ES" | undefined,
+  language: Language,
+  now = Date.now(),
+): EvidenceRow[] {
+  const detail = evidence.details.charging;
+  if (!detail) return [];
+  const c = evidenceCopy(language),
+    status = evidence.status.availability;
+  const eligible = evLiveEligible(evidence, country, now);
+  return [
+    {
+      label: c.power,
+      value:
+        detail.maximumRatedPowerKw != null &&
+        Number.isFinite(detail.maximumRatedPowerKw) &&
+        detail.maximumRatedPowerKw > 0
+          ? `${detail.maximumRatedPowerKw.toLocaleString(language)} kW`
+          : c.unknown,
+    },
+    {
+      label: c.connectors,
+      value:
+        detail.connectorTypes.map((connector) => c[connector]).join(", ") || c.unknown,
+    },
+    { label: c.evses, value: String(detail.totalEvses) },
+    {
+      label: c.liveCount,
+      value: eligible
+        ? `${status.availableUnits} / ${status.totalUnits} · ${timestamp(status.observedAt, language)}`
+        : `${c.unknown}${country === "ES" ? ` · ${c.spainLive}` : ""}`,
+    },
+    { label: c.chargePrice, value: c.unknown },
+  ];
+}
 export function fuelRows(evidence: Evidence, language: Language): EvidenceRow[] {
   const detail = evidence.details.fuel;
   if (!detail) return [];
@@ -71,11 +129,27 @@ export function priceText(price: Evidence["price"], language: Language) {
     " · ",
   );
 }
-export function statusRows(evidence: Evidence, language: Language): EvidenceRow[] {
+export function statusRows(
+  evidence: Evidence,
+  language: Language,
+  country?: "FR" | "ES",
+  now = Date.now(),
+): EvidenceRow[] {
   const c = evidenceCopy(language);
   return [
-    { label: c.price, value: priceText(evidence.price, language) },
+    {
+      label: c.price,
+      value: priceText(evidence.details.charging ? null : evidence.price, language),
+    },
     { label: c.opening, value: c[evidence.status.opening.state] },
-    { label: c.availability, value: c[evidence.status.availability.state] },
+    {
+      label: c.availability,
+      value:
+        c[
+          evidence.details.charging && !evLiveEligible(evidence, country, now)
+            ? "unknown"
+            : evidence.status.availability.state
+        ],
+    },
   ];
 }

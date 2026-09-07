@@ -1,5 +1,6 @@
 import { expect, it } from "vitest";
 import { fuelRows } from "../src/search/evidence";
+import { chargingRows } from "../src/search/evidence";
 import sample from "../../../docs/api/examples/nearby-fuel-cheapest.json";
 import {
   priceText,
@@ -9,6 +10,43 @@ import {
   type Evidence,
 } from "../src/search/evidence";
 const evidence = sample.results[0]!.evidence as Evidence;
+it("gates live EV counts by country, timestamp, quality and consistent quantities", () => {
+  const now = Date.parse("2026-09-07T10:00:00Z");
+  const ev: Evidence = {
+    ...evidence,
+    freshness: "live",
+    status: {
+      ...evidence.status,
+      availability: {
+        state: "available",
+        availableUnits: 2,
+        totalUnits: 4,
+        observedAt: "2026-09-07T09:59:00Z",
+      },
+    },
+    details: {
+      ...evidence.details,
+      fuel: null,
+      charging: {
+        operator: null,
+        network: null,
+        connectorTypes: ["ccs_combo_2"],
+        maximumRatedPowerKw: 150,
+        totalEvses: 4,
+      },
+    },
+  };
+  expect(chargingRows(ev, "FR", "en", now)[3]!.value).toContain("2 / 4");
+  expect(chargingRows(ev, "ES", "en", now)[3]!.value).toContain("Unknown");
+  expect(chargingRows(ev, "FR", "en", now + 300_000)[3]!.value).toBe("Unknown");
+  expect(chargingRows(ev, "FR", "en", now - 120_000)[3]!.value).toBe("Unknown");
+  expect(chargingRows({ ...ev, freshness: "stale" }, "FR", "en", now)[3]!.value).toBe(
+    "Unknown",
+  );
+  expect(chargingRows(ev, "FR", "en", now).at(-1)!.value).toBe("Unknown");
+  expect(statusRows(ev, "en", "ES", now)[2]!.value).toBe("Unknown");
+  expect(statusRows(ev, "en", "FR", now)[0]!.value).toBe("Unknown");
+});
 it("keeps unreported stock unknown rather than reporting no shortage", () => {
   const fuel = evidence.details.fuel!;
   const rows = fuelRows(

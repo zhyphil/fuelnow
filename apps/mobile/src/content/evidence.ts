@@ -1,5 +1,33 @@
 import type { Language } from "../i18n/preferences";
 const translations = {
+  power: [
+    "Maximum rated power (not delivered speed)",
+    "Puissance nominale maximale (pas le débit réel)",
+    "Potencia nominal máxima (no velocidad real)",
+  ],
+  connectors: ["Connectors", "Connecteurs", "Conectores"],
+  evses: ["Charging points", "Points de charge", "Puntos de recarga"],
+  liveCount: [
+    "Available charging points",
+    "Points de charge disponibles",
+    "Puntos de recarga disponibles",
+  ],
+  chargePrice: [
+    "Comparable charging tariff",
+    "Tarif de recharge comparable",
+    "Tarifa de recarga comparable",
+  ],
+  spainLive: [
+    "Spain live availability is not enabled",
+    "Disponibilité en direct non activée en Espagne",
+    "Disponibilidad en directo no activada en España",
+  ],
+  ccs_combo_2: ["CCS Combo 2", "CCS Combo 2", "CCS Combo 2"],
+  type_2: ["Type 2", "Type 2", "Tipo 2"],
+  type_2_attached: ["Attached Type 2", "Type 2 attaché", "Tipo 2 fijo"],
+  chademo: ["CHAdeMO", "CHAdeMO", "CHAdeMO"],
+  domestic_socket: ["Domestic socket", "Prise domestique", "Enchufe doméstico"],
+  tesla_eu: ["Tesla EU", "Tesla UE", "Tesla UE"],
   fuelTypes: ["Listed fuels", "Carburants répertoriés", "Combustibles registrados"],
   selectedFuel: ["Selected fuel", "Carburant choisi", "Combustible elegido"],
   stock: ["Fuel stock", "Stock du carburant", "Existencias de combustible"],

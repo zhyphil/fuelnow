@@ -4,13 +4,21 @@ import {
   statusRows,
   provenanceRows,
   fuelRows,
+  chargingRows,
   type Evidence,
 } from "../search/evidence";
-export function EvidenceSummary({ evidence }: { evidence: Evidence }) {
+export function EvidenceSummary({
+  evidence,
+  country,
+}: {
+  evidence: Evidence;
+  country?: "FR" | "ES";
+}) {
   const { language } = useLanguage();
   const rows = [
-    ...statusRows(evidence, language),
+    ...statusRows(evidence, language, country),
     ...fuelRows(evidence, language),
+    ...chargingRows(evidence, country, language),
     ...provenanceRows(evidence, language),
   ];
   return (
