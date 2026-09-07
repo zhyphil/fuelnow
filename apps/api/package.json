@@ -4,6 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "test:osm-live": "node --import tsx src/quality/runOsmCheck.ts",
     "source:import-ev": "node --env-file-if-exists=../../.env --import tsx src/worker/supplement-import/runStaticEvImport.ts",
     "test:ev-live": "node --import tsx src/quality/runStaticEvCheck.ts",
     "test:fuel-live": "node --import tsx src/quality/runLiveFuelCheck.ts",
