@@ -4,6 +4,19 @@ import { evidenceCopy } from "../content/evidence";
 import { sortMessages } from "../content/sorts";
 export type Evidence = NearbyPoint["evidence"];
 export type EvidenceRow = { label: string; value: string };
+export function airRows(evidence: Evidence, language: Language): EvidenceRow[] {
+  const detail = evidence.details.air;
+  if (!detail) return [];
+  const c = evidenceCopy(language);
+  return [
+    {
+      label: c.airCost,
+      value: detail.free === null ? c.unknown : detail.free ? c.free : c.paid,
+    },
+    { label: c.workingStatus, value: c[detail.workingStatus] },
+    { label: c.access, value: c[detail.access] },
+  ];
+}
 function evLiveEligible(
   evidence: Evidence,
   country: "FR" | "ES" | undefined,

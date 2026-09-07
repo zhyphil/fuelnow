@@ -1,6 +1,7 @@
 import { expect, it } from "vitest";
 import { fuelRows } from "../src/search/evidence";
 import { chargingRows } from "../src/search/evidence";
+import { airRows } from "../src/search/evidence";
 import sample from "../../../docs/api/examples/nearby-fuel-cheapest.json";
 import {
   priceText,
@@ -10,6 +11,30 @@ import {
   type Evidence,
 } from "../src/search/evidence";
 const evidence = sample.results[0]!.evidence as Evidence;
+it.each([true, false, null])(
+  "preserves the Air free/paid/unknown distinction: %s",
+  (free) => {
+    const rows = airRows(
+      {
+        ...evidence,
+        details: {
+          ...evidence.details,
+          air: { free, workingStatus: "broken", access: "customers_only" },
+        },
+      },
+      "en",
+    );
+    expect(rows[0]!.value).toBe(
+      free === true
+        ? "Free"
+        : free === false
+          ? "Paid; amount may be unknown"
+          : "Unknown",
+    );
+    expect(rows[1]!.value).toBe("Broken");
+    expect(rows[2]!.value).toBe("Customers only");
+  },
+);
 it("gates live EV counts by country, timestamp, quality and consistent quantities", () => {
   const now = Date.parse("2026-09-07T10:00:00Z");
   const ev: Evidence = {

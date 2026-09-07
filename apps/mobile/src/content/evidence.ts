@@ -1,5 +1,27 @@
 import type { Language } from "../i18n/preferences";
 const translations = {
+  airCost: ["Air fee", "Tarif de gonflage", "Tarifa de aire"],
+  free: ["Free", "Gratuit", "Gratis"],
+  paid: [
+    "Paid; amount may be unknown",
+    "Payant ; montant parfois inconnu",
+    "De pago; importe posiblemente desconocido",
+  ],
+  workingStatus: ["Equipment status", "État de l’équipement", "Estado del equipo"],
+  working: [
+    "Working according to source",
+    "Fonctionnel selon la source",
+    "Operativo según la fuente",
+  ],
+  broken: ["Broken", "En panne", "Averiado"],
+  temporarily_unavailable: [
+    "Temporarily unavailable",
+    "Temporairement indisponible",
+    "Temporalmente no disponible",
+  ],
+  access: ["Access", "Accès", "Acceso"],
+  public: ["Public", "Public", "Público"],
+  customers_only: ["Customers only", "Réservé aux clients", "Solo clientes"],
   power: [
     "Maximum rated power (not delivered speed)",
     "Puissance nominale maximale (pas le débit réel)",
