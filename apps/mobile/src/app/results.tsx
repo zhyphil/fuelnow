@@ -12,6 +12,7 @@ import { resultTitle, SearchController } from "../search/results";
 import { SortPicker } from "../components/SortPicker";
 import { PointSummary } from "../components/PointSummary";
 import { EvidenceSummary } from "../components/EvidenceSummary";
+import { RecommendationSummary } from "../components/RecommendationSummary";
 import { withSearchSort, type Sort, type FuelType } from "../search/sorts";
 
 export default function ResultsScreen() {
@@ -125,6 +126,7 @@ export default function ResultsScreen() {
               {item.brand?.trim() ? ` · ${item.brand}` : ""}
             </Text>
             <PointSummary point={item} />
+            <RecommendationSummary recommendation={item.recommendation} />
             <EvidenceSummary evidence={item.evidence} country={item.country} />
           </View>
         )}

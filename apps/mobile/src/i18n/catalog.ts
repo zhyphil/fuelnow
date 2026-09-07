@@ -8,9 +8,11 @@ import { resultMessages } from "../content/results";
 import { sortMessages } from "../content/sorts";
 import { pointMessages } from "../content/point";
 import { evidenceCopy } from "../content/evidence";
+import { recommendationCopy } from "../content/recommendations";
 
 export function getMessages(language: Language) {
   return {
+    recommendations: recommendationCopy(language),
     evidence: evidenceCopy(language),
     point: pointMessages[language],
     sorts: sortMessages[language],
