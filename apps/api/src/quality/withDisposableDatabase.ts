@@ -8,6 +8,7 @@ import { localLoadDatabaseUrl } from "./loadProfile.js";
 export async function withDisposableDatabase<T>(
   connectionString: string,
   run: (pool: pg.Pool) => Promise<T>,
+  options: { migrate?: boolean } = {},
 ): Promise<T> {
   const url = localLoadDatabaseUrl(connectionString);
   const name = `fuel_now_import_${randomBytes(6).toString("hex")}`;
@@ -31,7 +32,7 @@ export async function withDisposableDatabase<T>(
     const directory = new URL("../../db/migrations/", import.meta.url);
     const client = await pool.connect();
     try {
-      for (const file of (await readdir(directory))
+      for (const file of (options.migrate === false ? [] : await readdir(directory))
         .filter((entry) => /^\d{4}_.*\.sql$/.test(entry))
         .sort()) {
         const sql = (await readFile(new URL(file, directory), "utf8")).replace(

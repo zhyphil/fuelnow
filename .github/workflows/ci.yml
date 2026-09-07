@@ -56,6 +56,11 @@ jobs:
           LOAD_TEST_DATABASE_URL: postgresql://fuel_now:fuel_now@127.0.0.1:5432/fuel_now
         run: pnpm --filter @fuel-now/api test:import-local
 
+      - name: Check backup restoration into a fresh isolated database
+        env:
+          LOAD_TEST_DATABASE_URL: postgresql://fuel_now:fuel_now@127.0.0.1:5432/fuel_now
+        run: pnpm --filter @fuel-now/api test:restore-local
+
       - name: Stop integration database service
         if: always()
         run: docker compose down
