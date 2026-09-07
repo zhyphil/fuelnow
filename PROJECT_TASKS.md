@@ -2,9 +2,9 @@
 
 > 项目：France + Spain Driver Decision Engine  
 > 需求来源：[france_spain_driver_decision_engine_project.md](./france_spain_driver_decision_engine_project.md)  
-> 当前状态：Phase 4 开发及功能验收完成；按用户要求在此暂停
-> 当前阶段：Phase 4 已完成（不代表已发布或通过真机发布验收）
-> 下一项任务：等待用户授权进入 Phase 5；尚未开始 `P5-QA-01`
+> 当前状态：已获授权继续 Phase 5；逐项验证、commit、push 后进入下一项
+> 当前阶段：Phase 5 测试、合规与发布准备
+> 下一项任务：`P5-QA-02` 统一字段转换测试
 > 最后更新：2026-09-07
 
 ## 使用方法
@@ -328,7 +328,7 @@ V1 的核心验收结果是：
 
 ## 5.1 自动化与数据质量
 
-- [ ] `P5-QA-01` 为所有 Adapter 编写单元测试
+- [x] `P5-QA-01` 为所有 Adapter 编写单元测试 — 2026-09-07：2 个正式 Adapter 与西班牙补充关联覆盖；新增 20 项边界/自动库存测试，data-core 160 tests 与类型检查通过；EV/OSM 正式采集缺口详见 docs/testing/phase5-adapter-matrix.md
 - [ ] `P5-QA-02` 为统一字段转换编写测试
 - [ ] `P5-QA-03` 为排序和 Best 评分编写测试
 - [ ] `P5-QA-04` 为营业时间和时区编写测试
@@ -652,3 +652,4 @@ V1 的核心验收结果是：
 | 2026-09-07 | P4-ERR-05 过期与未知数据提示                   | 字段级陈旧/未知/低可信度提示，营业/可用状态观察时间分离；统一时钟使过期充电状态退回未知；128 客户端测试通过                                                                                                                                                                  |
 | 2026-09-07 | P4-A11Y-01 基本无障碍与紧凑列表                | 52 点操作按钮、显式选中/展开语义、文字/边框对比度和三语组件交互；144 客户端测试、类型与 lint 通过；设备读屏/大字体验收保留 Phase 5；见 docs/testing/mobile-accessibility.md                                                                                                  |
 | 2026-09-07 | Phase 4 全部完成并暂停                         | 25 项开发任务与五项功能验收完成；687 tests、双平台 bundle、四服务事务回滚式 PostGIS 地址验证通过；下一阶段须用户授权；详见 docs/testing/phase4-acceptance.md                                                                                                                 |
+| 2026-09-07 | P5-QA-01 Adapter 单元测试矩阵                  | 2 个正式 Adapter 与西班牙补充关联覆盖；新增 20 项边界/自动库存测试，data-core 160 tests 与类型检查通过；EV/OSM 正式采集缺口详见 docs/testing/phase5-adapter-matrix.md                                                                                                        |
