@@ -7,7 +7,12 @@ import {
   searchHealthMetrics,
 } from "../analytics/beta";
 import { betaCopy } from "../content/beta";
-import { freshnessBuckets, freshnessMetrics } from "../analytics/quality";
+import {
+  freshnessBuckets,
+  freshnessMetrics,
+  missingnessMetrics,
+  qualityFields,
+} from "../analytics/quality";
 import { useLanguage } from "../i18n/context";
 import { ActionButton } from "./ActionButton";
 export function DiagnosticsPanel() {
@@ -20,6 +25,7 @@ export function DiagnosticsPanel() {
   const timing = decisionMetrics(beta);
   const health = searchHealthMetrics(beta);
   const freshness = freshnessMetrics(beta);
+  const missing = missingnessMetrics(beta);
   const {
     language,
     copy: { evidence: copy },
@@ -38,6 +44,13 @@ export function DiagnosticsPanel() {
       {state.enabled && (
         <View>
           <Text>{local.title}</Text>
+          <Text>{local.missing}</Text>
+          {qualityFields.map((field) => (
+            <Text key={field}>
+              {local[field]}: {percent(missing[field].unknownShownRate)} (
+              {missing[field].unknownShown}/{missing[field].eligible})
+            </Text>
+          ))}
           <Text>
             {local.freshness} · n={freshness.total}
           </Text>

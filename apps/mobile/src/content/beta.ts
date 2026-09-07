@@ -1,5 +1,9 @@
 export const betaCopy = {
   en: {
+    missing: "Fields shown as unknown / eligible results",
+    price: "Price (selected Fuel type only)",
+    availability: "Availability",
+    opening: "Opening status",
     freshness: "Source observation age at first result display",
     live: "Live",
     under1h: "Under 1h (not live)",
@@ -19,6 +23,10 @@ export const betaCopy = {
     truncated: "Earlier attempts discarded: this is an incomplete window.",
   },
   fr: {
+    missing: "Champs affichés inconnus / résultats admissibles",
+    price: "Prix (carburant sélectionné uniquement)",
+    availability: "Disponibilité",
+    opening: "État d’ouverture",
     freshness: "Âge de l’observation source au premier affichage",
     live: "En direct",
     under1h: "Moins de 1h (pas en direct)",
@@ -38,6 +46,10 @@ export const betaCopy = {
     truncated: "Anciennes tentatives supprimées : fenêtre incomplète.",
   },
   es: {
+    missing: "Campos mostrados como desconocidos / resultados válidos",
+    price: "Precio (solo carburante seleccionado)",
+    availability: "Disponibilidad",
+    opening: "Estado de apertura",
     freshness: "Edad de la observación de origen al primer mostrar",
     live: "En directo",
     under1h: "Menos de 1h (no en directo)",

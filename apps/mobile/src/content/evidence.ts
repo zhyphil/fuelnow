@@ -116,9 +116,9 @@ const translations = {
   ],
   cancelRequest: ["Cancel request", "Annuler la requête", "Cancelar solicitud"],
   diagnosticsNotice: [
-    "Optional local test metrics: searches, timing, selection and navigation. No coordinates or uploads. Cleared after 15 minutes or when disabled.",
-    "Mesures de test locales facultatives : recherches, durées, sélection, navigation. Aucune coordonnée ni transmission. Effacées après 15 minutes ou à la désactivation.",
-    "Métricas de prueba locales opcionales: búsquedas, tiempos, selección y navegación. Sin coordenadas ni envíos. Se borran a los 15 minutos o al desactivar.",
+    "Optional local test metrics: searches, timing, data-quality counts, sorting, selection and navigation. No coordinates or uploads. Cleared after 15 minutes or when disabled.",
+    "Mesures de test locales facultatives : recherches, durées, compteurs de qualité, tri, sélection, navigation. Aucune coordonnée ni transmission. Effacées après 15 minutes ou à la désactivation.",
+    "Métricas de prueba locales opcionales: búsquedas, tiempos, recuentos de calidad, ordenación, selección y navegación. Sin coordenadas ni envíos. Se borran a los 15 minutos o al desactivar.",
   ],
   diagnosticsOn: [
     "Enable local test events",

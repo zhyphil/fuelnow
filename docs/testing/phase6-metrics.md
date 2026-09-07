@@ -1,5 +1,11 @@
 # Phase 6：本地指标工程，不是 Beta 结果
 
+## P6-MET-05a 字段缺失
+
+每次首次展示同步保留 price/availability/opening 的独立分母、原始缺失数、界面未知数及其比例；可按实际国家/服务切片。Fuel 未选择油种时价格不可测，不计其价格分母；不拿“未选择油种”误判数据缺失。Air Free/Paid 不替代实际金额，0 价格是已知值；closed/unavailable 是已知状态而非缺失。
+
+价格未知按既有界面规则：null/非法金额或 Charge（尚无合格价格契约）；EV availability 按与界面共用的法国、5 分钟、容量一致性规则，西班牙或失效证据仍为未知，即使接口字段非空。营业 Unknown 不推测成关门。分别保留 rawMissing 与 unknownShown 可以看到“字段存在但不能向用户展示为已知”的差距。此处非完整 Best 可决策性评分，旧价格/限制条件仍有独立提示；不是来源全量数据库缺失审计。
+
 ## P6-MET-04a 新鲜度
 
 按首次展示的每条结果的 source.observedAt 分类，绝不替代为 fetchedAt/publishedAt。互斥桶：Live（来源显式 live 且观察年龄 ≤5 分钟；EV 另过既有法国实时资格规则）、非 Live <1h、1h 至 <24h、≥24h 或上游标记 Stale、Unknown（缺失/非法/未来时间或上游 Unknown）。1h/24h 边界属于后一桶，Unknown 也进入分母，各桶总和为 100%；空样本全 null。

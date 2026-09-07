@@ -1,9 +1,67 @@
 import { expect, it } from "vitest";
-import { ageBucket, freshnessMetrics } from "../src/analytics/quality";
+import {
+  ageBucket,
+  captureQuality,
+  freshnessMetrics,
+  missingnessMetrics,
+} from "../src/analytics/quality";
 import { BetaSession, observeSearch } from "../src/analytics/beta";
 import type { NearbyResponse } from "../src/api/client";
 import sample from "../../../docs/api/examples/nearby-fuel-cheapest.json";
 const now = Date.parse("2026-09-07T12:00:00Z");
+it("distinguishes zero price, unavailable and closed from missing values", () => {
+  const reply = structuredClone(sample) as NearbyResponse;
+  const point = reply.results[0]!;
+  point.evidence.price!.amount = 0;
+  point.evidence.status.availability.state = "unavailable";
+  point.evidence.status.opening.state = "closed";
+  expect(captureQuality(reply, now)[0]!.fields).toEqual({
+    price: { eligible: 1, rawMissing: 0, unknownShown: 0 },
+    availability: { eligible: 1, rawMissing: 0, unknownShown: 0 },
+    opening: { eligible: 1, rawMissing: 0, unknownShown: 0 },
+  });
+  reply.fuelType = null;
+  expect(captureQuality(reply, now)[0]!.fields.price.eligible).toBe(0);
+});
+it.each(["FR", "ES"] as const)(
+  "does not promote invalid %s EV dynamics or prices to known",
+  (country) => {
+    const reply = structuredClone(sample) as NearbyResponse;
+    reply.service = "charging";
+    reply.results[0]!.country = country;
+    const fields = captureQuality(reply, now).find(
+      (row) => row.country === country,
+    )!.fields;
+    expect(fields.price).toMatchObject({ rawMissing: 0, unknownShown: 1 });
+    expect(fields.availability).toMatchObject({ rawMissing: 0, unknownShown: 1 });
+  },
+);
+it("aggregates unknown fields only once and preserves null empty denominators", async () => {
+  const session = new BetaSession(
+    () => 0,
+    () => now,
+  );
+  session.setEnabled(true);
+  const reply = structuredClone(sample) as NearbyResponse;
+  reply.results[0]!.evidence.price = null;
+  reply.results[0]!.evidence.status.opening.state = "unknown";
+  const received = await observeSearch(async () => reply, session)(
+    { latitude: 1, longitude: 2, service: "fuel" },
+    new AbortController().signal,
+  );
+  session.expose(received);
+  session.expose(received);
+  expect(missingnessMetrics(session.getSnapshot(), "FR", "fuel").price).toMatchObject({
+    eligible: 1,
+    rawMissingRate: 1,
+    unknownShownRate: 1,
+  });
+  expect(
+    missingnessMetrics(session.getSnapshot(), "ES").price.unknownShownRate,
+  ).toBeNull();
+  session.setEnabled(false);
+  expect(missingnessMetrics(session.getSnapshot()).opening.rawMissingRate).toBeNull();
+});
 it.each([
   ["live", 300_000, "live"],
   ["live", 300_001, "under1h"],
