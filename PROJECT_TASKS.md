@@ -2,9 +2,9 @@
 
 > 项目：France + Spain Driver Decision Engine  
 > 需求来源：[france_spain_driver_decision_engine_project.md](./france_spain_driver_decision_engine_project.md)  
-> 当前状态：Phase 5 已完成 10/21 主任务及 8 个工程子项（含 EV/OSM 四个细项）；按用户要求暂停每小时自动任务，当前任务直接连续迭代；运营/部署/分发留待单独决定
+> 当前状态：Phase 5 已完成 10/21 主任务及 9 个工程子项（含 EV/OSM 四个细项）；按用户要求暂停每小时自动任务，当前任务直接连续迭代；运营/部署/分发留待单独决定
 > 当前阶段：Phase 5 测试、合规与发布准备
-> 下一项任务：`P5-QA-10e` 当前官方数据四服务联合 API 验证；外部决定继续待办，见 [发布前置条件](./docs/testing/phase5-release-prerequisites.md)
+> 下一项任务：QA-10f 等待实际设备/人工证据；继续 LEG-04 来源展示等独立发布工程，外部决定继续待办，见 [发布前置条件](./docs/testing/phase5-release-prerequisites.md)
 > 最后更新：2026-09-07
 
 ## 使用方法
@@ -346,7 +346,7 @@ V1 的核心验收结果是：
     - [x] `P5-QA-10d2` 补充来源独立身份、事务写入及四服务 SQL 回归（2026-09-07；通用 canonical 写入器、4 项边界测试，真实临时库四服务 API/EV 层级/动态证据保护通过）
     - [x] `P5-QA-10d3` 官方 EV 快照有界读取、完整站点分组、更新/失败报告与原始内容摘要（2026-09-07；12 项解析/网络门禁测试；当前 FR 167,383 行、ES 43,610 行，所选站点 47/13 EVSE 实际临时库验证；全量 871 tests 通过；不是全国生产发布）
     - [x] `P5-QA-10d4` OSM 正面标签投影及开发导入，保留 ODbL 边界，不开启每次用户搜索的公共 Overpass 请求（2026-09-07；10 项测试，Toulouse 21 / Barcelona 20 个当前元素通过真实临时库与 Air/Wash API 检查）
-  - [ ] `P5-QA-10e` 在隔离数据库用当前官方数据跑通四服务 API 并核对真实站点，未支持字段保持 Unknown
+  - [x] `P5-QA-10e` 在隔离数据库用当前官方数据跑通四服务 API 并核对真实站点，未支持字段保持 Unknown（2026-09-07；五类来源、40 个 canonical 站点，同一临时库验证 FR/ES × 四服务 × 四排序，32 搜索 + 8 详情请求全部通过；[联合证据](./docs/testing/phase5-joint-live-services.md)）
   - [ ] `P5-QA-10f` 取得实际原生设备及人工抽查证据后关闭整项，不用 fixture 替代
 
 ## 5.2 隐私与合规
