@@ -4,7 +4,7 @@
 > 需求来源：[france_spain_driver_decision_engine_project.md](./france_spain_driver_decision_engine_project.md)  
 > 当前状态：已获授权继续 Phase 5；逐项验证、commit、push 后进入下一项
 > 当前阶段：Phase 5 测试、合规与发布准备
-> 下一项任务：`P5-QA-03` 排序与 Best 评分回归
+> 下一项任务：`P5-QA-04` 营业时间与时区回归
 > 最后更新：2026-09-07
 
 ## 使用方法
@@ -330,7 +330,7 @@ V1 的核心验收结果是：
 
 - [x] `P5-QA-01` 为所有 Adapter 编写单元测试 — 2026-09-07：2 个正式 Adapter 与西班牙补充关联覆盖；新增 20 项边界/自动库存测试，data-core 160 tests 与类型检查通过；EV/OSM 正式采集缺口详见 docs/testing/phase5-adapter-matrix.md
 - [x] `P5-QA-02` 为统一字段转换编写测试 — 2026-09-07：新增 8 项国家身份/单位/缺失证据边界，修复法国未提供自助支付标志被误映射为 false；168 data-core + 83 contract tests 通过；见 docs/testing/phase5-field-conversion.md
-- [ ] `P5-QA-03` 为排序和 Best 评分编写测试
+- [x] `P5-QA-03` 为排序和 Best 评分编写测试 — 2026-09-07：新增 11 项、两组 64 候选排序不变性/有界分数/贡献核对/单调性与 Air/Wash 降级测试；306 API tests 与类型检查通过；见 docs/testing/phase5-ranking-regression.md
 - [ ] `P5-QA-04` 为营业时间和时区编写测试
 - [ ] `P5-QA-05` 建立价格异常检测
 - [ ] `P5-QA-06` 建立错误坐标和重复站点检测
@@ -654,3 +654,4 @@ V1 的核心验收结果是：
 | 2026-09-07 | Phase 4 全部完成并暂停                         | 25 项开发任务与五项功能验收完成；687 tests、双平台 bundle、四服务事务回滚式 PostGIS 地址验证通过；下一阶段须用户授权；详见 docs/testing/phase4-acceptance.md                                                                                                                 |
 | 2026-09-07 | P5-QA-01 Adapter 单元测试矩阵                  | 2 个正式 Adapter 与西班牙补充关联覆盖；新增 20 项边界/自动库存测试，data-core 160 tests 与类型检查通过；EV/OSM 正式采集缺口详见 docs/testing/phase5-adapter-matrix.md                                                                                                        |
 | 2026-09-07 | P5-QA-02 字段转换与未知语义                    | 新增 8 项国家身份/单位/缺失证据边界，修复法国未提供自助支付标志被误映射为 false；168 data-core + 83 contract tests 通过；见 docs/testing/phase5-field-conversion.md                                                                                                          |
+| 2026-09-07 | P5-QA-03 排序与评分不变性回归                  | 新增 11 项、两组 64 候选排序不变性/有界分数/贡献核对/单调性与 Air/Wash 降级测试；306 API tests 与类型检查通过；见 docs/testing/phase5-ranking-regression.md                                                                                                                  |
