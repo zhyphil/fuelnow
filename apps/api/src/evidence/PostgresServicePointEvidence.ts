@@ -476,6 +476,7 @@ export class PostgresServicePointEvidence implements ServicePointEvidencePort {
                  FROM fuel_prices AS price
                  WHERE price.service_point_id = offer.service_point_id
                    AND price.fuel_type = offer.fuel_type
+                   AND (NOT offer.price_snapshot_set OR price.id = offer.current_price_id)
                  ORDER BY price.source_observed_at DESC NULLS LAST, price.created_at DESC, price.id DESC
                  LIMIT 1
                )

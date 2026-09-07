@@ -48,6 +48,18 @@ jobs:
       - name: Check generated native privacy configuration
         run: pnpm --filter @fuel-now/mobile privacy:check
 
+      - name: Start disposable integration database service
+        run: docker compose up --detach --wait db
+
+      - name: Check canonical import transactions and SQL-backed API
+        env:
+          LOAD_TEST_DATABASE_URL: postgresql://fuel_now:fuel_now@127.0.0.1:5432/fuel_now
+        run: pnpm --filter @fuel-now/api test:import-local
+
+      - name: Stop integration database service
+        if: always()
+        run: docker compose down
+
       - name: Build portable API image
         run: docker build --tag fuel-now-api:ci .
 

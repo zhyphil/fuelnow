@@ -20,7 +20,11 @@ async function main() {
         LEAD(unit) OVER history AS "previousUnit",
         ROW_NUMBER() OVER history AS position
       FROM fuel_prices WINDOW history AS (PARTITION BY service_point_id, fuel_type ORDER BY source_observed_at DESC NULLS LAST, created_at DESC, id DESC)
-    ) SELECT * FROM ranked WHERE position = 1 ORDER BY "servicePointId", "fuelType" LIMIT 10001`);
+    ) SELECT ranked.* FROM ranked
+      JOIN fuel_offers AS offer ON offer.service_point_id::text = ranked."servicePointId" AND offer.fuel_type = ranked."fuelType"
+      WHERE (NOT offer.price_snapshot_set AND position = 1)
+         OR (offer.price_snapshot_set AND offer.current_price_id::text = ranked."priceId")
+      ORDER BY "servicePointId", "fuelType" LIMIT 10001`);
     if (result.rows.length > 10000)
       throw new Error("Audit limit exceeded; use a scoped database snapshot");
     const rows = result.rows.map((row) => ({
