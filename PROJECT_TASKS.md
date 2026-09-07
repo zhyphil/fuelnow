@@ -4,7 +4,7 @@
 > 需求来源：[france_spain_driver_decision_engine_project.md](./france_spain_driver_decision_engine_project.md)  
 > 当前状态：本机测试环境已实现，新增 17 tests、全量 990 tests 通过，双平台开发包编译和临时库清理验证通过；Phase 5 为 10/21 主任务及 18 个子项；Phase 6 为 5/13 主任务及 8 个准备子项；未发布，小时任务保持暂停
 > 当前阶段：本机真机测试进行中（华为基础列表已通过；Phase 5/6 均未整体验收）
-> 下一项任务：华为 USB 模式下 Fuel Best 的实际排序、报价和推荐/限制理由已由照片确认，下一步验收 Barcelona / Charge 列表与静态详情。Fuel 详情油品上下文仍待修复，原连接故障根因及 USB 长期稳定性未确认。iPhone LAN 测试暂不可用，App 安装仍待处理；发布条件未关闭，见 [真机测试说明](./docs/development/local-phone-testing.md)
+> 下一项任务：华为 USB 模式下 Barcelona / Charge 基础列表和静态详情已由照片确认，下一步验收 Charge 最低价/营业筛选的禁用原因，再继续 Air/Wash 独立搜索。Fuel 详情油品上下文仍待修复，原连接故障根因及 USB 长期稳定性未确认。iPhone LAN 测试暂不可用，App 安装仍待处理；发布条件未关闭，见 [真机测试说明](./docs/development/local-phone-testing.md)
 > 最后更新：2026-09-07
 
 ## 使用方法
@@ -552,6 +552,8 @@ V1 的核心验收结果是：
 2026-09-07 执行顺序补充：用户暂缓运营主体/邮箱/部署/分发决定，授权继续独立工程工作；QA-10、LEG-01/02 及实际部署/设备门槛保留未完成。先完成 LEG-03 工程子项，再检查 LEG-06 日志与分析；许可和发布门槛不得自动勾选。
 
 # 完成记录
+
+2026-09-07 华为 USB Charge 基础验收：用户三张照片确认 Barcelona Charging 列表/详情、CCS Combo 2 与 Type 2、最高额定 150 kW、2 个充电点；价格/实时空闲数为未知，并明确西班牙未启用实时可用性，模拟来源及风险提示可见。勾选静态发现基础检查，不把额定功率当实际充电速度，不据此标记充电实时状态、排序或真实导航通过。下一步 Charge 能力禁用提示；Fuel 详情修复与连接稳定性保留待办，仅提交文字记录。
 
 2026-09-07 华为 USB Best 基础验收：照片确认法语结果为 1 个、实际排序 Meilleur choix，主站 1,659 EUR/litre，并显示距离较近 0 m、数据较新和驾车时间不可用三条理由/限制；勾选 Best 基础交互与理由显示。该次 USB 请求和显示成功，不代表原 HMR 间歇故障已修复或完整排名边界通过。下一步 Barcelona / Charge 静态发现验收；Fuel 详情修复与发布门槛不关闭，只提交文字记录。
 
