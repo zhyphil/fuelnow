@@ -5,11 +5,16 @@ import { LanguagePicker } from "../components/LanguagePicker";
 import { LocationPanel } from "../components/LocationPanel";
 import { ServicePicker } from "../components/ServicePicker";
 import { useSearchSelection } from "../search/context";
+import { useRouter } from "expo-router";
+import { useLocation } from "../location/context";
+import { ActionButton } from "../components/ActionButton";
 
 export default function WelcomeScreen() {
   const { service } = useSearchSelection();
+  const router = useRouter();
+  const { state: location } = useLocation();
   const {
-    copy: { app: copy },
+    copy: { app: copy, results },
   } = useLanguage();
   return (
     <SafeAreaView style={styles.screen}>
@@ -24,6 +29,11 @@ export default function WelcomeScreen() {
         </View>
         <ServicePicker />
         {service && <LocationPanel />}
+        <ActionButton
+          label={results.search}
+          disabled={!service || location.status !== "ready"}
+          onPress={() => router.push("/results")}
+        />
         <Text style={styles.coverage}>{copy.coverage}</Text>
         <LanguagePicker />
       </ScrollView>

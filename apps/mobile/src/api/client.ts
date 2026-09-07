@@ -114,7 +114,22 @@ export function createApiClient(config: MobileConfig, fetcher: typeof fetch = fe
           Array.isArray(body.results) &&
           body.resultCount === body.results.length &&
           isRecord(body.ranking) &&
-          isRecord(body.outcome),
+          ["nearest", "cheapest", "open_now", "best"].includes(
+            String(body.ranking.appliedSort),
+          ) &&
+          typeof body.ranking.degraded === "boolean" &&
+          isRecord(body.outcome) &&
+          Array.isArray(body.outcome.warnings) &&
+          isRecord(body.search) &&
+          typeof body.search.expanded === "boolean" &&
+          body.results.every(
+            (point: unknown) =>
+              isRecord(point) &&
+              typeof point.id === "string" &&
+              (point.name === null || typeof point.name === "string") &&
+              (point.brand === null || typeof point.brand === "string") &&
+              (point.country === "FR" || point.country === "ES"),
+          ),
         signal,
       );
     },

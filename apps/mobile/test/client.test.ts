@@ -94,6 +94,11 @@ describe("mobile API boundary", () => {
     "null",
     "{}",
     JSON.stringify({ ...sample, resultCount: 9 }),
+    JSON.stringify({ ...sample, ranking: {} }),
+    JSON.stringify({ ...sample, outcome: {} }),
+    JSON.stringify({ ...sample, search: null }),
+    JSON.stringify({ ...sample, results: [null] }),
+    JSON.stringify({ ...sample, results: [{ ...sample.results[0], name: 123 }] }),
   ])("rejects malformed success envelopes: %s", async (body) => {
     const fetcher = vi.fn<typeof fetch>().mockResolvedValue(new Response(body));
     await expect(createApiClient(config, fetcher).nearby(query)).rejects.toMatchObject({
