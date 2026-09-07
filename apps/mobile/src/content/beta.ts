@@ -1,5 +1,9 @@
 export const betaCopy = {
   en: {
+    empty: "No results / successful requests",
+    failure: "Failed / completed requests",
+    cancelled: "Cancelled",
+    pending: "Pending",
     title: "Local test metrics — not Beta results",
     decision: "Request → navigation click, median (not app launch)",
     exposed: "Searches shown",
@@ -9,6 +13,10 @@ export const betaCopy = {
     truncated: "Earlier attempts discarded: this is an incomplete window.",
   },
   fr: {
+    empty: "Sans résultat / requêtes réussies",
+    failure: "Échecs / requêtes terminées",
+    cancelled: "Annulées",
+    pending: "En attente",
     title: "Mesures de test locales — pas de résultats bêta",
     decision: "Requête → clic de navigation, médiane (pas le lancement)",
     exposed: "Recherches affichées",
@@ -18,6 +26,10 @@ export const betaCopy = {
     truncated: "Anciennes tentatives supprimées : fenêtre incomplète.",
   },
   es: {
+    empty: "Sin resultados / solicitudes correctas",
+    failure: "Fallidas / solicitudes completadas",
+    cancelled: "Canceladas",
+    pending: "Pendientes",
     title: "Métricas de prueba locales — no son resultados beta",
     decision: "Solicitud → clic de navegación, mediana (no desde el inicio)",
     exposed: "Búsquedas mostradas",

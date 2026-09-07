@@ -1,5 +1,6 @@
 import type { NearbyQuery, NearbyResponse } from "../api/client";
 import type { SearchPort } from "../search/results";
+import { errorReason, type ErrorReason } from "../search/errors";
 
 type Attempt = {
   id: number;
@@ -12,6 +13,7 @@ type Attempt = {
   startedMs: number;
   selectionMs: number | null;
   decisionMs: number | null;
+  failureReason: ErrorReason | null;
 };
 export type BetaSnapshot = {
   enabled: boolean;
@@ -52,6 +54,41 @@ export function decisionMetrics(snapshot: BetaSnapshot) {
     ).length,
     appOpenToDecisionMs: null,
     definition: "request_start_to_first_navigation_click" as const,
+  };
+}
+
+export function searchHealthMetrics(
+  snapshot: BetaSnapshot,
+  service?: NearbyQuery["service"],
+) {
+  const attempts = snapshot.attempts.filter((a) => !service || a.service === service);
+  const succeeded = attempts.filter((a) => a.status === "success").length;
+  const failed = attempts.filter((a) => a.status === "failure").length;
+  const empty = attempts.filter(
+    (a) => a.status === "success" && a.resultCount === 0,
+  ).length;
+  const failures = {
+    network: 0,
+    timeout: 0,
+    rateLimited: 0,
+    serverError: 0,
+    notFound: 0,
+    invalidResponse: 0,
+    requestError: 0,
+  };
+  for (const attempt of attempts)
+    if (attempt.status === "failure" && attempt.failureReason)
+      failures[attempt.failureReason]++;
+  return {
+    attempted: attempts.length,
+    succeeded,
+    failed,
+    empty,
+    cancelled: attempts.filter((a) => a.status === "cancelled").length,
+    pending: attempts.filter((a) => a.status === "pending").length,
+    noResultRate: succeeded ? empty / succeeded : null,
+    failureRate: succeeded + failed ? failed / (succeeded + failed) : null,
+    failures,
   };
 }
 
@@ -120,6 +157,7 @@ export class BetaSession {
           startedMs: this.elapsed(),
           selectionMs: null,
           decisionMs: null,
+          failureReason: null,
         }),
       ],
     };
@@ -130,6 +168,7 @@ export class BetaSession {
     id: number | undefined,
     outcome: "success" | "failure" | "cancelled",
     response?: NearbyResponse,
+    reason?: ErrorReason,
   ) {
     this.update(id, (a) =>
       a.status !== "pending"
@@ -138,6 +177,7 @@ export class BetaSession {
             ...a,
             status: outcome,
             resultCount: response?.resultCount ?? null,
+            failureReason: outcome === "failure" ? (reason ?? "requestError") : null,
           },
     );
     if (
@@ -201,7 +241,12 @@ export function observeSearch(port: SearchPort, session: BetaSession): SearchPor
       session.finish(id, signal.aborted ? "cancelled" : "success", response);
       return response;
     } catch (error) {
-      session.finish(id, signal.aborted ? "cancelled" : "failure");
+      session.finish(
+        id,
+        signal.aborted ? "cancelled" : "failure",
+        undefined,
+        errorReason(error),
+      );
       throw error;
     } finally {
       signal.removeEventListener("abort", cancel);
