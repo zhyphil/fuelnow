@@ -29,7 +29,7 @@ export function airRows(evidence: Evidence, language: Language): EvidenceRow[] {
     { label: c.access, value: c[detail.access] },
   ];
 }
-function evLiveEligible(
+export function evLiveEligible(
   evidence: Evidence,
   country: "FR" | "ES" | undefined,
   now: number,

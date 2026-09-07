@@ -7,6 +7,7 @@ import {
   searchHealthMetrics,
 } from "../analytics/beta";
 import { betaCopy } from "../content/beta";
+import { freshnessBuckets, freshnessMetrics } from "../analytics/quality";
 import { useLanguage } from "../i18n/context";
 import { ActionButton } from "./ActionButton";
 export function DiagnosticsPanel() {
@@ -18,6 +19,7 @@ export function DiagnosticsPanel() {
   const metrics = navigationMetrics(beta);
   const timing = decisionMetrics(beta);
   const health = searchHealthMetrics(beta);
+  const freshness = freshnessMetrics(beta);
   const {
     language,
     copy: { evidence: copy },
@@ -36,6 +38,15 @@ export function DiagnosticsPanel() {
       {state.enabled && (
         <View>
           <Text>{local.title}</Text>
+          <Text>
+            {local.freshness} · n={freshness.total}
+          </Text>
+          {freshnessBuckets.map((bucket) => (
+            <Text key={bucket}>
+              {bucket === "unknown" ? local.unknownAge : local[bucket]}:{" "}
+              {percent(freshness.ratios[bucket])}
+            </Text>
+          ))}
           <Text>
             {local.empty}: {percent(health.noResultRate)} ({health.empty}/
             {health.succeeded})

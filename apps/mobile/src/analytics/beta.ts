@@ -1,6 +1,7 @@
 import type { NearbyQuery, NearbyResponse } from "../api/client";
 import type { SearchPort } from "../search/results";
 import { errorReason, type ErrorReason } from "../search/errors";
+import { captureQuality, type QualityCounts } from "./quality";
 
 type Attempt = {
   id: number;
@@ -14,6 +15,7 @@ type Attempt = {
   selectionMs: number | null;
   decisionMs: number | null;
   failureReason: ErrorReason | null;
+  quality: readonly QualityCounts[] | null;
 };
 export type BetaSnapshot = {
   enabled: boolean;
@@ -100,7 +102,10 @@ export class BetaSession {
   private selected: { id: number; pointId: string } | undefined;
   private listeners = new Set<() => void>();
   private epoch = 0;
-  public constructor(private readonly clock: () => number = () => performance.now()) {}
+  public constructor(
+    private readonly clock: () => number = () => performance.now(),
+    private readonly wallClock: () => number = Date.now,
+  ) {}
   private elapsed() {
     return this.clock() - this.epoch;
   }
@@ -158,6 +163,7 @@ export class BetaSession {
           selectionMs: null,
           decisionMs: null,
           failureReason: null,
+          quality: null,
         }),
       ],
     };
@@ -189,7 +195,11 @@ export class BetaSession {
       this.responses.set(response, id);
   }
   public expose(response: NearbyResponse) {
-    this.update(this.responses.get(response), (a) => ({ ...a, exposed: true }));
+    this.update(this.responses.get(response), (a) =>
+      a.exposed
+        ? { ...a }
+        : { ...a, exposed: true, quality: captureQuality(response, this.wallClock()) },
+    );
   }
   public select(response: NearbyResponse, pointId: string) {
     const id = this.responses.get(response);

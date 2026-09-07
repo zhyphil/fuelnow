@@ -1,5 +1,11 @@
 export const betaCopy = {
   en: {
+    freshness: "Source observation age at first result display",
+    live: "Live",
+    under1h: "Under 1h (not live)",
+    under24h: "1h–under 24h",
+    stale: "Stale",
+    unknownAge: "Unknown age",
     empty: "No results / successful requests",
     failure: "Failed / completed requests",
     cancelled: "Cancelled",
@@ -13,6 +19,12 @@ export const betaCopy = {
     truncated: "Earlier attempts discarded: this is an incomplete window.",
   },
   fr: {
+    freshness: "Âge de l’observation source au premier affichage",
+    live: "En direct",
+    under1h: "Moins de 1h (pas en direct)",
+    under24h: "1h–moins de 24h",
+    stale: "Périmé",
+    unknownAge: "Âge inconnu",
     empty: "Sans résultat / requêtes réussies",
     failure: "Échecs / requêtes terminées",
     cancelled: "Annulées",
@@ -26,6 +38,12 @@ export const betaCopy = {
     truncated: "Anciennes tentatives supprimées : fenêtre incomplète.",
   },
   es: {
+    freshness: "Edad de la observación de origen al primer mostrar",
+    live: "En directo",
+    under1h: "Menos de 1h (no en directo)",
+    under24h: "1h–menos de 24h",
+    stale: "Obsoleto",
+    unknownAge: "Edad desconocida",
     empty: "Sin resultados / solicitudes correctas",
     failure: "Fallidas / solicitudes completadas",
     cancelled: "Canceladas",
