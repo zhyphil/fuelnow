@@ -6,7 +6,7 @@ The map is a user-opened modal containing the same result markers, with marker
 selection opening canonical details. No location layer, background tracking,
 in-app guidance or coordinate-bearing navigation route is enabled.
 
-The map notice identifies the provider and viewed-area processing before rendering.
+The map notice identifies the provider and viewed-area processing within the modal.
 Native provider attribution is preserved. Closing the modal returns to the list.
 Origin loss clears the response and removes the modal's map content.
 

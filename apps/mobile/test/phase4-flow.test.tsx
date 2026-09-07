@@ -1,0 +1,253 @@
+import { afterEach, expect, it, vi } from "vitest";
+import { act, createElement, useEffect, type ReactNode } from "react";
+import { createRoot } from "test-renderer";
+import { getMessages } from "../src/i18n/catalog";
+import { SearchProvider } from "../src/search/context";
+import WelcomeScreen from "../src/app/index";
+import ResultsScreen from "../src/app/results";
+import PointScreen from "../src/app/point/[id]";
+import {
+  ApiFailure,
+  type NearbyResponse,
+  type ServicePointResponse,
+} from "../src/api/client";
+import type { NearbyPoint } from "../src/search/presentation";
+import { analytics } from "../src/analytics/recorder";
+import sample from "../../../docs/api/examples/nearby-fuel-cheapest.json";
+import detail from "../../../docs/api/examples/service-point-detail.json";
+
+const ports = vi.hoisted(() => ({
+  language: "en" as "en" | "fr" | "es",
+  nearby: vi.fn(),
+  servicePoint: vi.fn(),
+  openURL: vi.fn(),
+  push: vi.fn(),
+  replace: vi.fn(),
+  back: vi.fn(),
+  id: "",
+  origin: { latitude: 48.8566, longitude: 2.3522, source: "manual", label: "Paris" },
+}));
+Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
+vi.mock("../src/api/runtime", () => ({
+  api: { nearby: ports.nearby, servicePoint: ports.servicePoint },
+}));
+vi.mock("../src/i18n/context", () => ({
+  useLanguage: () => ({
+    language: ports.language,
+    copy: getMessages(ports.language),
+    preference: ports.language,
+    storageFailed: false,
+    selectLanguage: vi.fn(),
+  }),
+}));
+vi.mock("../src/location/context", () => ({
+  useLocation: () => ({
+    state: { status: "ready", origin: ports.origin },
+    request: vi.fn(),
+    clear: vi.fn(),
+    selectManual: vi.fn(),
+  }),
+}));
+vi.mock("expo-router", () => ({
+  useRouter: () => ports,
+  useLocalSearchParams: () => ({ id: ports.id }),
+  useFocusEffect: (effect: () => (() => void) | void) => useEffect(effect, [effect]),
+}));
+vi.mock("react-native", () => ({
+  Text: "Text",
+  View: "View",
+  ScrollView: "ScrollView",
+  Modal: "Modal",
+  ActivityIndicator: "ActivityIndicator",
+  TextInput: "TextInput",
+  Platform: { OS: "ios" },
+  Linking: { openURL: ports.openURL },
+  StyleSheet: { create: (styles: unknown) => styles },
+  Pressable: ({
+    children,
+    style,
+    disabled,
+    onPress,
+    ...props
+  }: {
+    children: ReactNode;
+    style: (state: { pressed: boolean }) => unknown;
+    disabled: boolean;
+    onPress: () => void;
+  }) =>
+    createElement(
+      "Pressable",
+      {
+        ...props,
+        disabled,
+        onPress: disabled ? undefined : onPress,
+        style: style({ pressed: false }),
+      },
+      children,
+    ),
+  FlatList: ({
+    data,
+    renderItem,
+    ListHeaderComponent,
+    ListEmptyComponent,
+    ...props
+  }: {
+    data: NearbyPoint[];
+    renderItem: (entry: { item: NearbyPoint; index: number }) => ReactNode;
+    ListHeaderComponent: ReactNode;
+    ListEmptyComponent: ReactNode;
+  }) =>
+    createElement(
+      "FlatList",
+      props,
+      ListHeaderComponent,
+      data.length
+        ? data.map((item, index) =>
+            createElement("View", { key: item.id }, renderItem({ item, index })),
+          )
+        : ListEmptyComponent,
+    ),
+}));
+vi.mock("react-native-safe-area-context", () => ({ SafeAreaView: "SafeAreaView" }));
+vi.mock("react-native-maps", () => ({
+  default: "MapView",
+  Marker: "Marker",
+  PROVIDER_GOOGLE: "google",
+}));
+vi.mock("expo-constants", () => ({ default: { executionEnvironment: "storeClient" } }));
+
+const roots: ReturnType<typeof createRoot>[] = [];
+afterEach(async () => {
+  for (const root of roots.splice(0)) await act(async () => root.unmount());
+  analytics.setEnabled(false);
+  vi.clearAllMocks();
+});
+const cases = (["en", "fr", "es"] as const).flatMap((language) =>
+  (["fuel", "charging", "air", "wash"] as const).map((service) => ({
+    language,
+    service,
+  })),
+);
+it.each(cases)(
+  "connects $service home → list → detail → navigation in $language",
+  async ({ language, service }) => {
+    ports.language = language;
+    const copy = getMessages(language);
+    const response = structuredClone(sample) as NearbyResponse;
+    response.service = service;
+    response.ranking.requestedSort = "nearest";
+    response.ranking.appliedSort = "nearest";
+    const first = response.results[0]!;
+    ports.id = first.id;
+    // Synthetic transport fixtures are test-only; domain field edge cases have separate tests.
+    if (service !== "fuel") {
+      first.evidence.price = null;
+      first.evidence.details.fuel = null;
+    }
+    const point = structuredClone(detail) as ServicePointResponse;
+    point.servicePoint.id = first.id;
+    point.servicePoint.name = first.name;
+    point.servicePoint.location = first.location;
+    point.servicePoint.country = first.country;
+    point.servicePoint.serviceTypes = [service];
+    point.servicePoint.services = [{ serviceType: service, evidence: first.evidence }];
+    ports.nearby.mockResolvedValue(response);
+    ports.servicePoint.mockResolvedValue(point);
+    ports.openURL.mockResolvedValue(undefined);
+    const root = createRoot({ textComponentTypes: ["Text"] });
+    roots.push(root);
+    const render = async (screen: ReactNode) => {
+      await act(async () => root.render(<SearchProvider>{screen}</SearchProvider>));
+    };
+    const button = (label: string) =>
+      root.container.queryAll(
+        (n) => n.type === "Pressable" && n.props.accessibilityLabel === label,
+      )[0]!;
+    const press = async (label: string) => {
+      const target = button(label);
+      expect(target).toBeDefined();
+      expect(target.props.disabled).not.toBe(true);
+      await act(async () => target.props.onPress());
+    };
+    await render(<WelcomeScreen />);
+    expect(button(copy.results.search).props.disabled).toBe(true);
+    await press(
+      `${copy.services.names[service]}. ${copy.services.descriptions[service]}`,
+    );
+    await press(copy.results.search);
+    expect(ports.push).toHaveBeenLastCalledWith("/results");
+    await render(<ResultsScreen />);
+    expect(ports.nearby.mock.calls[0]![0]).toMatchObject({
+      latitude: ports.origin.latitude,
+      longitude: ports.origin.longitude,
+      service,
+      sort: "nearest",
+    });
+    expect(root.container.queryAll((n) => n.type === "FlatList")).toHaveLength(1);
+    expect(root.container.queryAll((n) => n.type === "MapView")).toHaveLength(0);
+    const text = JSON.stringify(root.container.toJSON());
+    expect(text).toContain(first.name);
+    expect(text).toContain(copy.evidence.confidence);
+    await press(`${copy.evidence.navigate} · Apple Maps`);
+    expect(ports.openURL).toHaveBeenCalledWith(
+      expect.stringContaining("https://maps.apple.com/"),
+    );
+    expect(ports.openURL.mock.calls[0]![0]).not.toContain("saddr");
+    await press(copy.evidence.map);
+    expect(root.container.queryAll((n) => n.type === "Marker")).toHaveLength(
+      response.results.length,
+    );
+    const map = root.container.queryAll((n) => n.type === "MapView")[0]!;
+    expect(map.props.showsUserLocation).toBe(false);
+    await press(copy.evidence.back);
+    expect(root.container.queryAll((n) => n.type === "MapView")).toHaveLength(0);
+    await press(copy.evidence.details);
+    expect(ports.push).toHaveBeenLastCalledWith({
+      pathname: "/point/[id]",
+      params: { id: first.id },
+    });
+    await render(<PointScreen />);
+    expect(ports.servicePoint.mock.calls[0]![0]).toBe(first.id);
+    await press("Google Maps");
+    expect(ports.openURL).toHaveBeenLastCalledWith(
+      expect.stringContaining("https://www.google.com/maps/dir/"),
+    );
+  },
+);
+
+it("shows a safe network error and retries the same service without exposing URLs", async () => {
+  ports.language = "en";
+  const copy = getMessages("en");
+  ports.nearby
+    .mockRejectedValueOnce(new ApiFailure("network"))
+    .mockResolvedValueOnce(sample);
+  const root = createRoot({ textComponentTypes: ["Text"] });
+  roots.push(root);
+  await act(async () =>
+    root.render(
+      <SearchProvider>
+        <WelcomeScreen />
+      </SearchProvider>,
+    ),
+  );
+  const button = (label: string) =>
+    root.container.queryAll(
+      (n) => n.type === "Pressable" && n.props.accessibilityLabel === label,
+    )[0]!;
+  await act(async () =>
+    button(
+      `${copy.services.names.fuel}. ${copy.services.descriptions.fuel}`,
+    ).props.onPress(),
+  );
+  await act(async () =>
+    root.render(
+      <SearchProvider>
+        <ResultsScreen />
+      </SearchProvider>,
+    ),
+  );
+  expect(JSON.stringify(root.container.toJSON())).toContain(copy.evidence.network);
+  await act(async () => button(copy.results.retry).props.onPress());
+  expect(ports.nearby).toHaveBeenCalledTimes(2);
+  expect(root.container.queryAll((n) => n.type === "FlatList")).toHaveLength(1);
+});
