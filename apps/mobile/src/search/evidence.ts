@@ -1,8 +1,39 @@
 import type { NearbyPoint } from "./presentation";
 import type { Language } from "../i18n/preferences";
 import { evidenceCopy } from "../content/evidence";
+import { sortMessages } from "../content/sorts";
 export type Evidence = NearbyPoint["evidence"];
 export type EvidenceRow = { label: string; value: string };
+export function fuelRows(evidence: Evidence, language: Language): EvidenceRow[] {
+  const detail = evidence.details.fuel;
+  if (!detail) return [];
+  const c = evidenceCopy(language),
+    fuels = sortMessages[language].fuels,
+    selected = detail.requestedFuel;
+  return [
+    {
+      label: c.fuelTypes,
+      value:
+        detail.availableFuelTypes.map((fuel) => fuels[fuel]).join(", ") || c.unknown,
+    },
+    { label: c.selectedFuel, value: selected ? fuels[selected.fuelType] : c.unknown },
+    {
+      label: c.fuelAvailability,
+      value:
+        selected?.available == null ? c.unknown : selected.available ? c.yes : c.no,
+    },
+    {
+      label: c.stock,
+      value:
+        selected?.outOfStock == null
+          ? c.unknown
+          : selected.outOfStock
+            ? c.outOfStock
+            : c.notOutOfStock,
+    },
+    { label: c.priceObserved, value: timestamp(evidence.price?.observedAt, language) },
+  ];
+}
 export function timestamp(value: string | null | undefined, language: Language) {
   const date = value ? new Date(value) : null;
   return date && Number.isFinite(date.getTime())

@@ -1,4 +1,5 @@
 import { expect, it } from "vitest";
+import { fuelRows } from "../src/search/evidence";
 import sample from "../../../docs/api/examples/nearby-fuel-cheapest.json";
 import {
   priceText,
@@ -8,6 +9,24 @@ import {
   type Evidence,
 } from "../src/search/evidence";
 const evidence = sample.results[0]!.evidence as Evidence;
+it("keeps unreported stock unknown rather than reporting no shortage", () => {
+  const fuel = evidence.details.fuel!;
+  const rows = fuelRows(
+    {
+      ...evidence,
+      details: {
+        ...evidence.details,
+        fuel: { ...fuel, requestedFuel: { ...fuel.requestedFuel!, outOfStock: null } },
+      },
+    },
+    "en",
+  );
+  expect(rows.find((row) => row.label === "Fuel stock")!.value).toBe("Unknown");
+  expect(rows.find((row) => row.label === "Selected fuel")!.value).toBe("Diesel");
+  expect(
+    fuelRows({ ...evidence, details: { ...evidence.details, fuel: null } }, "en"),
+  ).toEqual([]);
+});
 it("does not substitute retrieval time for an unknown source observation", () => {
   const rows = provenanceRows(
     { ...evidence, source: { ...evidence.source!, observedAt: null } },

@@ -1,10 +1,16 @@
 import { Text, View } from "react-native";
 import { useLanguage } from "../i18n/context";
-import { statusRows, provenanceRows, type Evidence } from "../search/evidence";
+import {
+  statusRows,
+  provenanceRows,
+  fuelRows,
+  type Evidence,
+} from "../search/evidence";
 export function EvidenceSummary({ evidence }: { evidence: Evidence }) {
   const { language } = useLanguage();
   const rows = [
     ...statusRows(evidence, language),
+    ...fuelRows(evidence, language),
     ...provenanceRows(evidence, language),
   ];
   return (

@@ -1,5 +1,22 @@
 import type { Language } from "../i18n/preferences";
 const translations = {
+  fuelTypes: ["Listed fuels", "Carburants répertoriés", "Combustibles registrados"],
+  selectedFuel: ["Selected fuel", "Carburant choisi", "Combustible elegido"],
+  stock: ["Fuel stock", "Stock du carburant", "Existencias de combustible"],
+  outOfStock: ["Out of stock", "En rupture", "Agotado"],
+  notOutOfStock: [
+    "No shortage reported",
+    "Aucune rupture signalée",
+    "Sin desabastecimiento comunicado",
+  ],
+  fuelAvailability: [
+    "Selected fuel offered",
+    "Carburant choisi proposé",
+    "Combustible elegido ofrecido",
+  ],
+  yes: ["Yes", "Oui", "Sí"],
+  no: ["No", "Non", "No"],
+  priceObserved: ["Price observation", "Observation du prix", "Observación del precio"],
   observed: ["Source observation", "Observation source", "Observación de la fuente"],
   published: ["Source publication", "Publication source", "Publicación de la fuente"],
   fetched: ["Retrieved", "Récupéré", "Recuperado"],
