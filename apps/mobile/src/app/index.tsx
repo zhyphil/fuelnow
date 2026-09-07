@@ -1,10 +1,13 @@
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { messages } from "../content/messages";
+import { useLanguage } from "../i18n/context";
+import { LanguagePicker } from "../components/LanguagePicker";
 import { LocationPanel } from "../components/LocationPanel";
 
 export default function WelcomeScreen() {
-  const copy = messages.en;
+  const {
+    copy: { app: copy },
+  } = useLanguage();
   return (
     <SafeAreaView style={styles.screen}>
       <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
@@ -18,6 +21,7 @@ export default function WelcomeScreen() {
         </View>
         <LocationPanel />
         <Text style={styles.coverage}>{copy.coverage}</Text>
+        <LanguagePicker />
       </ScrollView>
     </SafeAreaView>
   );

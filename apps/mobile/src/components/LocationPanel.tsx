@@ -1,16 +1,17 @@
 import { useState } from "react";
 import { ActivityIndicator, Linking, StyleSheet, Text, View } from "react-native";
 import { useLocation } from "../location/context";
-import { locationMessages } from "../content/location";
+import { useLanguage } from "../i18n/context";
 import { ActionButton } from "./ActionButton";
 import { ManualLocation } from "./ManualLocation";
-import { manualMessages } from "../content/manual";
 
 export function LocationPanel() {
   const { state, request, clear } = useLocation();
   const [settingsFailed, setSettingsFailed] = useState(false);
   const [manualOpen, setManualOpen] = useState(false);
-  const copy = locationMessages.en;
+  const {
+    copy: { location: copy, manual },
+  } = useLanguage();
   return (
     <View style={styles.panel}>
       <Text style={styles.explanation}>{copy.explanation}</Text>
@@ -19,7 +20,7 @@ export function LocationPanel() {
       </Text>
       {state.status === "ready" && state.origin.source === "manual" && (
         <Text style={styles.status}>
-          {manualMessages.en.selected}: {state.origin.label ?? manualMessages.en.custom}
+          {manual.selected}: {state.origin.label ?? manual.custom}
         </Text>
       )}
       {state.status === "ready" &&
@@ -52,7 +53,7 @@ export function LocationPanel() {
       )}
       <ActionButton
         secondary
-        label={manualMessages.en.choose}
+        label={manual.choose}
         onPress={() => {
           if (state.status === "requesting") clear();
           setManualOpen(true);

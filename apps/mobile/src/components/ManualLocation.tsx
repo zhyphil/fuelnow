@@ -1,13 +1,15 @@
 import { useState } from "react";
 import { Modal, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { manualMessages } from "../content/manual";
+import { useLanguage } from "../i18n/context";
 import { findManualPlaces, parseManualCoordinates } from "../location/manual";
 import { useLocation } from "../location/context";
 import { ActionButton } from "./ActionButton";
 
 export function ManualLocation({ onClose }: { onClose: () => void }) {
-  const copy = manualMessages.en;
+  const {
+    copy: { manual: copy },
+  } = useLanguage();
   const { selectManual } = useLocation();
   const [search, setSearch] = useState("");
   const [latitude, setLatitude] = useState("");

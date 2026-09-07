@@ -8,8 +8,14 @@ const config: ExpoConfig = {
   orientation: "portrait",
   userInterfaceStyle: "light",
   platforms: ["ios", "android"],
+  locales: {
+    en: "./locales/en.json",
+    fr: "./locales/fr.json",
+    es: "./locales/es.json",
+  },
   plugins: [
     "expo-router",
+    ["expo-localization", { supportedLocales: ["en", "fr", "es"] }],
     [
       "expo-location",
       {

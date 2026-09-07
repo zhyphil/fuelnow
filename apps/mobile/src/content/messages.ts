@@ -1,4 +1,4 @@
-// Locale selection and complete decision copy are added in P4-APP-04.
+// Keep all visible application copy in the typed locale catalog.
 const en = {
   appName: "Fuel Now",
   eyebrow: "A BETTER STOP, AHEAD",
