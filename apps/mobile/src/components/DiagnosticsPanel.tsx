@@ -2,6 +2,7 @@ import { useSyncExternalStore } from "react";
 import { Text, View } from "react-native";
 import { analytics } from "../analytics/recorder";
 import {
+  behaviorMetrics,
   decisionMetrics,
   navigationMetrics,
   searchHealthMetrics,
@@ -24,6 +25,7 @@ export function DiagnosticsPanel() {
   const metrics = navigationMetrics(beta);
   const timing = decisionMetrics(beta);
   const health = searchHealthMetrics(beta);
+  const behavior = behaviorMetrics(beta);
   const freshness = freshnessMetrics(beta);
   const missing = missingnessMetrics(beta);
   const {
@@ -44,6 +46,13 @@ export function DiagnosticsPanel() {
       {state.enabled && (
         <View>
           <Text>{local.title}</Text>
+          <Text>
+            {local.sortChanges}: {behavior.sortChanges}
+          </Text>
+          <Text>
+            {local.exits}: {behavior.explicitExitsWithoutNavigation} ·{" "}
+            {local.unresolved}: {behavior.unresolved}
+          </Text>
           <Text>{local.missing}</Text>
           {qualityFields.map((field) => (
             <Text key={field}>

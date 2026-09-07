@@ -1,5 +1,8 @@
 export const betaCopy = {
   en: {
+    sortChanges: "Explicit sort changes",
+    exits: "Returned home without navigation",
+    unresolved: "Unobserved outcome (not assumed abandoned)",
     missing: "Fields shown as unknown / eligible results",
     price: "Price (selected Fuel type only)",
     availability: "Availability",
@@ -23,6 +26,9 @@ export const betaCopy = {
     truncated: "Earlier attempts discarded: this is an incomplete window.",
   },
   fr: {
+    sortChanges: "Changements de tri explicites",
+    exits: "Retour à l’accueil sans navigation",
+    unresolved: "Résultat non observé (abandon non présumé)",
     missing: "Champs affichés inconnus / résultats admissibles",
     price: "Prix (carburant sélectionné uniquement)",
     availability: "Disponibilité",
@@ -46,6 +52,9 @@ export const betaCopy = {
     truncated: "Anciennes tentatives supprimées : fenêtre incomplète.",
   },
   es: {
+    sortChanges: "Cambios de orden explícitos",
+    exits: "Vuelta al inicio sin navegación",
+    unresolved: "Resultado no observado (sin suponer abandono)",
     missing: "Campos mostrados como desconocidos / resultados válidos",
     price: "Precio (solo carburante seleccionado)",
     availability: "Disponibilidad",

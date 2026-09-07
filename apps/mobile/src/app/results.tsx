@@ -103,7 +103,10 @@ export default function ResultsScreen() {
             <ActionButton
               label={copy.back}
               secondary
-              onPress={() => router.replace("/")}
+              onPress={() => {
+                analytics.beta.leaveResults(response);
+                router.replace("/");
+              }}
             />
             <Text accessibilityRole="header" style={styles.title}>
               {service ? services.names[service] : copy.title}
@@ -114,7 +117,10 @@ export default function ResultsScreen() {
                 sort={sort}
                 fuelType={fuelType}
                 response={response}
-                onSort={setSort}
+                onSort={(next) => {
+                  analytics.beta.changeSort(response, sort, next);
+                  setSort(next);
+                }}
                 onFuel={(fuel) => {
                   setFuelType(fuel);
                   setSort("nearest");

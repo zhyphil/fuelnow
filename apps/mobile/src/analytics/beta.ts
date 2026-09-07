@@ -2,6 +2,8 @@ import type { NearbyQuery, NearbyResponse } from "../api/client";
 import type { SearchPort } from "../search/results";
 import { errorReason, type ErrorReason } from "../search/errors";
 import { captureQuality, type QualityCounts } from "./quality";
+type Sort = NonNullable<NearbyQuery["sort"]>;
+type Transition = `${Sort}:${Sort}`;
 
 type Attempt = {
   id: number;
@@ -16,6 +18,9 @@ type Attempt = {
   decisionMs: number | null;
   failureReason: ErrorReason | null;
   quality: readonly QualityCounts[] | null;
+  requestedSort: Sort;
+  transitions: Readonly<Partial<Record<Transition, number>>>;
+  explicitExit: boolean;
 };
 export type BetaSnapshot = {
   enabled: boolean;
@@ -94,6 +99,31 @@ export function searchHealthMetrics(
   };
 }
 
+export function behaviorMetrics(
+  snapshot: BetaSnapshot,
+  service?: NearbyQuery["service"],
+) {
+  const exposed = snapshot.attempts.filter(
+    (a) => a.exposed && (a.resultCount ?? 0) > 0 && (!service || a.service === service),
+  );
+  const transitions: Partial<Record<Transition, number>> = {};
+  for (const attempt of snapshot.attempts) {
+    if (service && attempt.service !== service) continue;
+    for (const key of Object.keys(attempt.transitions) as Transition[])
+      transitions[key] = (transitions[key] ?? 0) + attempt.transitions[key]!;
+  }
+  const exits = exposed.filter((a) => a.explicitExit && !a.clicked).length;
+  return {
+    transitions,
+    sortChanges: Object.values(transitions).reduce((sum, n) => sum + n, 0),
+    exposedSearches: exposed.length,
+    explicitExitsWithoutNavigation: exits,
+    unresolved: exposed.filter((a) => !a.clicked && !a.explicitExit).length,
+    explicitExitRate: exposed.length ? exits / exposed.length : null,
+    inferredAbandonments: null,
+  };
+}
+
 /** No disk, network, location, request IDs or persistent identity. */
 export class BetaSession {
   private state: BetaSnapshot = { enabled: false, discarded: 0, attempts: [] };
@@ -164,6 +194,9 @@ export class BetaSession {
           decisionMs: null,
           failureReason: null,
           quality: null,
+          requestedSort: query.sort ?? "nearest",
+          transitions: Object.freeze({}),
+          explicitExit: false,
         }),
       ],
     };
@@ -214,6 +247,24 @@ export class BetaSession {
         selectionMs: a.selectionMs ?? this.duration(a.startedMs),
       }));
     }
+  }
+  public changeSort(response: NearbyResponse | null, from: Sort, to: Sort) {
+    const sorts = ["nearest", "cheapest", "open_now", "best"];
+    if (!response || from === to || !sorts.includes(from) || !sorts.includes(to))
+      return;
+    const key: Transition = `${from}:${to}`;
+    this.update(this.responses.get(response), (a) => ({
+      ...a,
+      transitions: Object.freeze({
+        ...a.transitions,
+        [key]: (a.transitions[key] ?? 0) + 1,
+      }),
+    }));
+  }
+  public leaveResults(response: NearbyResponse | null) {
+    if (!response) return;
+    this.update(this.responses.get(response), (a) => ({ ...a, explicitExit: true }));
+    this.selected = undefined;
   }
   public click(pointId: string, response?: NearbyResponse): number | undefined {
     const id = response
