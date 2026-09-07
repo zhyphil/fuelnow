@@ -8,6 +8,7 @@ import { PostgresCandidateSearch } from "../search/PostgresCandidateSearch.js";
 import { PostgresServicePointDetail } from "../detail/PostgresServicePointDetail.js";
 import { PostgresServicePointEvidence } from "../evidence/PostgresServicePointEvidence.js";
 import { localLoadDatabaseUrl, summarizeLoad } from "./loadProfile.js";
+import { assessOperations, readOperationsSnapshot } from "./operationsSnapshot.js";
 
 let stage = "configuration";
 async function main() {
@@ -72,6 +73,16 @@ async function main() {
     } finally {
       migrationClient.release();
     }
+    stage = "operational counters";
+    const operations = assessOperations(await readOperationsSnapshot(pool));
+    if (operations.activeSources === 0 || operations.servicePoints === 0)
+      throw new Error("Missing operational fixture coverage");
+    console.log(
+      JSON.stringify({
+        scope: "disposable fixture operational counters",
+        ...operations,
+      }),
+    );
     stage = "local HTTP requests";
     app = createApiApp({
       candidateSearch: new PostgresCandidateSearch(pool),

@@ -4,6 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "operations:check": "node --env-file-if-exists=../../.env --import tsx src/quality/runOperationsCheck.ts",
     "release:check": "node --import tsx src/quality/runReleaseCheck.ts",
     "test:load-local": "node --import tsx src/quality/runLocalLoad.ts",
     "quality:geography": "node --env-file-if-exists=../../.env --import tsx src/quality/runGeographyAudit.ts",
