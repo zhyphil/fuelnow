@@ -157,6 +157,22 @@ const translations = {
     "Navegación no disponible: lugar cerrado o destino no válido.",
   ],
   map: ["View map", "Voir la carte", "Ver mapa"],
+  mapLoading: ["Loading map…", "Chargement de la carte…", "Cargando mapa…"],
+  mapStartFailed: [
+    "The map did not start. Retry or go back to the results.",
+    "La carte n’a pas démarré. Réessayez ou revenez aux résultats.",
+    "El mapa no se ha iniciado. Reintenta o vuelve a los resultados.",
+  ],
+  mapTilesFailed: [
+    "The map background has not loaded. Retry or go back to the results.",
+    "Le fond de carte n’a pas été chargé. Réessayez ou revenez aux résultats.",
+    "El fondo del mapa no se ha cargado. Reintenta o vuelve a los resultados.",
+  ],
+  mapNoPoints: [
+    "No results with valid map coordinates. Go back to the list to change your search.",
+    "Aucun résultat avec des coordonnées valides. Revenez à la liste pour modifier la recherche.",
+    "No hay resultados con coordenadas válidas. Vuelve a la lista para cambiar la búsqueda.",
+  ],
   mapNotice: [
     "Optional map: Apple Maps on iOS, Google Maps on Android. The map provider processes the viewed area. No location tracking is enabled.",
     "Carte facultative : Apple Maps sur iOS, Google Maps sur Android. Le fournisseur traite la zone affichée. Aucun suivi de position n’est activé.",

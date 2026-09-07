@@ -262,6 +262,17 @@ it.each(cases)(
     );
     expect(ports.openURL.mock.calls[0]![0]).not.toContain("saddr");
     await press(copy.evidence.map);
+    const showMap = async () => {
+      await act(() => {
+        root.container.queryAll((n) => n.type === "Modal")[0]!.props.onShow();
+        root.container
+          .queryAll((n) => !!n.props.onLayout)[0]!
+          .props.onLayout({
+            nativeEvent: { layout: { width: 320, height: 480 } },
+          });
+      });
+    };
+    await showMap();
     expect(root.container.queryAll((n) => n.type === "Marker")).toHaveLength(
       response.results.length,
     );
@@ -279,6 +290,7 @@ it.each(cases)(
     });
     // Map selection must carry exactly the same context as list selection.
     await press(copy.evidence.map);
+    await showMap();
     await act(async () =>
       root.container.queryAll((n) => n.type === "Marker")[0]!.props.onPress(),
     );

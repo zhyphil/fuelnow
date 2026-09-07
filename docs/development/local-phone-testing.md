@@ -170,6 +170,16 @@ pnpm local:start --lan
 
 ### 2026-09-07 修复期间的 USB 开发服务绑定
 
+地图工程修复与待复验：
+
+- [x] Android 地图弹窗开启硬件加速，等 onShow 与非零布局后挂载 MapView，使用 absoluteFill 填满地图容器。此为渲染兼容处理，不将 Surface/EGL 警告直接定为根因。
+- [x] 跟踪初始化/加载状态；12 秒未成功时区分“地图未启动”和“底图未加载”，提供三语提示、重试和既有返回；重试更换独立实例，旧加载回调不影响新状态，成功或退出取消计时器。Apple Maps 使用 ready 回调，不依赖不支持的 Google loaded 事件。
+- [x] 新增 8 项原生适配边界组件回归，覆盖尺寸/弹窗时机、Android 仅 ready 不能代表底图已加载、三语超时/重试/迟到成功、Apple Maps、退出清理及无结果/未配置。全量 `pnpm check` 1012 tests、iOS/Android export 通过。
+- [ ] 华为底图和标记复验尚未完成，不能将自动测试或 Google 标识可见当作通过。若新版仍无底图，记录具体超时文案与地图相关错误，继续定位；未改密钥、Google 账户或手机系统设置。
+- 原生语义参考：[React Native Modal](https://reactnative.dev/docs/modal#hardwareaccelerated)（独立弹窗硬件加速默认关闭）、[react-native-maps MapView](https://github.com/react-native-maps/react-native-maps/blob/master/docs/mapview.md)（ready 与 loaded 分离）；同时核对本机安装版本源码。
+
+USB 连接：
+
 - [x] 复现并修复本次重开的 IPv4/IPv6 不一致：Metro 仅监听 `[::1]:8081`，`127.0.0.1:8081/status` 拒绝连接。当前 USB 入口使用 IPv4；Expo CLI 本地代码以 localhost 绑定。为隔离的 Expo 子进程固定 `NODE_OPTIONS=--dns-result-order=ipv4first`，不继承任意宿主 NODE_OPTIONS、不开放公网监听。
 - [x] 新增环境隔离回归；重启后实测 `127.0.0.1:8081` 监听和健康请求成功，手机关闭重开后 Metro 收到 Android bundle 请求且编译完成。仅对本次 USB 启动问题下结论，不将之前 LAN `/hot` 警告全部归入同一原因。
 - 原测试会话临时库随正常停止清理成功，新会话使用独立模拟库；不覆盖原库、不清手机应用数据、不修改系统设置。长期 USB 稳定性与手机页面操作仍需复验。
