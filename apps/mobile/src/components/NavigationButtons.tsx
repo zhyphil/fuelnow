@@ -30,7 +30,9 @@ export function NavigationButtons({
     setFailed(false);
     analytics.record({ type: "navigation_click", pointId: target.id });
     const attempt = analytics.beta.click(target.id, response);
-    const opened = await openNavigation(target, provider, Linking.openURL);
+    const opened = await openNavigation(target, provider, (url) =>
+      Linking.openURL(url),
+    );
     analytics.beta.handoff(attempt, opened);
     analytics.record({
       type: "navigation_handoff",

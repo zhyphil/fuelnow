@@ -7,6 +7,7 @@ import WelcomeScreen from "../src/app/index";
 import SourcesScreen from "../src/app/sources";
 import { sourceNotices, sourcePageCopy } from "../src/content/sourceNotices";
 import { EvidenceSummary } from "../src/components/EvidenceSummary";
+import { NavigationButtons } from "../src/components/NavigationButtons";
 import ResultsScreen from "../src/app/results";
 import PointScreen from "../src/app/point/[id]";
 import {
@@ -20,6 +21,7 @@ import sample from "../../../docs/api/examples/nearby-fuel-cheapest.json";
 import detail from "../../../docs/api/examples/service-point-detail.json";
 
 const ports = vi.hoisted(() => ({
+  os: "ios",
   language: "en" as "en" | "fr" | "es",
   nearby: vi.fn(),
   servicePoint: vi.fn(),
@@ -65,8 +67,21 @@ vi.mock("react-native", () => ({
   Modal: "Modal",
   ActivityIndicator: "ActivityIndicator",
   TextInput: "TextInput",
-  Platform: { OS: "ios" },
-  Linking: { openURL: ports.openURL },
+  Platform: {
+    get OS() {
+      return ports.os;
+    },
+  },
+  // Native Linking.openURL uses this._validateURL; a bare vi.fn hides lost receivers.
+  Linking: {
+    _validateURL(url: string) {
+      if (typeof url !== "string") throw new Error("Invalid URL");
+    },
+    openURL(url: string) {
+      this._validateURL(url);
+      return ports.openURL(url);
+    },
+  },
   StyleSheet: { create: (styles: unknown) => styles },
   Pressable: ({
     children,
@@ -127,7 +142,50 @@ afterEach(async () => {
   analytics.setEnabled(false);
   vi.clearAllMocks();
   ports.fuelType = undefined;
+  ports.os = "ios";
 });
+it.each(["android", "ios"])(
+  "preserves the native Linking receiver and can retry a failed %s handoff",
+  async (os) => {
+    ports.os = os;
+    ports.language = "en";
+    const root = createRoot({ textComponentTypes: ["Text"] });
+    roots.push(root);
+    await act(async () =>
+      root.render(
+        <NavigationButtons
+          target={{
+            id: "real-point",
+            location: { latitude: 43.6047, longitude: 1.4442 },
+            lifecycleStatus: "active",
+          }}
+        />,
+      ),
+    );
+    const button = () =>
+      root.container.queryAll((node) => node.type === "Pressable")[0]!;
+    ports.openURL.mockRejectedValueOnce(new Error("handoff failed"));
+    await act(async () => button().props.onPress());
+    expect(ports.openURL).toHaveBeenCalledOnce();
+    expect(JSON.stringify(root.container.toJSON())).toContain(
+      getMessages("en").evidence.navigationFailed,
+    );
+    ports.openURL.mockResolvedValue(undefined);
+    await act(async () => button().props.onPress());
+    expect(ports.openURL).toHaveBeenCalledTimes(2);
+    expect(ports.openURL).toHaveBeenLastCalledWith(
+      expect.stringContaining(
+        os === "android"
+          ? "https://www.google.com/maps/dir/?api=1"
+          : "https://maps.apple.com/",
+      ),
+    );
+    expect(JSON.stringify(root.container.toJSON())).not.toContain(
+      getMessages("en").evidence.navigationFailed,
+    );
+    expect(button().props.disabled).toBe(false);
+  },
+);
 const cases = (["en", "fr", "es"] as const).flatMap((language) =>
   (["fuel", "charging", "air", "wash"] as const).map((service) => ({
     language,

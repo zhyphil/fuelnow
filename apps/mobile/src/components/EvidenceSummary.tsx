@@ -50,9 +50,9 @@ export function EvidenceSummary({
           onPress={
             notice
               ? () => {
-                  void openSourceNotice(notice.licenceUrl, Linking.openURL).then(
-                    (opened) => setLinkFailed(!opened),
-                  );
+                  void openSourceNotice(notice.licenceUrl, (url) =>
+                    Linking.openURL(url),
+                  ).then((opened) => setLinkFailed(!opened));
                 }
               : undefined
           }

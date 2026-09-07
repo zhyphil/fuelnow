@@ -16,7 +16,7 @@ export default function SourcesScreen() {
   const router = useRouter();
   const [failed, setFailed] = useState(false);
   const open = async (url: string) =>
-    setFailed(!(await openSourceNotice(url, Linking.openURL)));
+    setFailed(!(await openSourceNotice(url, (link) => Linking.openURL(link))));
   return (
     <SafeAreaView style={styles.screen}>
       <ScrollView contentContainerStyle={styles.content}>

@@ -42,3 +42,15 @@ LIVE_SOURCE_CHECK=true pnpm local:start --real-fuel --check
 - 新增 8 个回归测试：区域约束/截断与越界、显式授权与回环限制、非空/非临时库拒绝、健康页声明、移动环境边界；全量 `pnpm check` 1026 tests 通过。
 
 本轮没有点击真实外部导航，没有请求新 GPS 定位，没有验证现场油价，也没有完成全部平台/网络/无障碍或 Phase 5/6 发布验收。用户可在当前手机柴油结果页继续体验。
+
+## 后续：导航跳转修复与真机复验（2026-09-07）
+
+用户反馈已装 Google Maps 但点击提示无法打开，随后明确同意修复及测试。只读核对安装包存在，Android 可将 Maps HTTPS URL 解析到 Google Maps。根因是将 `Linking.openURL` 直接作为参数传递；当前 RN 0.86.3 实现调用 `this._validateURL`，脱离对象后在原生交接之前抛错，应用 catch 将其显示成通用失败提示。使用当前依赖函数体做隔离诊断，未绑定调用失败且 nativeHandoff=false，通过对象调用成功。
+
+导航调用改为 `(url) => Linking.openURL(url)`；来源页/证据许可证链接同样修复。保留既有目的地坐标、驾驶模式、合成/关闭/无效站点保护、错误提示及重试，不传出发点、不添加 `dir_action=navigate`，不新增收费 API 或权限。链接采用 [Google 官方 Maps URLs](https://developers.google.com/maps/documentation/urls/get-started) 格式。
+
+流程 mock 现在模拟 Linking 的接收者依赖，新增 Android/iOS 失败后重试两项回归，来源页已有三语言测试也经过此校验。全量 `pnpm check` 通过：12 + 83 + 189 + 242 + 502 = 1028 tests。既有 DiagnosticsPanel act 警告仍在，未当作新失败或声称零警告。
+
+华为通过已热更新的详情页实际点击 `Itinéraire · Google Maps`，成功进入 Google Maps 驾车路线预览；未点击开始导航、未改手机设置/权限或重装。当前地图有自身离线地图完成提示，未操作其下载/管理。仅验证该次交接，不验证实际行程/入口位置。官方站点地址为 30 Chemin de Ferro-Lèbres，Google 对目的地坐标反查显示 20 Chem. Ferro-Lèbres，保留来源差异，不修改原始地址。本机证据 `/tmp/fuel-now-navigation-handoff-fixed.png` 含地图位置，不提交 Git 或上传。
+
+当前测试服务保持运行，手机停留 Google Maps 路线预览。详情营业时间原始 JSON 的可读性另行处理，不在本次导航修复内。
