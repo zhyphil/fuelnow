@@ -64,6 +64,18 @@ separates empty searches from partial data and supplies stable warning, empty
 reason and fallback codes for client localization. Unknown evidence remains
 Unknown; it is never converted into a positive price, opening or equipment claim.
 
+Each result includes `route`. A configured backend Matrix provider enriches at
+most the budgeted Top N candidates with road distance and ETA. The status and
+reason fields distinguish calculated, unreachable, unavailable and not-requested
+routes. If routing is disabled or fails, candidates remain usable by exact
+straight-line distance and `outcome` reports the affected ETA count.
+
+For `sort=best`, each retained result also contains `recommendation` with a
+versioned formula, normalized score and structured localizable reasons. Fuel
+requires `fuelType`; Charge is deliberately price-free; Air/Wash use a limited
+formula and explicitly say when the available evidence makes Best equivalent to
+Nearest. Non-Best results return `recommendation: null`.
+
 See the contract-checked [Fuel Cheapest response](./examples/nearby-fuel-cheapest.json)
 and [empty response](./examples/nearby-empty.json).
 
@@ -103,6 +115,11 @@ Browser requests must come from the configured CORS allowlist. Production also
 requires HTTPS. Forwarded client/protocol headers are trusted only from configured
 proxy IPs or CIDRs. The precise search origin is sent to the spatial query but is
 not returned, stored or written to URL-bearing request logs.
+
+Matrix calls are server-side and remain disabled when the monthly budget is zero.
+A positive `MAPBOX_MONTHLY_ELEMENT_BUDGET` also requires a non-empty server-only
+`MAPBOX_ACCESS_TOKEN`; startup fails rather than accidentally running with a
+misconfigured paid capability.
 
 The complete error example is available in
 [error-response.json](./examples/error-response.json). Run `pnpm api:start` from

@@ -385,7 +385,8 @@ export function presentServiceEvidence(
         )
       : "unknown";
   const freshness = price?.freshness ?? statusFreshness;
-  const confidence = price?.confidence ?? "low";
+  const sourceQuality = evidence.sourceQuality ?? null;
+  const confidence = sourceQuality?.confidence ?? price?.confidence ?? "low";
   const usesSiteOpening = evidence.serviceType === "fuel";
 
   return {
@@ -404,7 +405,10 @@ export function presentServiceEvidence(
     price,
     source: evidence.source,
     freshness,
-    confidence: { level: confidence, score: null },
+    confidence: {
+      level: confidence,
+      score: sourceQuality?.confidenceScore ?? null,
+    },
     details: {
       fuel:
         evidence.serviceType === "fuel"
@@ -421,7 +425,16 @@ export function presentServiceEvidence(
                     },
             }
           : null,
-      charging: evidence.charging,
+      charging:
+        evidence.charging === null
+          ? null
+          : {
+              operator: evidence.charging.operator,
+              network: evidence.charging.network,
+              connectorTypes: evidence.charging.connectorTypes,
+              maximumRatedPowerKw: evidence.charging.maximumRatedPowerKw,
+              totalEvses: evidence.charging.totalEvses,
+            },
       air:
         evidence.air === null
           ? null

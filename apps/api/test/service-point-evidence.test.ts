@@ -23,6 +23,8 @@ function databaseRow(overrides: Record<string, unknown> = {}): Record<string, un
     source_observed_at: "2026-09-04T07:00:00Z",
     source_published_at: null,
     fetched_at: "2026-09-04T07:05:00Z",
+    source_confidence: "high",
+    source_confidence_score: 90,
     fuel_offers: [
       {
         fuelType: "diesel",
@@ -48,6 +50,7 @@ function databaseRow(overrides: Record<string, unknown> = {}): Record<string, un
     charging_network: null,
     charging_total_evses: null,
     connector_types: [],
+    connector_capabilities: [],
     maximum_rated_power_kw: null,
     air_working_status: null,
     air_free: null,
@@ -95,6 +98,7 @@ describe("PostgreSQL service-point evidence reader", () => {
           id: "fr-official-fuel",
           fetchedAt: "2026-09-04T07:05:00.000Z",
         }),
+        sourceQuality: { confidence: "high", confidenceScore: 90 },
         fuelOffers: [
           expect.objectContaining({
             fuelType: "diesel",
@@ -110,6 +114,9 @@ describe("PostgreSQL service-point evidence reader", () => {
     expect(pool.query.mock.calls[0]?.[0]).toContain(
       "eligible_source.lifecycle_status <> 'withdrawn'",
     );
+    expect(pool.query.mock.calls[0]?.[0]).toContain(
+      "provenance.source_record_id = source_record.id",
+    );
   });
 
   it("maps Charge connector types and validated maximum rated power", async () => {
@@ -123,6 +130,10 @@ describe("PostgreSQL service-point evidence reader", () => {
             charging_network: "Network",
             charging_total_evses: "2",
             connector_types: ["ccs_combo_2", "type_2"],
+            connector_capabilities: [
+              { connectorType: "ccs_combo_2", maximumRatedPowerKw: 150 },
+              { connectorType: "type_2", maximumRatedPowerKw: 22 },
+            ],
             maximum_rated_power_kw: "150.000",
           }),
         ],
@@ -140,6 +151,10 @@ describe("PostgreSQL service-point evidence reader", () => {
           operator: "Operator",
           network: "Network",
           connectorTypes: ["ccs_combo_2", "type_2"],
+          connectorCapabilities: [
+            { connectorType: "ccs_combo_2", maximumRatedPowerKw: 150 },
+            { connectorType: "type_2", maximumRatedPowerKw: 22 },
+          ],
           maximumRatedPowerKw: 150,
           totalEvses: 2,
         },
@@ -203,6 +218,40 @@ describe("PostgreSQL service-point evidence reader", () => {
         serviceTypes: ["charging"],
       }),
     ).rejects.toThrow("invalid EV connector types");
+
+    const corruptConfidence = {
+      query: vi.fn().mockResolvedValue({
+        rows: [databaseRow({ source_confidence: "high", source_confidence_score: 70 })],
+      }),
+    };
+    await expect(
+      new PostgresServicePointEvidence(corruptConfidence as never).findEvidence({
+        servicePointIds: [POINT_ID],
+        serviceTypes: ["fuel"],
+      }),
+    ).rejects.toThrow("invalid source confidence");
+
+    const corruptConnectorPower = {
+      query: vi.fn().mockResolvedValue({
+        rows: [
+          databaseRow({
+            service_type: "charging",
+            fuel_offers: [],
+            charging_total_evses: "1",
+            connector_types: ["ccs_combo_2"],
+            connector_capabilities: [
+              { connectorType: "ccs_combo_2", maximumRatedPowerKw: 1_001 },
+            ],
+          }),
+        ],
+      }),
+    };
+    await expect(
+      new PostgresServicePointEvidence(corruptConnectorPower as never).findEvidence({
+        servicePointIds: [POINT_ID],
+        serviceTypes: ["charging"],
+      }),
+    ).rejects.toThrow("invalid connector-specific maximum rated power");
   });
 });
 

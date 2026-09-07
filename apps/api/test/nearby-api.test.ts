@@ -8,7 +8,7 @@ import type {
   ServicePointEvidencePort,
 } from "../src/evidence/PostgresServicePointEvidence.js";
 import type { CandidateSearchPort } from "../src/search/expandingCandidateSearch.js";
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { createApiApp } from "../src/api/app.js";
 import { resolveApiRuntimeConfig } from "../src/api/config.js";
@@ -134,8 +134,14 @@ const servicePointDetails: ServicePointDetailPort = {
 
 const apps: Array<ReturnType<typeof createApiApp>> = [];
 
+beforeEach(() => {
+  vi.useFakeTimers({ toFake: ["Date"] });
+  vi.setSystemTime(new Date("2026-09-04T12:00:00.000Z"));
+});
+
 afterEach(async () => {
   await Promise.all(apps.splice(0).map((app) => app.close()));
+  vi.useRealTimers();
 });
 
 describe("GET /v1/nearby", () => {
@@ -177,14 +183,14 @@ describe("GET /v1/nearby", () => {
       ranking: {
         requestedSort: "nearest",
         appliedSort: "nearest",
-        capability: { state: "conditional", reason: null },
-        degraded: false,
-        reason: null,
+        capability: { state: "enabled", reason: null },
+        degraded: true,
+        reason: "eta_provider_unavailable",
       },
       outcome: {
         state: "results",
         sort: "nearest",
-        capability: { state: "conditional", reason: null },
+        capability: { state: "enabled", reason: null },
         candidateCount: 10,
         resultCount: 10,
         priceUnknownCount: 10,
@@ -359,10 +365,10 @@ describe("GET /v1/nearby", () => {
     });
   });
 
-  it("discloses Nearest degradation until Cheapest and Best evidence is connected", async () => {
+  it("requires a Fuel type before applying Cheapest or Best", async () => {
     for (const [sort, reason] of [
       ["cheapest", "fuel_type_required"],
-      ["best", "decision_evidence_unavailable"],
+      ["best", "fuel_type_required"],
     ] as const) {
       const search = new FakeCandidateSearch(() => [candidate(0)]);
       const app = createApiApp({
@@ -390,7 +396,7 @@ describe("GET /v1/nearby", () => {
         outcome: {
           state: "results",
           sort: "nearest",
-          capability: { state: "conditional", reason: null },
+          capability: { state: "enabled", reason: null },
           fallbackAction: null,
         },
         resultCount: 1,
@@ -428,7 +434,7 @@ describe("GET /v1/nearby", () => {
         sort: "cheapest",
         capability: { state: "enabled", reason: null },
         priceUnknownCount: 0,
-        routeEtaUnavailableCount: 0,
+        routeEtaUnavailableCount: 1,
       },
     });
     expect(search.requests).toEqual([
@@ -603,9 +609,9 @@ describe("GET /v1/nearby", () => {
       minimumPowerKw: 150,
       ranking: {
         requestedSort: "best",
-        appliedSort: "nearest",
-        degraded: true,
-        reason: "decision_evidence_unavailable",
+        appliedSort: "best",
+        degraded: false,
+        reason: null,
       },
     });
     expect(search.requests).toEqual([
@@ -708,6 +714,14 @@ describe("API runtime configuration", () => {
       bodyLimitBytes: 16_384,
       trustedProxies: [],
       requireSecureTransport: false,
+      mapboxAccessToken: null,
+      routing: {
+        monthlyElementBudget: 0,
+        elementsPerSearchMax: 9,
+        requestTimeoutMs: 2_500,
+        cacheTtlSeconds: 300,
+        paidRoutingEnabled: false,
+      },
     });
     expect(() => resolveApiRuntimeConfig({ APP_ENV: "test" })).toThrow(
       "DATABASE_URL is required",
@@ -740,6 +754,36 @@ describe("API runtime configuration", () => {
       trustedProxies: ["10.0.0.0/8", "2001:db8::/32"],
       requireSecureTransport: true,
     });
+  });
+
+  it("enables paid routing only with an explicit server-side token and budget", () => {
+    expect(
+      resolveApiRuntimeConfig({
+        APP_ENV: "test",
+        DATABASE_URL: "postgresql://example.invalid/fuel_now",
+        MAPBOX_ACCESS_TOKEN: "fixture-token",
+        MAPBOX_MONTHLY_ELEMENT_BUDGET: "1000",
+        MAPBOX_ELEMENTS_PER_SEARCH_MAX: "7",
+        MAPBOX_TIMEOUT_MS: "1200",
+        ROUTE_CACHE_TTL_SECONDS: "120",
+      }),
+    ).toMatchObject({
+      mapboxAccessToken: "fixture-token",
+      routing: {
+        monthlyElementBudget: 1_000,
+        elementsPerSearchMax: 7,
+        requestTimeoutMs: 1_200,
+        cacheTtlSeconds: 120,
+        paidRoutingEnabled: true,
+      },
+    });
+    expect(() =>
+      resolveApiRuntimeConfig({
+        APP_ENV: "test",
+        DATABASE_URL: "postgresql://example.invalid/fuel_now",
+        MAPBOX_MONTHLY_ELEMENT_BUDGET: "1",
+      }),
+    ).toThrow("MAPBOX_ACCESS_TOKEN");
   });
 
   it("rejects invalid ports, pool sizes and SSL modes before listening", () => {

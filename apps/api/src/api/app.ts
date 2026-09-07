@@ -7,6 +7,7 @@ import Fastify, {
 import type { ServicePointDetailPort } from "../detail/PostgresServicePointDetail.js";
 import type { ServicePointEvidencePort } from "../evidence/PostgresServicePointEvidence.js";
 import type { CandidateSearchPort } from "../search/expandingCandidateSearch.js";
+import type { RoutingProvider } from "../routing/types.js";
 import { registerApiErrorHandling, registerApiNotFoundHandler } from "./errors.js";
 import { registerNearbyRoute } from "./nearby.js";
 import { registerOpenApi, registerOpenApiRoute } from "./openapi.js";
@@ -21,6 +22,8 @@ export interface CreateApiAppOptions {
   candidateSearch: CandidateSearchPort;
   servicePointDetails: ServicePointDetailPort;
   servicePointEvidence: ServicePointEvidencePort;
+  routingProvider?: RoutingProvider | null;
+  routingTopN?: number;
   security?: ApiSecurityOptions;
   logger?: FastifyServerOptions["logger"];
 }
@@ -29,6 +32,8 @@ export function createApiApp({
   candidateSearch,
   servicePointDetails,
   servicePointEvidence,
+  routingProvider = null,
+  routingTopN = 9,
   security = DEFAULT_API_SECURITY_OPTIONS,
   logger = false,
 }: CreateApiAppOptions): FastifyInstance {
@@ -50,7 +55,13 @@ export function createApiApp({
   void app.register(async (routes) => {
     registerApiNotFoundHandler(routes);
     registerOpenApiRoute(routes);
-    registerNearbyRoute(routes, candidateSearch, servicePointEvidence);
+    registerNearbyRoute(
+      routes,
+      candidateSearch,
+      servicePointEvidence,
+      routingProvider,
+      routingTopN,
+    );
     registerServicePointDetailRoute(routes, servicePointDetails, servicePointEvidence);
   });
   return app;

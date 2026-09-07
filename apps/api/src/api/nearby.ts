@@ -3,28 +3,20 @@ import {
   CAPABILITY_STATES,
   EV_CONNECTOR_TYPES,
   FuelTypeSchema,
+  RecommendationReasonsSchema,
   SearchOutcomeSchema,
   ServiceTypeSchema,
-  type DecisionCapability,
   type EvConnectorType,
-  type FuelType,
-  type SearchSort,
-  type ServiceType,
 } from "@fuel-now/contracts";
 import { Type, type Static } from "@sinclair/typebox";
 import type { FastifyInstance } from "fastify";
 import type { TypeBoxTypeProvider } from "@fastify/type-provider-typebox";
 
-import { filterOpenNow } from "../decision/filterOpenNow.js";
 import { buildSearchOutcome } from "../decision/buildSearchOutcome.js";
-import { rankCheapest } from "../decision/rankCheapest.js";
-import type {
-  ServicePointEvidence,
-  ServicePointEvidencePort,
-} from "../evidence/PostgresServicePointEvidence.js";
-import { rankNearestCandidates } from "../routing/rankNearestCandidates.js";
+import type { ServicePointEvidencePort } from "../evidence/PostgresServicePointEvidence.js";
+import { routeTopCandidates } from "../routing/routeTopCandidates.js";
 import type { CandidateWithRoute } from "../routing/routeTopCandidates.js";
-import type { ServicePointCandidate } from "../search/PostgresCandidateSearch.js";
+import type { RoutingProvider } from "../routing/types.js";
 import {
   findCandidatesWithExpansion,
   type CandidateSearchPort,
@@ -32,10 +24,10 @@ import {
 } from "../search/expandingCandidateSearch.js";
 import {
   ServiceEvidenceResponseSchema,
-  effectiveFuelOffers,
   presentServiceEvidence,
 } from "./serviceEvidence.js";
 import { ApiErrorResponseSchema, ApiRequestError } from "./errors.js";
+import { rankNearbyCandidates } from "./rankNearbyCandidates.js";
 
 export const NEARBY_DEFAULT_RADIUS_METRES = 10_000;
 export const NEARBY_MAXIMUM_RADIUS_METRES = 50_000;
@@ -60,6 +52,7 @@ const SortDegradationReasonSchema = Type.Union([
   Type.Literal("decision_evidence_unavailable"),
   Type.Literal("no_eligible_fuel_price"),
   Type.Literal("service_hours_unknown"),
+  Type.Literal("eta_provider_unavailable"),
 ]);
 const DecisionCapabilityResponseSchema = Type.Object(
   {
@@ -96,6 +89,54 @@ const LifecycleStatusSchema = Type.Union([
   Type.Literal("unverified"),
 ]);
 
+const RouteUnavailableReasonSchema = Type.Union([
+  Type.Literal("budget_exceeded"),
+  Type.Literal("invalid_response"),
+  Type.Literal("provider_unavailable"),
+  Type.Literal("rate_limited"),
+  Type.Literal("timeout"),
+  Type.Literal("unreachable"),
+]);
+const NearbyRouteSchema = Type.Object(
+  {
+    status: Type.Union([
+      Type.Literal("calculated"),
+      Type.Literal("not_requested"),
+      Type.Literal("unavailable"),
+      Type.Literal("unreachable"),
+    ]),
+    roadDistanceM: Type.Union([Type.Number({ minimum: 0 }), Type.Null()]),
+    etaSeconds: Type.Union([Type.Integer({ minimum: 0 }), Type.Null()]),
+    calculatedAt: Type.Union([
+      Type.String({
+        pattern: "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d{1,3})?Z$",
+      }),
+      Type.Null(),
+    ]),
+    provider: Type.Union([Type.String({ minLength: 1 }), Type.Null()]),
+    profile: Type.Union([
+      Type.Literal("driving"),
+      Type.Literal("driving-traffic"),
+      Type.Null(),
+    ]),
+    trafficAware: Type.Union([Type.Boolean(), Type.Null()]),
+    reason: Type.Union([RouteUnavailableReasonSchema, Type.Null()]),
+  },
+  { additionalProperties: false },
+);
+const NearbyBestRecommendationSchema = Type.Object(
+  {
+    formulaVersion: Type.Union([
+      Type.Literal("fuel-best-v1"),
+      Type.Literal("ev-best-v1"),
+      Type.Literal("limited-service-best-v1"),
+    ]),
+    score: Type.Number({ minimum: 0, maximum: 1 }),
+    reasons: RecommendationReasonsSchema,
+  },
+  { additionalProperties: false },
+);
+
 export const NearbyServicePointSchema = Type.Object(
   {
     id: Type.String({ minLength: 1 }),
@@ -111,6 +152,8 @@ export const NearbyServicePointSchema = Type.Object(
     ),
     lifecycleStatus: LifecycleStatusSchema,
     straightLineDistanceM: Type.Number({ minimum: 0 }),
+    route: NearbyRouteSchema,
+    recommendation: Type.Union([NearbyBestRecommendationSchema, Type.Null()]),
     evidence: ServiceEvidenceResponseSchema,
   },
   { additionalProperties: false },
@@ -207,17 +250,9 @@ function assertCompatibleFilters(query: NearbyQuery): void {
 
 export type NearbySortDegradationReason = Static<typeof SortDegradationReasonSchema>;
 
-interface NearbySortResult {
-  candidates: ServicePointCandidate[];
-  requestedSort: SearchSort;
-  appliedSort: SearchSort;
-  capability: DecisionCapability;
-  appliedCapability: DecisionCapability;
-  degraded: boolean;
-  reason: NearbySortDegradationReason | null;
-}
-
-function withoutRoutes(candidates: ServicePointCandidate[]): CandidateWithRoute[] {
+function withoutRouting(
+  candidates: Awaited<ReturnType<CandidateSearchPort["findCandidates"]>>,
+): CandidateWithRoute[] {
   return candidates.map((candidate) => ({
     ...candidate,
     routeStatus: "not_requested",
@@ -226,129 +261,35 @@ function withoutRoutes(candidates: ServicePointCandidate[]): CandidateWithRoute[
   }));
 }
 
-function nearest(candidates: ServicePointCandidate[]): ServicePointCandidate[] {
-  return rankNearestCandidates(withoutRoutes(candidates));
-}
-
-function nearestCapability(candidateCount: number): DecisionCapability {
-  return candidateCount === 0
-    ? { state: "enabled", reason: null }
-    : { state: "conditional", reason: null };
-}
-
-function sortCandidates(
-  candidates: ServicePointCandidate[],
-  evidenceById: ReadonlyMap<string, ServicePointEvidence>,
-  evaluatedAt: string,
-  serviceType: ServiceType,
-  fuelType: FuelType | undefined,
-  requestedSort: SearchSort,
-): NearbySortResult {
-  if (requestedSort === "nearest") {
-    const capability = nearestCapability(candidates.length);
-    return {
-      candidates: nearest(candidates),
-      requestedSort,
-      appliedSort: "nearest",
-      capability,
-      appliedCapability: capability,
-      degraded: false,
-      reason: null,
-    };
+async function enrichRoutes(
+  routingProvider: RoutingProvider | null,
+  routingTopN: number,
+  latitude: number,
+  longitude: number,
+  candidates: Awaited<ReturnType<CandidateSearchPort["findCandidates"]>>,
+): Promise<CandidateWithRoute[]> {
+  if (routingProvider === null || candidates.length === 0) {
+    return withoutRouting(candidates);
   }
-
-  if (requestedSort === "open_now") {
-    const result = filterOpenNow({
-      serviceType,
-      candidates: withoutRoutes(nearest(candidates)),
-    });
-    if (result.capability.state !== "unavailable") {
-      return {
-        candidates: result.candidates,
-        requestedSort,
-        appliedSort: "open_now",
-        capability: result.capability,
-        appliedCapability: result.capability,
-        degraded: false,
-        reason: null,
-      };
-    }
-    return {
-      candidates: nearest(candidates),
-      requestedSort,
-      appliedSort: "nearest",
-      capability: result.capability,
-      appliedCapability: nearestCapability(candidates.length),
-      degraded: true,
-      reason: "service_hours_unknown",
-    };
-  }
-
-  if (
-    requestedSort === "cheapest" &&
-    serviceType === "fuel" &&
-    fuelType !== undefined
-  ) {
-    const result = rankCheapest({
-      serviceType,
-      fuelType,
-      candidates: withoutRoutes(candidates).map((candidate) => ({
-        ...candidate,
-        fuelOffers:
-          evidenceById.get(candidate.id) === undefined
-            ? []
-            : effectiveFuelOffers(evidenceById.get(candidate.id)!, evaluatedAt),
-      })),
-    });
-    if (result.capability.state === "enabled") {
-      const candidateById = new Map(
-        candidates.map((candidate) => [candidate.id, candidate]),
-      );
-      return {
-        candidates: result.candidates.map(({ id }) => candidateById.get(id)!),
-        requestedSort,
-        appliedSort: "cheapest",
-        capability: result.capability,
-        appliedCapability: result.capability,
-        degraded: false,
-        reason: null,
-      };
-    }
-    return {
-      candidates: nearest(candidates),
-      requestedSort,
-      appliedSort: "nearest",
-      capability: result.capability,
-      appliedCapability: nearestCapability(candidates.length),
-      degraded: true,
-      reason: "no_eligible_fuel_price",
-    };
-  }
-
-  const reason: NearbySortDegradationReason =
-    requestedSort === "cheapest"
-      ? serviceType === "fuel"
-        ? fuelType === undefined
-          ? "fuel_type_required"
-          : "decision_evidence_unavailable"
-        : "price_not_available_for_service"
-      : "decision_evidence_unavailable";
-  return {
-    candidates: nearest(candidates),
-    requestedSort,
-    appliedSort: "nearest",
-    capability: { state: "unavailable", reason },
-    appliedCapability: nearestCapability(candidates.length),
-    degraded: true,
-    reason,
-  };
+  return (
+    await routeTopCandidates(routingProvider, {
+      origin: { latitude, longitude },
+      candidates,
+      topN: routingTopN,
+    })
+  ).candidates;
 }
 
 export function registerNearbyRoute(
   app: FastifyInstance,
   candidateSearch: CandidateSearchPort,
   servicePointEvidence: ServicePointEvidencePort,
+  routingProvider: RoutingProvider | null = null,
+  routingTopN = 9,
 ): void {
+  if (!Number.isSafeInteger(routingTopN) || routingTopN < 1 || routingTopN > 9) {
+    throw new Error("routingTopN must be an integer between 1 and 9");
+  }
   app.withTypeProvider<TypeBoxTypeProvider>().get(
     "/v1/nearby",
     {
@@ -374,10 +315,19 @@ export function registerNearbyRoute(
         candidateSearch,
         searchRequest(request.query),
       );
-      const evidence = await servicePointEvidence.findEvidence({
-        servicePointIds: result.candidates.map(({ id }) => id),
-        serviceTypes: [request.query.service],
-      });
+      const [evidence, routedCandidates] = await Promise.all([
+        servicePointEvidence.findEvidence({
+          servicePointIds: result.candidates.map(({ id }) => id),
+          serviceTypes: [request.query.service],
+        }),
+        enrichRoutes(
+          routingProvider,
+          routingTopN,
+          request.query.latitude,
+          request.query.longitude,
+          result.candidates,
+        ),
+      ]);
       const evidenceById = new Map(evidence.map((item) => [item.servicePointId, item]));
       const candidateIds = new Set(result.candidates.map(({ id }) => id));
       if (
@@ -409,29 +359,49 @@ export function registerNearbyRoute(
           ] as const;
         }),
       );
-      const sorted = sortCandidates(
-        result.candidates,
+      const sorted = rankNearbyCandidates({
+        candidates: routedCandidates,
         evidenceById,
+        presentedEvidenceById,
         evaluatedAt,
-        request.query.service,
-        request.query.fuelType,
-        sort,
-      );
-      const results: NearbyServicePoint[] = sorted.candidates.map((candidate) => {
-        return {
-          id: candidate.id,
-          country: candidate.country,
-          name: candidate.name,
-          brand: candidate.brand,
-          location: {
-            latitude: candidate.latitude,
-            longitude: candidate.longitude,
-          },
-          lifecycleStatus: candidate.lifecycleStatus,
-          straightLineDistanceM: candidate.straightLineDistanceM,
-          evidence: presentedEvidenceById.get(candidate.id)!,
-        };
+        serviceType: request.query.service,
+        ...(request.query.fuelType === undefined
+          ? {}
+          : { fuelType: request.query.fuelType }),
+        ...(request.query.connectorType === undefined
+          ? {}
+          : { connectorType: request.query.connectorType }),
+        requestedSort: sort,
       });
+      const results: NearbyServicePoint[] = sorted.candidates.map(
+        ({ candidate, recommendation }) => {
+          const route = candidate.route;
+          return {
+            id: candidate.id,
+            country: candidate.country,
+            name: candidate.name,
+            brand: candidate.brand,
+            location: {
+              latitude: candidate.latitude,
+              longitude: candidate.longitude,
+            },
+            lifecycleStatus: candidate.lifecycleStatus,
+            straightLineDistanceM: candidate.straightLineDistanceM,
+            route: {
+              status: candidate.routeStatus,
+              roadDistanceM: route?.roadDistanceM ?? null,
+              etaSeconds: route?.etaSeconds ?? null,
+              calculatedAt: route?.calculatedAt ?? null,
+              provider: route?.provider ?? null,
+              profile: route?.profile ?? null,
+              trafficAware: route?.trafficAware ?? null,
+              reason: candidate.routeUnavailableReason,
+            },
+            recommendation,
+            evidence: presentedEvidenceById.get(candidate.id)!,
+          };
+        },
+      );
       const allPresentedEvidence = [...presentedEvidenceById.values()];
       const outcome = buildSearchOutcome({
         sort: sorted.appliedSort,
@@ -449,8 +419,8 @@ export function registerNearbyRoute(
             : allPresentedEvidence.filter(
                 ({ status }) => status.availability.state === "unknown",
               ).length,
-        routeEtaUnavailableCount:
-          sorted.appliedSort === "nearest" ? result.candidates.length : 0,
+        routeEtaUnavailableCount: routedCandidates.filter(({ route }) => route === null)
+          .length,
       });
       return {
         requestId: request.id,

@@ -2,6 +2,9 @@ import { Pool } from "pg";
 
 import { PostgresServicePointDetail } from "../detail/PostgresServicePointDetail.js";
 import { PostgresServicePointEvidence } from "../evidence/PostgresServicePointEvidence.js";
+import { CachedBudgetedRoutingProvider } from "../routing/CachedBudgetedRoutingProvider.js";
+import { MapboxMatrixRoutingProvider } from "../routing/MapboxMatrixRoutingProvider.js";
+import { PostgresRouteCache } from "../routing/PostgresRouteCache.js";
 import { PostgresCandidateSearch } from "../search/PostgresCandidateSearch.js";
 import { createApiApp } from "./app.js";
 import { resolveApiRuntimeConfig } from "./config.js";
@@ -13,10 +16,26 @@ async function startApi(): Promise<void> {
     max: config.databasePoolMax,
     ssl: config.databaseSsl ? { rejectUnauthorized: true } : false,
   });
+  const routingProvider =
+    config.routing.paidRoutingEnabled && config.mapboxAccessToken !== null
+      ? new CachedBudgetedRoutingProvider({
+          provider: new MapboxMatrixRoutingProvider({
+            accessToken: config.mapboxAccessToken,
+            timeoutMs: config.routing.requestTimeoutMs,
+          }),
+          store: new PostgresRouteCache(pool),
+          providerName: "mapbox",
+          monthlyElementBudget: config.routing.monthlyElementBudget,
+          elementsPerSearchMax: config.routing.elementsPerSearchMax,
+          cacheTtlSeconds: config.routing.cacheTtlSeconds,
+        })
+      : null;
   const app = createApiApp({
     candidateSearch: new PostgresCandidateSearch(pool),
     servicePointDetails: new PostgresServicePointDetail(pool),
     servicePointEvidence: new PostgresServicePointEvidence(pool),
+    routingProvider,
+    routingTopN: config.routing.elementsPerSearchMax,
     security: {
       corsAllowedOrigins: config.corsAllowedOrigins,
       rateLimitMaxPerMinute: config.rateLimitMaxPerMinute,

@@ -2,10 +2,10 @@
 
 > 项目：France + Spain Driver Decision Engine  
 > 需求来源：[france_spain_driver_decision_engine_project.md](./france_spain_driver_decision_engine_project.md)  
-> 当前状态：进行中  
-> 当前阶段：Phase 3 — 搜索、路线与决策引擎
-> 下一项任务：`P3-API-10` 建立接口集成与性能测试
-> 最后更新：2026-09-04
+> 当前状态：开发已恢复；按任务完成、验收、commit、push 顺序继续
+> 当前阶段：Phase 3 已完成
+> 下一项任务：`P4-APP-01` 建立客户端工程、环境配置和 API 层
+> 最后更新：2026-09-07
 
 ## 使用方法
 
@@ -263,14 +263,14 @@ V1 的核心验收结果是：
 - [x] `P3-API-07` 统一所有 API 错误为 requestId/code/message/retryable 契约，区分 schema、筛选组合、未知路由/站点与脱敏内部错误；附近搜索同时返回请求 capability、实际 appliedSort 与共享 SearchOutcome，精确表达空结果、Nearest 回退及价格/营业/设备/路线 Unknown 计数，避免把降级结果伪装成请求模式成功（2026-09-04；513 tests；[API 错误与结果](./docs/architecture/api-errors-and-outcomes.md)）
 - [x] `P3-API-08` 在既有 TypeBox 严格输入校验上增加显式 CORS 白名单、每客户端 60/min 默认限流（含未知路由）、16 KiB 默认 body 上限、Helmet/no-store 响应头与生产 HTTPS 门槛；只信任显式 IP/CIDR 代理，默认忽略伪造 Forwarded headers；关闭含精确坐标 URL 的内置日志并仅记录 route template，固定 Fastify 5 兼容插件版本，同时声明多实例发布前需共享 limiter store（2026-09-04；521 tests；[API 输入与安全边界](./docs/architecture/api-input-rate-security.md)）
 - [x] `P3-API-09` 从运行时 TypeBox schema 生成并提供 OpenAPI 3.0 契约，记录附近搜索、详情、筛选兼容性、能力降级、统一错误与安全限制；四份 JSON 响应示例由自动测试持续校验，防止文档和接口漂移（2026-09-04；523 tests；[API 文档](./docs/api/README.md)）
-- [ ] `P3-API-10` 建立接口集成与性能测试
+- [x] `P3-API-10` 将批量证据与有预算的 Top N 路线并行接入统一附近接口，公开安全 ETA/道路距离和 Fuel/Charge/Air/Wash 的版本化 Best 分数及推荐理由；Mapbox 未配置、超预算、超时或失败时保留直线距离结果；50 候选请求固定为 1 次搜索+1 次批量证据+最多 9 个路线目的地，20 次暖机后请求满足 500 ms p95 回归上限；干净 PostgreSQL 18/PostGIS 3.6 全迁移与 fixture 验证通过（2026-09-07；Node.js 24 全量 530 tests；[集成与性能验收](./docs/testing/api-integration-performance.md)）
 
 ## Phase 3 验收门槛
 
-- [ ] 四类服务均可通过统一 API 搜索
-- [ ] Nearest、Cheapest、Open now、Best 均按 ADR 0013 capability matrix 返回明确一致的 enabled/conditional/unavailable 行为
-- [ ] Best 结果包含可理解的推荐理由
-- [ ] 数据缺失或第三方服务失败时仍能提供合理降级结果
+- [x] 四类服务均可通过统一 API 搜索
+- [x] Nearest、Cheapest、Open now、Best 均按 ADR 0013 capability matrix 返回明确一致的 enabled/conditional/unavailable 行为
+- [x] Best 结果包含可理解的推荐理由
+- [x] 数据缺失或第三方服务失败时仍能提供合理降级结果
 
 ---
 
@@ -622,3 +622,5 @@ V1 的核心验收结果是：
 | 2026-09-04 | 统一 API 错误与降级结果                        | 全部错误使用 requestId/code/message/retryable 且内部细节不外泄；附近响应区分请求 capability 与实际 outcome，返回空结果、回退和 Unknown 精确计数；完整质量门槛 513 项测试通过；见 `docs/architecture/api-errors-and-outcomes.md`                  |
 | 2026-09-04 | 建立 API 输入、限流与安全边界                  | 严格 schema 之外新增 CORS、单客户端/未知路由限流、body 上限、安全/no-store headers、生产 HTTPS 与显式可信代理；精确 origin 不进入请求日志；固定 Fastify 5 插件并记录多实例共享存储门槛；完整质量门槛 521 项测试通过；见 `docs/architecture/api-input-rate-security.md` |
 | 2026-09-04 | 发布 API 契约、示例与调用文档                  | 运行时公开 OpenAPI 3.0 契约并记录两条公共 API、筛选组合、能力/结果语义、错误与安全限制；四份提交的 JSON 示例均由真实 TypeBox schema 校验；完整质量门槛 523 项测试通过；见 `docs/api/README.md` |
+| 2026-09-07 | 完成 API 集成与性能测试                        | 统一附近接口并行连接批量证据和 Top N 路线，返回安全路线字段及四服务可解释 Best；验证 provider 失败降级、50 候选无 N+1/最多 9 路线元素及 500 ms p95 回归上限；干净 PostgreSQL/PostGIS 验证通过，完整质量门槛 530 项测试通过；见 `docs/testing/api-integration-performance.md` |
+| 2026-09-07 | 完成 Phase 3 搜索、路线与决策引擎 | 从暂停点修复充电内部功率字段泄漏导致的响应 500、纠正所选接口功率断言并固定燃油测试时钟；Node.js 24 全量 530 tests、15 项迁移和四服务真实 PostgreSQL 证据读取通过；下一项 P4-APP-01 |

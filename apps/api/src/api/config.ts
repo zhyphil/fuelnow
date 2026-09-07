@@ -1,4 +1,9 @@
-import { resolveEnvironmentProfile, type LogLevel } from "@fuel-now/config";
+import {
+  resolveEnvironmentProfile,
+  resolveRoutingConfig,
+  type LogLevel,
+  type RoutingConfig,
+} from "@fuel-now/config";
 import { isIP } from "node:net";
 
 export interface ApiRuntimeConfig {
@@ -13,6 +18,8 @@ export interface ApiRuntimeConfig {
   bodyLimitBytes: number;
   trustedProxies: string[];
   requireSecureTransport: boolean;
+  mapboxAccessToken: string | null;
+  routing: RoutingConfig;
 }
 
 function integerInRange(
@@ -116,6 +123,26 @@ export function resolveApiRuntimeConfig(
   if (databaseSslMode !== "disable" && databaseSslMode !== "require") {
     throw new Error("DATABASE_SSL_MODE must be disable or require");
   }
+  const routing = resolveRoutingConfig({
+    ...(environment.MAPBOX_MONTHLY_ELEMENT_BUDGET === undefined
+      ? {}
+      : { monthlyElementBudget: environment.MAPBOX_MONTHLY_ELEMENT_BUDGET }),
+    ...(environment.MAPBOX_ELEMENTS_PER_SEARCH_MAX === undefined
+      ? {}
+      : { elementsPerSearchMax: environment.MAPBOX_ELEMENTS_PER_SEARCH_MAX }),
+    ...(environment.MAPBOX_TIMEOUT_MS === undefined
+      ? {}
+      : { requestTimeoutMs: environment.MAPBOX_TIMEOUT_MS }),
+    ...(environment.ROUTE_CACHE_TTL_SECONDS === undefined
+      ? {}
+      : { cacheTtlSeconds: environment.ROUTE_CACHE_TTL_SECONDS }),
+  });
+  const mapboxAccessToken = environment.MAPBOX_ACCESS_TOKEN?.trim() || null;
+  if (routing.paidRoutingEnabled && mapboxAccessToken === null) {
+    throw new Error(
+      "MAPBOX_ACCESS_TOKEN is required when the monthly route budget is positive",
+    );
+  }
   return {
     host: environment.API_HOST?.trim() || "127.0.0.1",
     port: integerInRange("API_PORT", environment.API_PORT, 3_000, 1, 65_535),
@@ -149,5 +176,7 @@ export function resolveApiRuntimeConfig(
     ),
     trustedProxies: trustedProxies(environment.API_TRUSTED_PROXIES),
     requireSecureTransport: profile.requireSecureTransport,
+    mapboxAccessToken,
+    routing,
   };
 }

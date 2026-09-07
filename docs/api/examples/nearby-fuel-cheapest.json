@@ -55,6 +55,17 @@
       },
       "lifecycleStatus": "active",
       "straightLineDistanceM": 850,
+      "route": {
+        "status": "calculated",
+        "roadDistanceM": 1100,
+        "etaSeconds": 240,
+        "calculatedAt": "2026-09-04T07:00:00.000Z",
+        "provider": "mapbox",
+        "profile": "driving-traffic",
+        "trafficAware": true,
+        "reason": null
+      },
+      "recommendation": null,
       "evidence": {
         "status": {
           "opening": {

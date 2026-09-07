@@ -2,6 +2,7 @@ import {
   EV_CONNECTOR_TYPES,
   FuelOfferSchema,
   SERVICE_TYPES,
+  type Confidence,
   type AirAccess,
   type AirWorkingStatus,
   type EvConnectorType,
@@ -26,12 +27,23 @@ export interface ServiceSourceAttribution {
   fetchedAt: string;
 }
 
+export interface ServiceSourceQuality {
+  confidence: Confidence;
+  confidenceScore: number;
+}
+
 export interface ChargingEvidence {
   operator: string | null;
   network: string | null;
   connectorTypes: EvConnectorType[];
+  connectorCapabilities?: ChargingConnectorCapability[];
   maximumRatedPowerKw: number | null;
   totalEvses: number;
+}
+
+export interface ChargingConnectorCapability {
+  connectorType: Exclude<EvConnectorType, "unknown">;
+  maximumRatedPowerKw: number | null;
 }
 
 export interface AirEvidence {
@@ -53,6 +65,7 @@ export interface ServicePointEvidence {
   servicePointId: string;
   serviceType: ServiceType;
   source: ServiceSourceAttribution | null;
+  sourceQuality?: ServiceSourceQuality | null;
   serviceOpeningStatus: OpeningStatus;
   serviceOpeningStatusEvaluatedAt: string | null;
   fuelOffers: FuelOffer[];
@@ -82,6 +95,8 @@ interface EvidenceRow extends QueryResultRow {
   source_observed_at: Date | string | null;
   source_published_at: Date | string | null;
   fetched_at: Date | string | null;
+  source_confidence: Confidence | null;
+  source_confidence_score: number | string | null;
   service_opening_status: OpeningStatus;
   service_opening_status_evaluated_at: Date | string | null;
   fuel_offers: unknown;
@@ -89,6 +104,7 @@ interface EvidenceRow extends QueryResultRow {
   charging_network: string | null;
   charging_total_evses: number | string | null;
   connector_types: unknown;
+  connector_capabilities: unknown;
   maximum_rated_power_kw: number | string | null;
   air_working_status: AirWorkingStatus | null;
   air_free: boolean | null;
@@ -139,6 +155,7 @@ const WASH_TYPES: ReadonlySet<string> = new Set([
   "vacuum",
   "unknown",
 ]);
+const CONFIDENCE_VALUES: ReadonlySet<string> = new Set(["high", "medium", "low"]);
 
 function timestamp(value: Date | string, label: string): string {
   const parsed = value instanceof Date ? value : new Date(value);
@@ -215,6 +232,30 @@ function sourceFromRow(row: EvidenceRow): ServiceSourceAttribution | null {
   };
 }
 
+function sourceQualityFromRow(row: EvidenceRow): ServiceSourceQuality | null {
+  if (
+    row.source_confidence === null ||
+    row.source_confidence === undefined ||
+    row.source_confidence_score === null ||
+    row.source_confidence_score === undefined
+  ) {
+    return null;
+  }
+  const score = Number(row.source_confidence_score);
+  const inBand =
+    (row.source_confidence === "high" && score >= 80 && score <= 100) ||
+    (row.source_confidence === "medium" && score >= 50 && score <= 79) ||
+    (row.source_confidence === "low" && score >= 0 && score <= 49);
+  if (
+    !CONFIDENCE_VALUES.has(row.source_confidence) ||
+    !Number.isSafeInteger(score) ||
+    !inBand
+  ) {
+    throw new Error("Database returned invalid source confidence");
+  }
+  return { confidence: row.source_confidence, confidenceScore: score };
+}
+
 function fuelOffersFromRow(row: EvidenceRow): FuelOffer[] {
   if (!Array.isArray(row.fuel_offers)) {
     throw new Error("Database returned invalid Fuel offers");
@@ -236,10 +277,54 @@ function chargingFromRow(row: EvidenceRow): ChargingEvidence | null {
     CONNECTOR_TYPE_SET,
     "EV connector types",
   ) as EvConnectorType[];
+  const connectorCapabilities = Array.isArray(row.connector_capabilities)
+    ? row.connector_capabilities.map((value) => {
+        if (typeof value !== "object" || value === null) {
+          throw new Error("Database returned invalid EV connector capabilities");
+        }
+        const candidate = value as {
+          connectorType?: unknown;
+          maximumRatedPowerKw?: unknown;
+        };
+        if (
+          typeof candidate.connectorType !== "string" ||
+          candidate.connectorType === "unknown" ||
+          !CONNECTOR_TYPE_SET.has(candidate.connectorType) ||
+          !connectorTypes.includes(candidate.connectorType as EvConnectorType)
+        ) {
+          throw new Error("Database returned invalid EV connector capabilities");
+        }
+        return {
+          connectorType: candidate.connectorType as Exclude<EvConnectorType, "unknown">,
+          maximumRatedPowerKw:
+            candidate.maximumRatedPowerKw === null
+              ? null
+              : (() => {
+                  const power = nullableNumber(
+                    candidate.maximumRatedPowerKw as number | string,
+                    "connector-specific maximum rated power",
+                  );
+                  if (power === null || power <= 0 || power > 1_000) {
+                    throw new Error(
+                      "Database returned invalid connector-specific maximum rated power",
+                    );
+                  }
+                  return power;
+                })(),
+        };
+      })
+    : [];
+  if (
+    new Set(connectorCapabilities.map(({ connectorType }) => connectorType)).size !==
+    connectorCapabilities.length
+  ) {
+    throw new Error("Database returned duplicate EV connector capabilities");
+  }
   return {
     operator: row.charging_operator,
     network: row.charging_network,
     connectorTypes,
+    connectorCapabilities,
     maximumRatedPowerKw: nullableNumber(
       row.maximum_rated_power_kw,
       "maximum rated power",
@@ -304,6 +389,7 @@ function mapEvidence(row: EvidenceRow): ServicePointEvidence {
     servicePointId: row.service_point_id,
     serviceType: row.service_type,
     source: sourceFromRow(row),
+    sourceQuality: sourceQualityFromRow(row),
     serviceOpeningStatus: row.service_opening_status,
     serviceOpeningStatusEvaluatedAt: nullableTimestamp(
       row.service_opening_status_evaluated_at,
@@ -352,6 +438,8 @@ export class PostgresServicePointEvidence implements ServicePointEvidencePort {
          source_record.source_observed_at,
          source_record.source_published_at,
          source_record.fetched_at,
+         source_quality.confidence AS source_confidence,
+         source_quality.confidence_score AS source_confidence_score,
          CASE WHEN service.service_type = 'fuel' THEN COALESCE((
            SELECT jsonb_agg(
              jsonb_build_object(
@@ -408,6 +496,28 @@ export class PostgresServicePointEvidence implements ServicePointEvidencePort {
              AND connector.connector_type IS NOT NULL
              AND connector.operational IS DISTINCT FROM false
          ), '[]'::jsonb) ELSE '[]'::jsonb END AS connector_types,
+         CASE WHEN service.service_type = 'charging' THEN COALESCE((
+           SELECT jsonb_agg(
+             jsonb_build_object(
+               'connectorType', capability.connector_type,
+               'maximumRatedPowerKw', capability.maximum_rated_power_kw
+             ) ORDER BY capability.connector_type
+           )
+           FROM (
+             SELECT
+               connector.connector_type,
+               max(connector.power_kw) FILTER (
+                 WHERE connector.power_kw BETWEEN 1 AND 1000
+               ) AS maximum_rated_power_kw
+             FROM charging_evses AS evse
+             JOIN charging_connectors AS connector ON connector.evse_id = evse.id
+             WHERE evse.service_point_id = service.service_point_id
+               AND connector.operational IS DISTINCT FROM false
+               AND connector.connector_type IS NOT NULL
+               AND connector.connector_type <> 'unknown'
+             GROUP BY connector.connector_type
+           ) AS capability
+         ), '[]'::jsonb) ELSE '[]'::jsonb END AS connector_capabilities,
          CASE WHEN service.service_type = 'charging' THEN (
            SELECT max(connector.power_kw)
            FROM charging_evses AS evse
@@ -464,6 +574,15 @@ export class PostgresServicePointEvidence implements ServicePointEvidencePort {
        LEFT JOIN data_sources AS source
          ON source.id = source_record.source_id
          AND source.lifecycle_status <> 'withdrawn'
+       LEFT JOIN LATERAL (
+         SELECT provenance.confidence, provenance.confidence_score
+         FROM field_provenance AS provenance
+         WHERE provenance.service_point_id = service.service_point_id
+           AND provenance.source_record_id = source_record.id
+           AND provenance.conflict = false
+         ORDER BY provenance.confidence_score, provenance.id
+         LIMIT 1
+       ) AS source_quality ON true
        WHERE service.service_point_id = ANY($1::uuid[])
          AND service.service_type = ANY($2::text[])
        ORDER BY service.service_point_id, service.service_type`,
