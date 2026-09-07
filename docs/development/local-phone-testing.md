@@ -98,7 +98,9 @@ pnpm local:start --lan
 - [ ] 让 Fuel 详情接收并校验列表选定油品，API 按该油品返回真实对应报价；保留未选择/无报价时 Unknown，不任取其他油品或伪造价格。补契约、列表/地图跳转与详情回归，再在华为验收。
 - [x] 按 Toulouse / Fuel / Gazole 测试步骤确认列表模拟报价：用户新照片 1 显示 `Price: €1.659 / litre · Tax included · Recent`（2026-09-07）；详情缺口单独保留，不算一并修复。
 - [x] 验证柴油 Cheapest 基础交互与有效报价优先：2026-09-07 用户照片显示 `Results: 2 · Order: Cheapest`，1.659 EUR/liter 主站排第一，Unknown/临时关闭站排第二。仅一个有效报价，不代替多报价升序/同价决胜边界验收。
-- [ ] 验证 Fuel `Open now`：当前模拟数据下应返回主站，排除 Temporarily Closed 站；顶部显示实际 Open now 排序，营业依据仅为模拟营业时间，不承诺真实即时状态。
+- [x] 验证 Fuel `Open now` 基础过滤：2026-09-07 用户照片显示 `Results: 1 · Order: Open now`，只剩 Multi-service 主站，价格 1.659 EUR/liter、Scheduled opening Open，临时关闭站已筛除。仅验证当前模拟营业状态，不代表真实即时营业或全部营业边界通过。
+- [ ] 验证 Fuel `Best`：Diesel 保持选中，检查实际排序 Best、主站推荐理由和 ETA 不可用说明。Mac 使用实际移动请求代码查询同一模拟城市/柴油，返回 appliedSort best、capability enabled、1 个主站，理由为距离较近、数据较新、ETA 不可用；手机仍待验收。Fuel 详情缺口和间歇加载失败仍未关闭。
+- [ ] 核对后续照片中的 `Cannot connect to Expo CLI`：本地 Expo 源码确认此提示来自 HMR 开发连接错误；当时 USB 已授权、服务监听和 8081/status 正常，但完整 URL/Error 未取得。待展开 See More 获取具体原因，不把此警告当作已定位的 Fuel API/Best 故障，不关闭加载稳定性问题。
 - [ ] 实际点击 DEMO 导航不应跳出；真实目的地导航另行验收。
 
 ### 2026-09-07 间歇加载失败与恢复

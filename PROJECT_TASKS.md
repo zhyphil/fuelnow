@@ -4,7 +4,7 @@
 > 需求来源：[france_spain_driver_decision_engine_project.md](./france_spain_driver_decision_engine_project.md)  
 > 当前状态：本机测试环境已实现，新增 17 tests、全量 990 tests 通过，双平台开发包编译和临时库清理验证通过；Phase 5 为 10/21 主任务及 18 个子项；Phase 6 为 5/13 主任务及 8 个准备子项；未发布，小时任务保持暂停
 > 当前阶段：本机真机测试进行中（华为基础列表已通过；Phase 5/6 均未整体验收）
-> 下一项任务：华为 Gazole 列表报价和 Cheapest 基础交互已由照片确认（有效报价在 Unknown 前，非多报价完整排序验收），下一步验收 Fuel Open now 筛除关闭站。Fuel 详情油品上下文缺口仍待修复回归；间歇加载失败虽已恢复但根因未确认。iPhone App 安装仍待处理；发布与真实 Beta 条件仍未关闭，见 [真机测试说明](./docs/development/local-phone-testing.md)
+> 下一项任务：华为 Gazole 列表报价、Cheapest 基础交互和 Open now 筛除关闭站已由照片确认，下一步验收 Fuel Best 推荐与限制说明。Fuel 详情油品上下文缺口仍待修复回归；间歇加载失败虽已恢复但根因未确认。iPhone App 安装仍待处理；发布与真实 Beta 条件仍未关闭，见 [真机测试说明](./docs/development/local-phone-testing.md)
 > 最后更新：2026-09-07
 
 ## 使用方法
@@ -552,6 +552,8 @@ V1 的核心验收结果是：
 2026-09-07 执行顺序补充：用户暂缓运营主体/邮箱/部署/分发决定，授权继续独立工程工作；QA-10、LEG-01/02 及实际部署/设备门槛保留未完成。先完成 LEG-03 工程子项，再检查 LEG-06 日志与分析；许可和发布门槛不得自动勾选。
 
 # 完成记录
+
+2026-09-07 华为 Open now 基础验收：照片显示 Results 1 / Order Open now，保留 1.659 EUR/liter 的营业主站，先前的临时关闭站已排除；勾选当前模拟数据过滤检查，不代表全部营业边界或真实现场通过。Mac 侧另验证 Best 返回主站及距离/新鲜度/ETA 缺失理由，手机 Best 仍待验收；随后用户照片显示 Cannot connect to Expo CLI 警告，完整 URL/Error 尚待提供，不能据此判定 Best 查询失败。Fuel 详情缺口与加载稳定性仍待处理。用户已重新明确授权按原约定 commit 并 push 到 origin/main；只发布文字记录，不上传照片或原始日志。
 
 2026-09-07 华为 Cheapest 基础验收：照片显示 Results 2 / Order Cheapest；1.659 EUR/liter 主站第一，Unknown/Closed/Unavailable 站第二，未知价格没有获得零价优势。真机测试说明勾选排序基础交互；由于只有一个有效报价，多报价排序边界未验收。下一步 Open now 筛除关闭站，Fuel 详情修复及加载稳定性仍待处理；仅提交文字记录。
 
