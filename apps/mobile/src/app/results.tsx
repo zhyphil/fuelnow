@@ -9,6 +9,8 @@ import { useLocation } from "../location/context";
 import { useSearchSelection } from "../search/context";
 import { buildInitialSearch } from "../search/selection";
 import { resultTitle, SearchController } from "../search/results";
+import { SortPicker } from "../components/SortPicker";
+import { withSearchSort, type Sort, type FuelType } from "../search/sorts";
 
 export default function ResultsScreen() {
   const router = useRouter();
@@ -18,7 +20,12 @@ export default function ResultsScreen() {
   const { service } = useSearchSelection();
   const { state: location } = useLocation();
   const origin = location.status === "ready" ? location.origin : null;
-  const query = useMemo(() => buildInitialSearch(service, origin), [service, origin]);
+  const [sort, setSort] = useState<Sort>("nearest");
+  const [fuelType, setFuelType] = useState<FuelType>();
+  const query = useMemo(() => {
+    const initial = buildInitialSearch(service, origin);
+    return initial ? withSearchSort(initial, sort, fuelType) : null;
+  }, [service, origin, sort, fuelType]);
   const [controller] = useState(() => new SearchController(api.nearby));
   const state = useSyncExternalStore(controller.subscribe, controller.getSnapshot);
   useFocusEffect(
@@ -48,6 +55,19 @@ export default function ResultsScreen() {
             <Text accessibilityRole="header" style={styles.title}>
               {service ? services.names[service] : copy.title}
             </Text>
+            {service && query && (
+              <SortPicker
+                service={service}
+                sort={sort}
+                fuelType={fuelType}
+                response={response}
+                onSort={setSort}
+                onFuel={(fuel) => {
+                  setFuelType(fuel);
+                  setSort("nearest");
+                }}
+              />
+            )}
             {!query ? (
               <Text style={styles.body}>{copy.missing}</Text>
             ) : (

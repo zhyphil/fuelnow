@@ -118,6 +118,14 @@ export function createApiClient(config: MobileConfig, fetcher: typeof fetch = fe
             String(body.ranking.appliedSort),
           ) &&
           typeof body.ranking.degraded === "boolean" &&
+          isRecord(body.ranking.capability) &&
+          [
+            "enabled",
+            "conditional",
+            "unavailable",
+            "source_unhealthy",
+            "legally_blocked",
+          ].includes(String(body.ranking.capability.state)) &&
           isRecord(body.outcome) &&
           Array.isArray(body.outcome.warnings) &&
           isRecord(body.search) &&

@@ -5,9 +5,11 @@ import { languageMessages } from "../content/language";
 import type { Language } from "./preferences";
 import { serviceMessages } from "../content/services";
 import { resultMessages } from "../content/results";
+import { sortMessages } from "../content/sorts";
 
 export function getMessages(language: Language) {
   return {
+    sorts: sortMessages[language],
     results: resultMessages[language],
     services: serviceMessages[language],
     app: messages[language],

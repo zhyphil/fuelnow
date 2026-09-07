@@ -4,7 +4,7 @@
 > 需求来源：[france_spain_driver_decision_engine_project.md](./france_spain_driver_decision_engine_project.md)  
 > 当前状态：开发已恢复；按任务完成、验收、commit、push 顺序继续
 > 当前阶段：Phase 4 客户端开发
-> 下一项任务：`P4-RES-02` 实现 capability-aware 排序切换
+> 下一项任务：`P4-RES-03` 显示名称、地址、距离和 ETA
 > 最后更新：2026-09-07
 
 ## 使用方法
@@ -289,7 +289,7 @@ V1 的核心验收结果是：
 ## 4.2 搜索结果
 
 - [x] `P4-RES-01` 实现列表优先的结果页 — 2026-09-07：真实 API 列表、三语状态、取消与重试；603 tests 和双平台 bundle 通过
-- [ ] `P4-RES-02` 实现 capability-aware Nearest/Cheapest/Open now/Best 切换，隐藏或解释不可用能力
+- [x] `P4-RES-02` 实现 capability-aware Nearest/Cheapest/Open now/Best 切换，隐藏或解释不可用能力 — 2026-09-07：四排序、燃油选择、服务器能力/原因三语解释；622 tests 和双平台 bundle 通过
 - [ ] `P4-RES-03` 显示名称、地址、距离和 ETA
 - [ ] `P4-RES-04` 显示价格、营业状态和服务状态
 - [ ] `P4-RES-05` 显示数据更新时间、来源和可信度
@@ -630,3 +630,4 @@ V1 的核心验收结果是：
 | 2026-09-07 | 完成三语选择与本地偏好                         | P4-APP-04：EN/FR/ES 目录和即时切换、设备语言回退、串行写入/清除与原生权限文案；只保存语言码；全量 580 tests 和双平台 bundle 通过                                                                                                                                             |
 | 2026-09-07 | 完成首页四服务入口                             | P4-APP-05：四服务选择后展示位置入口，使用标准服务值、不加国家边界过滤、不虚构默认位置；586 tests 与双平台 bundle 通过；下一项列表结果页                                                                                                                                      |
 | 2026-09-07 | 完成列表优先结果页                             | P4-RES-01：服务/位置连接真实 API，按后端排序展示列表与降级提示，离页/后台清理、旧请求竞态隔离和异常响应保护；603 tests 与双平台 bundle 通过；设备交互验收留在 Phase 5                                                                                                        |
+| 2026-09-07 | 完成 capability-aware 排序切换                 | P4-RES-02：四排序与九类燃油选择；不可比较的三服务 Cheapest 禁用、条件能力需当前证据、服务器状态和原因三语解释、请求/实际排序明确区分；622 tests 与双平台 bundle 通过；下一项名称/地址/距离/ETA                                                                               |

@@ -95,6 +95,7 @@ describe("mobile API boundary", () => {
     "{}",
     JSON.stringify({ ...sample, resultCount: 9 }),
     JSON.stringify({ ...sample, ranking: {} }),
+    JSON.stringify({ ...sample, ranking: { ...sample.ranking, capability: null } }),
     JSON.stringify({ ...sample, outcome: {} }),
     JSON.stringify({ ...sample, search: null }),
     JSON.stringify({ ...sample, results: [null] }),
