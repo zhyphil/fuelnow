@@ -16,6 +16,7 @@ import { EvidenceSummary } from "../components/EvidenceSummary";
 import { RecommendationSummary } from "../components/RecommendationSummary";
 import { ResultMap } from "../components/ResultMap";
 import { NavigationButtons } from "../components/NavigationButtons";
+import { LocationPanel } from "../components/LocationPanel";
 import { withSearchSort, type Sort, type FuelType } from "../search/sorts";
 
 export default function ResultsScreen() {
@@ -109,7 +110,10 @@ export default function ResultsScreen() {
               />
             )}
             {!query ? (
-              <Text style={styles.body}>{copy.missing}</Text>
+              <View style={styles.header}>
+                <Text style={styles.body}>{copy.missing}</Text>
+                {service && <LocationPanel />}
+              </View>
             ) : (
               <>
                 {state.status === "loading" && (

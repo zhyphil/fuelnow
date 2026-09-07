@@ -1,8 +1,34 @@
 import { describe, expect, it } from "vitest";
 import { buildInitialSearch, SERVICES } from "../src/search/selection";
 import { serviceMessages } from "../src/content/services";
+import { LocationController } from "../src/location/controller";
 
 describe("four-service entry", () => {
+  it.each([true, false])(
+    "recovers from denied permission via manual location (can ask again: %s)",
+    async (canAskAgain) => {
+      const location = new LocationController({
+        permission: async () => ({ granted: false, canAskAgain }),
+        requestPermission: async () => ({ granted: false, canAskAgain }),
+        servicesEnabled: async () => true,
+        position: async () => {
+          throw new Error("GPS must not run");
+        },
+      });
+      await location.request();
+      expect(location.getSnapshot().status).toBe(canAskAgain ? "denied" : "blocked");
+      location.selectManual({ latitude: 41.3874, longitude: 2.1686 });
+      const state = location.getSnapshot();
+      expect(state.status).toBe("ready");
+      for (const service of SERVICES)
+        expect(
+          buildInitialSearch(service, state.status === "ready" ? state.origin : null)
+            ?.service,
+        ).toBe(service);
+      location.clear();
+      expect(location.getSnapshot().status).toBe("idle");
+    },
+  );
   it.each(SERVICES)(
     "builds canonical %s searches without a country restriction",
     (service) => {
