@@ -19,3 +19,17 @@ Migration 0016 adds explicit canonical ownership and an offer-specific current-p
 Collection does not delete missing stations or declare equipment permanently closed. Disappearing air/wash capabilities cease to be advertised; unknown fuel prices remain null. Price history is retained. This writer deliberately does not auto-merge independently sourced stations or alter manual lifecycle decisions. Production source credentials/schedules remain separate gates.
 
 Verification: `pnpm --filter @fuel-now/api test:import-local` requires `LOAD_TEST_DATABASE_URL` with a loopback PostgreSQL connection. It creates a randomly named database, applies all 16 migrations, tests 13 groups including real rollback/concurrency and three-service API reads, then drops only that generated database. CI executes the same integration check. Full quality gate: 827 tests (373 API), plus isolated 320-request load regression. Fixtures establish engineering correctness, not current-data or native-device acceptance.
+
+## Bounded official collection — P5-QA-10c
+
+`source:import-fuel` is an operator-invoked development command, not a scheduler or a national snapshot loader. It requires `APP_ENV=development|test`, `SOURCE_SYNC_ENABLED=true`, a loopback `DATABASE_URL`, and a previously registered/enabled source. It never silently registers or re-enables a source.
+
+- France: `FUEL_IMPORT_COUNTRY=FR`, `FUEL_IMPORT_STATION_IDS=31000001` (1–20 distinct numeric IDs).
+- Spain: `FUEL_IMPORT_COUNTRY=ES`, `FUEL_IMPORT_MUNICIPALITY=4384` (one municipality, at most 100 records).
+- Fixed official HTTPS origins; no arbitrary URL, geographic user input, credentials or redirects. One request, 20-second timeout, 2 MiB streamed-byte cap, strict JSON envelope and scope/duplicate validation.
+- Empty, truncated, oversized, invalid or out-of-scope batches are rejected before persistence. Failed collection does not replace accepted data. A reporting error can follow a committed batch; rerunning that exact snapshot is idempotent.
+- `sync_runs` records attempt, status and counters with sanitized failures. Command output includes byte count, SHA-256, collection timestamp and `bounded_development` scope, not raw records. A bounded run is explicitly incremental, never evidence of a complete national snapshot; it does not mark unseen stations missing.
+
+`LIVE_SOURCE_CHECK=true LOAD_TEST_DATABASE_URL=<loopback development URL> pnpm --filter @fuel-now/api test:fuel-live` fetches current official data into a fresh disposable database only. On 2026-09-07 at 13:01–13:02 UTC, France station 31000001 and 17 Pinto stations passed raw price/unit retention, duplicate retry, API/source consistency and successful sync-record checks. French response SHA-256: `a66a71c73771617b553d793f3670deeb65d5a23b91fa0b1d90b432f7c08961db`; Spanish response SHA-256: `967e6ec278ff2d5aadb238e29edea33a588bac355743f3b7fb081e178545f786`. Temporary database `fuel_now_import_3e405264e636` was removed.
+
+Spain REST has a snapshot publication time, not a per-station price observation time. Its amounts are retained in SQL, while the existing presentation/ranking policy keeps unknown-age prices hidden/ineligible. The live check verifies this deliberate degradation rather than substituting collection time. Full gate: 843 tests, including 16 collection tests. EV, OSM, national snapshot publication, sustained production scheduling and native/manual acceptance remain separate work.
