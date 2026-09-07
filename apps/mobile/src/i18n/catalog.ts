@@ -7,9 +7,11 @@ import { serviceMessages } from "../content/services";
 import { resultMessages } from "../content/results";
 import { sortMessages } from "../content/sorts";
 import { pointMessages } from "../content/point";
+import { evidenceCopy } from "../content/evidence";
 
 export function getMessages(language: Language) {
   return {
+    evidence: evidenceCopy(language),
     point: pointMessages[language],
     sorts: sortMessages[language],
     results: resultMessages[language],
