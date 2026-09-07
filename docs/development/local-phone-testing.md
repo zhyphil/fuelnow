@@ -1,6 +1,6 @@
 # 本机 + iPhone / Android 真机测试
 
-2026-09-07。iPhone 15 Pro Max / iOS 26.6.1；华为 Mate 20 HMA-L29 / EMUI 12.0.0，USB 读取确认 Android 10 / API 29、Expo Go 57.0.9。两台手机的 LAN 浏览器检查已通过；华为已完成 Fuel 基础列表报价、Cheapest、Open now、USB Best 理由显示，Barcelona / Charge 基础列表、静态详情和排序限制说明显示，以及 Toulouse / Air 独立搜索与详情检查。Wash 基础独立搜索已确认 1 个最近排序结果、模拟价格与状态，详情此前已展示。Fuel 详情油品上下文缺口仍待修复。当前使用华为 USB 回环对照环境，LAN 测试暂停；下一步验证 DEMO 导航实际点击不会跳出，USB 长期稳定性仍待确认。这不是正式 Beta 发布或现场验收。
+2026-09-07。iPhone 15 Pro Max / iOS 26.6.1；华为 Mate 20 HMA-L29 / EMUI 12.0.0，USB 读取确认 Android 10 / API 29、Expo Go 57.0.9。两台手机的 LAN 浏览器检查已通过；华为已完成 Fuel 基础列表报价、Cheapest、Open now、USB Best 理由显示，Barcelona / Charge 基础列表、静态详情和排序限制说明显示，以及 Toulouse / Air 独立搜索与详情检查。Wash 基础独立搜索已确认 1 个最近排序结果、模拟价格与状态，详情此前已展示；用户实际点击 Wash 列表 DEMO 导航后未跳转。Fuel 详情油品上下文缺口仍待修复。当前使用华为 USB 回环对照环境，LAN 测试暂停；下一步验证详情页 DEMO 导航实际点击，再补 Charge 禁用项点击回归，USB 长期稳定性仍待确认。这不是正式 Beta 发布或现场验收。
 
 ## 启动与停止
 
@@ -145,7 +145,8 @@ pnpm local:start --lan
 - [x] Toulouse / Lavage（Wash）基础列表卡片：2026-09-07 用户按独立入口步骤提交的新照片显示列表刷新/地图按钮和第 1 个 Toulouse 主 DEMO 站，价格 6,00 EUR/programme de lavage，会员条件/税费未知，营业时间未知，服务按来源可用；模拟导航禁用和低置信度提示可见。与此前多服务详情中的 6 EUR 洗车方案、自动滚筒/吸尘器、设备按来源工作一致。仅确认已显示的模拟卡片，不代表真实价格或设备状态。
 - [x] Wash 列表顶部结果数量/排序：2026-09-07 用户随后补图明确显示 Lavage、Résultats: 1、Classement: Le plus proche，以及 ETA 缺失时按距离排序、部分数据未知和扩大搜索范围的说明。结合价格卡片，完成当前模拟数据的 Wash 基础独立搜索展示验收；不代替多候选排序或真实行程时间验收。
 - [ ] 定位 `Cannot connect to Expo CLI`：用户展开照片确认 URL 为 `192.168.1.63:8081`、Error 为 `undefined`；本地 Expo 源码显示此警告来自 HMR `/hot` 的 connection-error，读取 `e.message`，undefined 本身不提供底层原因。USB 已授权，Mac 回环和 LAN 地址的 `/hot` WebSocket 握手均成功；限定 Expo 进程的近期日志出现新的项目启动记录，但未取得对应网络异常，不能宣称手机长连接已修复，也不能把该警告认定为 Fuel API/Best 故障。建议用户确认后做 USB 与 LAN 对照，尚未设置 USB 端口转发、重启服务或修改配置。
-- [ ] 实际点击 DEMO 导航不应跳出；真实目的地导航另行验收。
+- [x] Wash 列表 DEMO 导航点击保护：2026-09-07 用户按步骤点击当前 Toulouse DEMO 站灰色 Itinéraire · Google Maps 按钮，明确回复“点击后没反应，没有跳转”。确认该列表入口实际点击未打开外部导航，符合此前可见的模拟站点导航禁用说明；证据为用户操作反馈，不扩展为其他页面或真实导航验收。
+- [ ] 详情页 DEMO 导航点击保护：进入同站 Voir les détails，点击详情页 Itinéraire · Google Maps，确认不会打开外部导航；真实目的地导航另行验收。
 
 ### 2026-09-07 间歇加载失败与恢复
 
