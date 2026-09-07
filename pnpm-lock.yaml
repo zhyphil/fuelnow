@@ -68,6 +68,9 @@ importers:
       pg:
         specifier: 8.23.0
         version: 8.23.0
+      tsx:
+        specifier: 4.23.13
+        version: 4.23.13
     devDependencies:
       '@types/pg':
         specifier: 8.23.1
@@ -75,9 +78,6 @@ importers:
       openapi-typescript:
         specifier: 7.13.0
         version: 7.13.0(typescript@5.9.2)
-      tsx:
-        specifier: 4.23.13
-        version: 4.23.13
 
   apps/mobile:
     dependencies:

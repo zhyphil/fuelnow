@@ -4,7 +4,7 @@
 > 需求来源：[france_spain_driver_decision_engine_project.md](./france_spain_driver_decision_engine_project.md)  
 > 当前状态：Phase 5 继续独立工程项；运营/部署/分发待单独决定，定时自动任务保持暂停
 > 当前阶段：Phase 5 测试、合规与发布准备
-> 下一项任务：`P5-REL-01` 可移植部署工程准备；实际开通待确认，见 [发布前置条件](./docs/testing/phase5-release-prerequisites.md)
+> 下一项任务：`P5-REL-05` 发布检查与回滚工程准备；实际开通待确认，见 [发布前置条件](./docs/testing/phase5-release-prerequisites.md)
 > 最后更新：2026-09-07
 
 ## 使用方法
@@ -351,7 +351,8 @@ V1 的核心验收结果是：
 
 ## 5.3 发布准备
 
-- [ ] `P5-REL-01` 建立测试和生产部署流程 — 阻塞：待确认测试/生产平台、区域及域名
+- [ ] `P5-REL-01` 建立测试和生产部署流程 — 进行中：容器工程包完成；实际测试/生产环境、域名与部署验证待确认
+  - [x] `P5-REL-01a` 固定运行镜像、生产依赖与无网络只读容器 CI 冒烟 — 2026-09-07：本地构建与 200/400 API 冒烟通过，不含生产数据或部署验收；见 docs/testing/phase5-portable-runtime.md
 - [ ] `P5-REL-02` 建立错误监控、性能监控和数据同步告警
 - [ ] `P5-REL-03` 准备 Beta 发布说明和反馈渠道
 - [ ] `P5-REL-04` 完成核心用户流程回归测试
@@ -669,3 +670,4 @@ V1 的核心验收结果是：
 | 2026-09-07 | Phase 5 部分进度与阻塞交接（非阶段完成）       | QA-01 至 QA-09 共 9/21 项完成并各自 push；QA-10 留存两国十站当前官方记录核对但未勾选；771 tests，CI dc06fcc 成功；运营/部署/设备条件待确认，见 docs/testing/phase5-release-prerequisites.md                                                                                  |
 | 2026-09-07 | P5-LEG-03a 原生权限最小化                      | 移除多余权限、关闭 Android 备份，新增双平台 introspect CI 门槛与 11 项回归；170 mobile tests、类型、lint 通过；LEG-03 整项仍待设备/法律依据审查                                                                                                                              |
 | 2026-09-07 | P5-LEG-06 应用日志与分析隐私                   | 清除任意异常名称/原文、服务端 request ID、SQL 写入边界过滤；9 个新增测试覆盖正常/错误/限流路径，337 API tests 通过；实际部署日志和未来 SDK 仍须重验                                                                                                                          |
+| 2026-09-07 | P5-REL-01a 可移植后端容器                      | 固定 Node 镜像摘要、冻结生产依赖、构建允许列表；非 root/只读/无网络容器实际 API 冒烟通过，纳入 CI；未部署、未上传镜像，REL-01 整项待平台验证                                                                                                                                 |

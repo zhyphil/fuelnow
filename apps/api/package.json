@@ -28,11 +28,11 @@
     "@fuel-now/contracts": "workspace:*",
     "@sinclair/typebox": "0.34.52",
     "fastify": "5.12.1",
-    "pg": "8.23.0"
+    "pg": "8.23.0",
+    "tsx": "4.23.13"
   },
   "devDependencies": {
     "@types/pg": "8.23.1",
-    "openapi-typescript": "7.13.0",
-    "tsx": "4.23.13"
+    "openapi-typescript": "7.13.0"
   }
 }
