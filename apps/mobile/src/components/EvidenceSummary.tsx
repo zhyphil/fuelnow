@@ -6,6 +6,7 @@ import {
   fuelRows,
   chargingRows,
   airRows,
+  washRows,
   type Evidence,
 } from "../search/evidence";
 export function EvidenceSummary({
@@ -21,6 +22,7 @@ export function EvidenceSummary({
     ...fuelRows(evidence, language),
     ...chargingRows(evidence, country, language),
     ...airRows(evidence, language),
+    ...washRows(evidence, language),
     ...provenanceRows(evidence, language),
   ];
   return (

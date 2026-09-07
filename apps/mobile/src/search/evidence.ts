@@ -4,6 +4,18 @@ import { evidenceCopy } from "../content/evidence";
 import { sortMessages } from "../content/sorts";
 export type Evidence = NearbyPoint["evidence"];
 export type EvidenceRow = { label: string; value: string };
+export function washRows(evidence: Evidence, language: Language): EvidenceRow[] {
+  const detail = evidence.details.wash;
+  if (!detail) return [];
+  const c = evidenceCopy(language);
+  return [
+    {
+      label: c.washTypes,
+      value: detail.washTypes.map((type) => c[type]).join(", ") || c.unknown,
+    },
+    { label: c.workingStatus, value: c[detail.workingStatus] },
+  ];
+}
 export function airRows(evidence: Evidence, language: Language): EvidenceRow[] {
   const detail = evidence.details.air;
   if (!detail) return [];

@@ -1,5 +1,24 @@
 import type { Language } from "../i18n/preferences";
 const translations = {
+  washTypes: ["Wash services", "Types de lavage", "Tipos de lavado"],
+  automatic_rollers: [
+    "Automatic rollers",
+    "Rouleaux automatiques",
+    "Rodillos automáticos",
+  ],
+  automatic_touchless: [
+    "Automatic touchless",
+    "Automatique sans contact",
+    "Automático sin contacto",
+  ],
+  high_pressure_self_service: [
+    "Self-service pressure wash",
+    "Haute pression en libre-service",
+    "Alta presión autoservicio",
+  ],
+  hand_wash: ["Hand wash", "Lavage manuel", "Lavado a mano"],
+  interior_cleaning: ["Interior cleaning", "Nettoyage intérieur", "Limpieza interior"],
+  vacuum: ["Vacuum", "Aspirateur", "Aspirador"],
   airCost: ["Air fee", "Tarif de gonflage", "Tarifa de aire"],
   free: ["Free", "Gratuit", "Gratis"],
   paid: [

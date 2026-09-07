@@ -2,6 +2,7 @@ import { expect, it } from "vitest";
 import { fuelRows } from "../src/search/evidence";
 import { chargingRows } from "../src/search/evidence";
 import { airRows } from "../src/search/evidence";
+import { washRows } from "../src/search/evidence";
 import sample from "../../../docs/api/examples/nearby-fuel-cheapest.json";
 import {
   priceText,
@@ -11,6 +12,28 @@ import {
   type Evidence,
 } from "../src/search/evidence";
 const evidence = sample.results[0]!.evidence as Evidence;
+it("shows all known wash types and keeps missing types or prices unknown", () => {
+  const wash: Evidence = {
+    ...evidence,
+    price: null,
+    details: {
+      ...evidence.details,
+      wash: { washTypes: ["automatic_touchless", "vacuum"], workingStatus: "closed" },
+    },
+  };
+  expect(washRows(wash, "en")[0]!.value).toBe("Automatic touchless, Vacuum");
+  expect(washRows(wash, "en")[1]!.value).toBe("Closed");
+  expect(priceText(wash.price, "en")).toBe("Unknown");
+  expect(
+    washRows(
+      {
+        ...wash,
+        details: { ...wash.details, wash: { washTypes: [], workingStatus: "unknown" } },
+      },
+      "es",
+    )[0]!.value,
+  ).toBe("Desconocido");
+});
 it.each([true, false, null])(
   "preserves the Air free/paid/unknown distinction: %s",
   (free) => {
