@@ -133,7 +133,8 @@ pnpm local:start --lan
 
 待处理：
 
-- [ ] 让 Fuel 详情接收并校验列表选定油品，API 按该油品返回真实对应报价；保留未选择/无报价时 Unknown，不任取其他油品或伪造价格。补契约、列表/地图跳转与详情回归，再在华为验收。
+- [x] Fuel 详情油品上下文工程修复（2026-09-07）：列表/地图详情跳转携带已显示结果的 fuelType，详情校验参数并在切换/重试时保留，API 只选择对应油品报价；不选择、未提供或无报价时保持 Unknown，其他服务不受影响。更新生成契约，新增 12 项回归，全量 `pnpm check` 1002 tests 通过；`pnpm local:check` 通过真实 HTTP/临时库验证柴油 1.659、SP95 E10 1.719、不选油品和未提供 E85 均无价格，临时库清理成功。不等同真机复验。
+- [ ] 华为复验 Fuel 列表进入详情的柴油/SP95 E10 报价一致性，以及切换油品后无旧报价残留；工程修复已完成，手机验收未关闭。
 - [x] 按 Toulouse / Fuel / Gazole 测试步骤确认列表模拟报价：用户新照片 1 显示 `Price: €1.659 / litre · Tax included · Recent`（2026-09-07）；详情缺口单独保留，不算一并修复。
 - [x] 验证柴油 Cheapest 基础交互与有效报价优先：2026-09-07 用户照片显示 `Results: 2 · Order: Cheapest`，1.659 EUR/liter 主站排第一，Unknown/临时关闭站排第二。仅一个有效报价，不代替多报价升序/同价决胜边界验收。
 - [x] 验证 Fuel `Open now` 基础过滤：2026-09-07 用户照片显示 `Results: 1 · Order: Open now`，只剩 Multi-service 主站，价格 1.659 EUR/liter、Scheduled opening Open，临时关闭站已筛除。仅验证当前模拟营业状态，不代表真实即时营业或全部营业边界通过。

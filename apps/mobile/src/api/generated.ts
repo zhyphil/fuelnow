@@ -508,7 +508,18 @@ export interface operations {
   };
   getServicePoint: {
     parameters: {
-      query?: never;
+      query?: {
+        fuelType?:
+          | "sp95"
+          | "sp95_e10"
+          | "sp98"
+          | "e85"
+          | "diesel"
+          | "premium_diesel"
+          | "lpg"
+          | "cng"
+          | "lng";
+      };
       header?: never;
       path: {
         id: string;

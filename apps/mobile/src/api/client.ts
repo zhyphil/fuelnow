@@ -9,6 +9,9 @@ export type NearbyResponse =
   operations["searchNearbyServicePoints"]["responses"][200]["content"]["application/json"];
 export type ServicePointResponse =
   operations["getServicePoint"]["responses"][200]["content"]["application/json"];
+export type ServicePointQuery = NonNullable<
+  operations["getServicePoint"]["parameters"]["query"]
+>;
 export type ApiFailureKind =
   "network" | "timeout" | "cancelled" | "http" | "invalid_response";
 
@@ -160,12 +163,20 @@ export function createApiClient(config: MobileConfig, fetcher: typeof fetch = fe
         signal,
       );
     },
-    servicePoint(id: string, signal?: AbortSignal): Promise<ServicePointResponse> {
+    servicePoint(
+      id: string,
+      signal?: AbortSignal,
+      query: ServicePointQuery = {},
+    ): Promise<ServicePointResponse> {
       if (!/^[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}$/i.test(id)) {
         throw new Error("Invalid service point ID");
       }
       return get(
-        `/v1/service-points/${encodeURIComponent(id)}`,
+        `/v1/service-points/${encodeURIComponent(id)}${
+          query.fuelType
+            ? `?${new URLSearchParams({ fuelType: query.fuelType }).toString()}`
+            : ""
+        }`,
         (body) =>
           validDetail(body) &&
           typeof body.requestId === "string" &&

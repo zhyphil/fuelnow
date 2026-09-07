@@ -117,8 +117,19 @@ async function main() {
                 }
                 if (sort === "nearest") {
                   const selected = response.results[0]!;
-                  const detail = await client.servicePoint(selected.id);
+                  const detail = await client.servicePoint(
+                    selected.id,
+                    undefined,
+                    response.fuelType ? { fuelType: response.fuelType } : {},
+                  );
                   assert.equal(detail.servicePoint.id, selected.id);
+                  if (service === "fuel") {
+                    const fuel = detail.servicePoint.services.find(
+                      (entry) => entry.serviceType === "fuel",
+                    )!.evidence;
+                    assert.deepEqual(fuel.price, selected.evidence.price);
+                    assert.deepEqual(fuel.details.fuel, selected.evidence.details.fuel);
+                  }
                   assert.ok(
                     detail.servicePoint.services.some(
                       (entry) => entry.serviceType === service,

@@ -28,6 +28,7 @@ const ports = vi.hoisted(() => ({
   replace: vi.fn(),
   back: vi.fn(),
   id: "",
+  fuelType: undefined as string | string[] | undefined,
   origin: { latitude: 48.8566, longitude: 2.3522, source: "manual", label: "Paris" },
 }));
 Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
@@ -53,7 +54,7 @@ vi.mock("../src/location/context", () => ({
 }));
 vi.mock("expo-router", () => ({
   useRouter: () => ports,
-  useLocalSearchParams: () => ({ id: ports.id }),
+  useLocalSearchParams: () => ({ id: ports.id, fuelType: ports.fuelType }),
   useFocusEffect: (effect: () => (() => void) | void) => useEffect(effect, [effect]),
 }));
 vi.mock("react-native", () => ({
@@ -124,6 +125,7 @@ afterEach(async () => {
   for (const root of roots.splice(0)) await act(async () => root.unmount());
   analytics.setEnabled(false);
   vi.clearAllMocks();
+  ports.fuelType = undefined;
 });
 const cases = (["en", "fr", "es"] as const).flatMap((language) =>
   (["fuel", "charging", "air", "wash"] as const).map((service) => ({
@@ -269,10 +271,30 @@ it.each(cases)(
     await press(copy.evidence.details);
     expect(ports.push).toHaveBeenLastCalledWith({
       pathname: "/point/[id]",
-      params: { id: first.id },
+      params: {
+        id: first.id,
+        ...(service === "fuel" ? { fuelType: response.fuelType } : {}),
+      },
     });
+    // Map selection must carry exactly the same context as list selection.
+    await press(copy.evidence.map);
+    await act(async () =>
+      root.container.queryAll((n) => n.type === "Marker")[0]!.props.onPress(),
+    );
+    await press(copy.evidence.details);
+    expect(ports.push).toHaveBeenLastCalledWith({
+      pathname: "/point/[id]",
+      params: {
+        id: first.id,
+        ...(service === "fuel" ? { fuelType: response.fuelType } : {}),
+      },
+    });
+    ports.fuelType = service === "fuel" ? (response.fuelType ?? undefined) : undefined;
     await render(<PointScreen />);
     expect(ports.servicePoint.mock.calls[0]![0]).toBe(first.id);
+    expect(ports.servicePoint.mock.calls[0]![2]).toEqual(
+      service === "fuel" ? { fuelType: response.fuelType } : {},
+    );
     await press("Google Maps");
     expect(analytics.beta.getSnapshot().attempts).toMatchObject([
       { status: "success", exposed: true, clicked: true, handedOff: true },
@@ -332,6 +354,54 @@ it("disables synthetic station navigation in both result and detail screens", as
   );
   expect(button("Google Maps").props.disabled).toBe(true);
   expect(ports.openURL).not.toHaveBeenCalled();
+});
+
+it("reloads detail on fuel changes, retries the same fuel and rejects invalid route fuel", async () => {
+  ports.language = "en";
+  ports.id = detail.servicePoint.id;
+  ports.fuelType = "diesel";
+  ports.servicePoint.mockResolvedValue(detail);
+  const root = createRoot({ textComponentTypes: ["Text"] });
+  roots.push(root);
+  await act(async () => root.render(<PointScreen />));
+  expect(ports.servicePoint).toHaveBeenLastCalledWith(
+    ports.id,
+    expect.any(AbortSignal),
+    { fuelType: "diesel" },
+  );
+  ports.fuelType = "sp95_e10";
+  ports.servicePoint.mockRejectedValueOnce(new ApiFailure("network"));
+  await act(async () => root.render(<PointScreen />));
+  expect(ports.servicePoint).toHaveBeenLastCalledWith(
+    ports.id,
+    expect.any(AbortSignal),
+    { fuelType: "sp95_e10" },
+  );
+  const retry = root.container.queryAll(
+    (node) =>
+      node.type === "Pressable" &&
+      node.props.accessibilityLabel === getMessages("en").results.retry,
+  )[0]!;
+  await act(async () => retry.props.onPress());
+  expect(ports.servicePoint).toHaveBeenLastCalledWith(
+    ports.id,
+    expect.any(AbortSignal),
+    { fuelType: "sp95_e10" },
+  );
+  const calls = ports.servicePoint.mock.calls.length;
+  ports.fuelType = ["diesel", "sp95_e10"];
+  await act(async () => root.render(<PointScreen />));
+  expect(ports.servicePoint).toHaveBeenCalledTimes(calls);
+  expect(JSON.stringify(root.container.toJSON())).toContain(
+    getMessages("en").evidence.invalidPoint,
+  );
+  ports.fuelType = undefined;
+  await act(async () => root.render(<PointScreen />));
+  expect(ports.servicePoint).toHaveBeenLastCalledWith(
+    ports.id,
+    expect.any(AbortSignal),
+    {},
+  );
 });
 
 it("shows a safe network error and retries the same service without exposing URLs", async () => {

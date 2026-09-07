@@ -90,8 +90,33 @@ async function main() {
                   point.evidence.source?.id.startsWith("__fixture__"),
               ),
             );
-            const detail = await client.servicePoint(response.results[0]!.id);
+            const detail = await client.servicePoint(
+              response.results[0]!.id,
+              undefined,
+              response.fuelType ? { fuelType: response.fuelType } : {},
+            );
             assert.ok(detail.servicePoint.name?.startsWith("DEMO — "));
+            if (service === "fuel") {
+              const pointId = response.results[0]!.id;
+              const fuelEvidence = (value: typeof detail) =>
+                value.servicePoint.services.find(
+                  (entry) => entry.serviceType === "fuel",
+                )!.evidence;
+              assert.equal(fuelEvidence(detail).price?.amount, 1.659);
+              assert.equal(
+                fuelEvidence(detail).details.fuel?.requestedFuel?.fuelType,
+                "diesel",
+              );
+              const petrol = await client.servicePoint(pointId, undefined, {
+                fuelType: "sp95_e10",
+              });
+              assert.equal(fuelEvidence(petrol).price?.amount, 1.719);
+              for (const query of [{}, { fuelType: "e85" as const }]) {
+                const unknown = await client.servicePoint(pointId, undefined, query);
+                assert.equal(fuelEvidence(unknown).price, null);
+                assert.equal(fuelEvidence(unknown).details.fuel?.requestedFuel, null);
+              }
+            }
           }
           const fuel = await client.nearby({
             service: "fuel",

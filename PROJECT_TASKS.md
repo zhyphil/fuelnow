@@ -2,9 +2,9 @@
 
 > 项目：France + Spain Driver Decision Engine  
 > 需求来源：[france_spain_driver_decision_engine_project.md](./france_spain_driver_decision_engine_project.md)  
-> 当前状态：本机测试环境已实现，新增 17 tests、全量 990 tests 通过，双平台开发包编译和临时库清理验证通过；Phase 5 为 10/21 主任务及 18 个子项；Phase 6 为 5/13 主任务及 8 个准备子项；未发布，小时任务保持暂停
+> 当前状态：用户已授权真机问题修复；Fuel 详情油品上下文修复及回归完成，全量 1002 tests 与真实临时库接口检查通过，手机复验待进行；Phase 5 为 10/21 主任务及 18 个子项；Phase 6 为 5/13 主任务及 8 个准备子项；未发布，小时任务保持暂停
 > 当前阶段：本机真机测试进行中（华为基础列表已通过；Phase 5/6 均未整体验收）
-> 下一项任务：用户确认已恢复原字体档位，本次大字体测试设置恢复完成；建议经用户确认转入已发现问题的修复，优先处理已定位的 Fuel 详情油品上下文并补回归。Combustible 词内断行和地图持续空白仍未解决，地图/原连接故障根因及 USB 长期稳定性未确认；尚未开始修复代码，未将分项测试等同整体验收。iPhone LAN 测试暂不可用，App 安装仍待处理；发布条件未关闭，见 [真机测试说明](./docs/development/local-phone-testing.md)
+> 下一项任务：继续修复首页 Combustible 长词在窄屏/大字体下的断行，然后处理地图持续空白；Fuel 详情工程检查已通过，待更新 USB 测试服务后在华为复验。地图/原连接故障根因及 USB 长期稳定性未确认，未将分项测试等同整体验收。iPhone LAN 测试暂不可用，App 安装仍待处理；发布条件未关闭，见 [真机测试说明](./docs/development/local-phone-testing.md)
 > 最后更新：2026-09-07
 
 ## 使用方法

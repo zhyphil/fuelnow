@@ -75,7 +75,15 @@ export default function ResultsScreen() {
       pointId: id,
       ...(service ? { service } : {}),
     });
-    router.push({ pathname: "/point/[id]", params: { id } });
+    router.push({
+      pathname: "/point/[id]",
+      params: {
+        id,
+        ...(response?.service === "fuel" && response.fuelType
+          ? { fuelType: response.fuelType }
+          : {}),
+      },
+    });
   };
   const run = () => {
     if (query) void controller.run(query);

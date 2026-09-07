@@ -188,6 +188,88 @@ describe("PostgreSQL service-point detail reader", () => {
 });
 
 describe("GET /v1/service-points/:id", () => {
+  it.each([
+    ["", null, null],
+    ["?fuelType=diesel", "diesel", 1.659],
+    ["?fuelType=sp95_e10", "sp95_e10", 1.719],
+    ["?fuelType=e85", null, null],
+    ["?fuelType=lpg", "lpg", null],
+  ])(
+    "selects only the requested fuel for detail %s",
+    async (query, fuelType, amount) => {
+      const observedAt = new Date().toISOString();
+      const app = createApiApp({
+        candidateSearch,
+        servicePointDetails: new FakeServicePointDetails(detail()),
+        servicePointEvidence: {
+          async findEvidence(input) {
+            const evidence = await servicePointEvidence.findEvidence(input);
+            for (const item of evidence) {
+              if (item.serviceType !== "fuel") continue;
+              item.fuelOffers = (["diesel", "sp95_e10", "lpg"] as const).map(
+                (type) => ({
+                  fuelType: type,
+                  sourceFuelId: type,
+                  sourceLabel: type,
+                  available: true,
+                  outOfStock: false,
+                  unavailableReason: null,
+                  sourceObservedAt: observedAt,
+                  price:
+                    type === "lpg"
+                      ? null
+                      : {
+                          amount: type === "diesel" ? 1.659 : 1.719,
+                          currency: "EUR",
+                          unit: "liter",
+                          taxIncluded: true,
+                          membershipRequired: false,
+                          sourceObservedAt: observedAt,
+                          freshness: "recent",
+                          confidence: "high",
+                        },
+                }),
+              );
+            }
+            return evidence;
+          },
+        },
+      });
+      apps.push(app);
+      const response = await app.inject(`/v1/service-points/${POINT_ID}${query}`);
+      expect(response.statusCode).toBe(200);
+      const services = response.json().servicePoint.services;
+      const fuel = services.find(
+        (item: { serviceType: string }) => item.serviceType === "fuel",
+      ).evidence;
+      expect(fuel.details.fuel.requestedFuel?.fuelType ?? null).toBe(fuelType);
+      expect(fuel.price?.amount ?? null).toBe(amount);
+      for (const item of services.filter(
+        (item: { serviceType: string }) => item.serviceType !== "fuel",
+      )) {
+        expect(item.evidence.details.fuel).toBeNull();
+        expect(item.evidence.status.opening.state).toBe("unknown");
+      }
+    },
+  );
+
+  it.each([
+    "fuelType=invalid",
+    "fuelType=",
+    "fuelType=diesel&fuelType=sp95",
+    "unknown=value",
+  ])("rejects invalid detail query %s before database access", async (query) => {
+    const reader = new FakeServicePointDetails(detail());
+    const app = createApiApp({
+      candidateSearch,
+      servicePointDetails: reader,
+      servicePointEvidence,
+    });
+    apps.push(app);
+    const response = await app.inject(`/v1/service-points/${POINT_ID}?${query}`);
+    expect(response.statusCode).toBe(400);
+    expect(reader.ids).toEqual([]);
+  });
   it("returns canonical location, opening and lifecycle detail", async () => {
     const servicePointDetails = new FakeServicePointDetails(detail());
     const app = createApiApp({

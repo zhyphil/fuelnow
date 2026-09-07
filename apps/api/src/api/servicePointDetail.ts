@@ -1,5 +1,6 @@
 import type { TypeBoxTypeProvider } from "@fastify/type-provider-typebox";
 import {
+  FuelTypeSchema,
   NormalizedOpeningHoursSchema,
   OpeningStatusSchema,
   SERVICE_TYPES,
@@ -45,6 +46,11 @@ const LifecycleStatusSchema = Type.Union([
 
 export const ServicePointIdParamsSchema = Type.Object(
   { id: Type.String({ pattern: UUID_PATTERN }) },
+  { additionalProperties: false },
+);
+
+export const ServicePointDetailQuerySchema = Type.Object(
+  { fuelType: Type.Optional(FuelTypeSchema) },
   { additionalProperties: false },
 );
 
@@ -145,6 +151,7 @@ export function registerServicePointDetailRoute(
           "Returns stable canonical detail and one evidence block for each declared service.",
         tags: ["Service points"],
         params: ServicePointIdParamsSchema,
+        querystring: ServicePointDetailQuerySchema,
         response: {
           200: ServicePointDetailResponseSchema,
           400: ApiErrorResponseSchema,
@@ -218,6 +225,9 @@ export function registerServicePointDetailRoute(
               siteOpeningStatus: detail.openingStatus,
               siteOpeningStatusEvaluatedAt: detail.openingStatusEvaluatedAt,
               evaluatedAt,
+              ...(item.serviceType === "fuel" && request.query.fuelType
+                ? { requestedFuelType: request.query.fuelType }
+                : {}),
             }),
           })),
         },

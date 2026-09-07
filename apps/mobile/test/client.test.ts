@@ -54,6 +54,26 @@ const query = {
 afterEach(() => vi.useRealTimers());
 
 describe("mobile API boundary", () => {
+  it("sends the detail fuel query and preserves cancellation", async () => {
+    const fetcher = vi
+      .fn<typeof fetch>()
+      .mockImplementation(async () => new Response(JSON.stringify(detailSample)));
+    const client = createApiClient(config, fetcher);
+    for (const fuelType of ["diesel", "sp95_e10"] as const) {
+      await client.servicePoint(detailSample.servicePoint.id, undefined, { fuelType });
+      expect(String(fetcher.mock.lastCall?.[0]).endsWith(`?fuelType=${fuelType}`)).toBe(
+        true,
+      );
+    }
+    const controller = new AbortController();
+    controller.abort();
+    await expect(
+      client.servicePoint(detailSample.servicePoint.id, controller.signal, {
+        fuelType: "diesel",
+      }),
+    ).rejects.toMatchObject({ kind: "cancelled" });
+    expect(fetcher).toHaveBeenCalledTimes(2);
+  });
   it("loads canonical detail and treats a missing point as a non-retryable failure", async () => {
     const fetcher = vi
       .fn<typeof fetch>()

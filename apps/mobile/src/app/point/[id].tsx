@@ -1,4 +1,4 @@
-import { useCallback, useState, useSyncExternalStore } from "react";
+import { useCallback, useMemo, useState, useSyncExternalStore } from "react";
 import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
 import { ActivityIndicator, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -9,30 +9,34 @@ import { EvidenceSummary } from "../../components/EvidenceSummary";
 import { NavigationButtons } from "../../components/NavigationButtons";
 import { useLanguage } from "../../i18n/context";
 import { ResourceController } from "../../search/results";
-import { detailAddress, validPointId } from "../../search/detail";
+import { detailAddress, detailRequest, type DetailRequest } from "../../search/detail";
 import { timestamp } from "../../search/evidence";
 import { analytics } from "../../analytics/recorder";
 
 export default function PointScreen() {
-  const { id } = useLocalSearchParams<{ id: string }>();
+  const { id, fuelType } = useLocalSearchParams<{ id: string; fuelType?: string }>();
+  const query = useMemo(() => detailRequest(id, fuelType), [id, fuelType]);
   const router = useRouter();
   const {
     language,
     copy: { evidence: copy, results, point: labels, services },
   } = useLanguage();
   const [controller] = useState(
-    () => new ResourceController<string, ServicePointResponse>(api.servicePoint),
+    () =>
+      new ResourceController<DetailRequest, ServicePointResponse>(
+        ({ id, ...query }, signal) => api.servicePoint(id, signal, query),
+      ),
   );
   const state = useSyncExternalStore(controller.subscribe, controller.getSnapshot);
   useFocusEffect(
     useCallback(() => {
-      if (validPointId(id)) void controller.run(id);
+      if (query) void controller.run(query);
       else controller.clear();
       return () => {
         controller.clear();
         analytics.beta.clearSelection();
       };
-    }, [controller, id]),
+    }, [controller, query]),
   );
   const point = state.status === "ready" ? state.response.servicePoint : null;
   return (
@@ -43,9 +47,7 @@ export default function PointScreen() {
           label={copy.back}
           onPress={() => (router.canGoBack() ? router.back() : router.replace("/"))}
         />
-        {!validPointId(id) && (
-          <Text accessibilityRole="alert">{copy.invalidPoint}</Text>
-        )}
+        {!query && <Text accessibilityRole="alert">{copy.invalidPoint}</Text>}
         {state.status === "loading" && (
           <>
             <ActivityIndicator />
@@ -59,7 +61,7 @@ export default function PointScreen() {
               <ActionButton
                 label={results.retry}
                 onPress={() => {
-                  void controller.run(id);
+                  if (query) void controller.run(query);
                 }}
               />
             )}
