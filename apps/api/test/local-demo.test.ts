@@ -67,6 +67,16 @@ it("does not leak inherited public secrets, provider tokens or dotenv to Expo", 
     EXPO_PUBLIC_API_BASE_URL: "http://192.168.1.20:3001",
   });
 });
+it("pins the Expo child to IPv4-first lookup without inheriting arbitrary Node options", () => {
+  const env = demoMobileEnvironment(
+    { NODE_OPTIONS: "--require=untrusted.js" },
+    "127.0.0.1",
+  );
+  expect(env.NODE_OPTIONS).toBe("--dns-result-order=ipv4first");
+  expect(env.REACT_NATIVE_PACKAGER_HOSTNAME).toBe("127.0.0.1");
+  expect(env.EXPO_PUBLIC_API_BASE_URL).toBe("http://127.0.0.1:3001");
+  expect(JSON.stringify(env)).not.toContain("untrusted");
+});
 it("shifts synthetic timestamps together preserving relative ages, without rewriting source files", () => {
   const sql =
     "-- Fuel Now deterministic integration fixture.\n'2026-01-15T11:55:00Z' '2026-01-14T12:00:00Z'";

@@ -151,6 +151,9 @@ export function demoMobileEnvironment(
   return {
     ...result,
     NODE_ENV: "development",
+    // Expo binds "localhost"; adb reverse targets IPv4 on this USB test setup.
+    // Keep the test server loopback-only while avoiding an IPv6-only listener.
+    NODE_OPTIONS: "--dns-result-order=ipv4first",
     EXPO_NO_DOTENV: "1",
     EXPO_NO_TELEMETRY: "1",
     EXPO_OFFLINE: "1",
