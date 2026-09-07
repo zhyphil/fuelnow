@@ -4,6 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "quality:geography": "node --env-file-if-exists=../../.env --import tsx src/quality/runGeographyAudit.ts",
     "quality:prices": "node --env-file-if-exists=../../.env --import tsx src/quality/runPriceAudit.ts",
     "client:types": "node --import tsx src/api/generateClientContract.ts",
     "dev": "node --env-file-if-exists=../../.env --import tsx --watch src/api/start.ts",
@@ -22,6 +23,7 @@
     "@fastify/swagger": "9.8.1",
     "@fastify/type-provider-typebox": "5.2.0",
     "@fuel-now/config": "workspace:*",
+    "@fuel-now/data-core": "workspace:*",
     "@fuel-now/contracts": "workspace:*",
     "@sinclair/typebox": "0.34.52",
     "fastify": "5.12.1",

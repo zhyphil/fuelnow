@@ -56,6 +56,9 @@ importers:
       '@fuel-now/contracts':
         specifier: workspace:*
         version: link:../../packages/contracts
+      '@fuel-now/data-core':
+        specifier: workspace:*
+        version: link:../../packages/data-core
       '@sinclair/typebox':
         specifier: 0.34.52
         version: 0.34.52

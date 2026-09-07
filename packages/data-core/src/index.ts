@@ -1,4 +1,5 @@
 export * from "./domain.js";
+export { auditGeography } from "./quality/auditGeography.js";
 export {
   FranceFuelAdapter,
   parseFranceFuelLocalDateTime,
