@@ -31,6 +31,13 @@ it("deduplicates exposures, bounds memory and expires the session", () => {
   expect(recorder.getSnapshot().events).toHaveLength(1);
   for (let i = 0; i < 150; i++) recorder.record({ type: "navigation_click" });
   expect(recorder.getSnapshot().events).toHaveLength(100);
+  recorder.beta.begin({ latitude: 1, longitude: 2, service: "fuel" });
+  expect(recorder.beta.getSnapshot().attempts).toHaveLength(1);
   vi.advanceTimersByTime(15 * 60_000);
   expect(recorder.getSnapshot()).toEqual({ enabled: false, events: [] });
+  expect(recorder.beta.getSnapshot()).toEqual({
+    enabled: false,
+    discarded: 0,
+    attempts: [],
+  });
 });

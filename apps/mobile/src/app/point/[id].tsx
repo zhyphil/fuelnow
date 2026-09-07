@@ -11,6 +11,7 @@ import { useLanguage } from "../../i18n/context";
 import { ResourceController } from "../../search/results";
 import { detailAddress, validPointId } from "../../search/detail";
 import { timestamp } from "../../search/evidence";
+import { analytics } from "../../analytics/recorder";
 
 export default function PointScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -27,7 +28,10 @@ export default function PointScreen() {
     useCallback(() => {
       if (validPointId(id)) void controller.run(id);
       else controller.clear();
-      return controller.clear;
+      return () => {
+        controller.clear();
+        analytics.beta.clearSelection();
+      };
     }, [controller, id]),
   );
   const point = state.status === "ready" ? state.response.servicePoint : null;

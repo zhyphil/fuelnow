@@ -9,6 +9,42 @@ import type { NearbyQuery, NearbyResponse } from "../src/api/client";
 import sample from "../../../docs/api/examples/nearby-fuel-cheapest.json";
 const query: NearbyQuery = { latitude: 43, longitude: 1, service: "fuel" };
 const response = () => structuredClone(sample) as NearbyResponse;
+it("does not replace an invalid first decision with a later retry timestamp", async () => {
+  let now = 0;
+  const session = new BetaSession(() => now);
+  session.setEnabled(true);
+  const reply = await shown(session);
+  now = -1;
+  session.select(reply, reply.results[0]!.id);
+  session.click(reply.results[0]!.id, reply);
+  now = 1000;
+  session.select(reply, reply.results[0]!.id);
+  session.click(reply.results[0]!.id, reply);
+  expect(session.getSnapshot().attempts[0]).toMatchObject({
+    selected: true,
+    clicked: true,
+    selectionMs: null,
+    decisionMs: null,
+  });
+});
+it("filters enum fields at runtime rather than retaining arbitrary caller text", () => {
+  const session = new BetaSession();
+  session.setEnabled(true);
+  expect(
+    session.begin({ ...query, service: "private" } as unknown as NearbyQuery),
+  ).toBeUndefined();
+  const id = session.begin({ ...query, sort: "private" } as unknown as NearbyQuery);
+  session.finish(id, "failure", undefined, "private" as never);
+  expect(JSON.stringify(session.getSnapshot())).not.toContain("private");
+});
+it("drops detail attribution when the detail route loses focus", async () => {
+  const session = new BetaSession();
+  session.setEnabled(true);
+  const reply = await shown(session);
+  session.select(reply, reply.results[0]!.id);
+  session.clearSelection();
+  expect(session.click(reply.results[0]!.id)).toBeUndefined();
+});
 it("times only first navigation decisions and reports uncaptured app starts as unknown", async () => {
   let now = 100;
   const session = new BetaSession(() => now);

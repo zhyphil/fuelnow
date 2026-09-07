@@ -15,6 +15,7 @@ type Attempt = {
   handedOff: boolean;
   startedMs: number;
   selectionMs: number | null;
+  selected: boolean;
   decisionMs: number | null;
   failureReason: ErrorReason | null;
   quality: readonly QualityCounts[] | null;
@@ -173,7 +174,11 @@ export class BetaSession {
     this.notify();
   }
   public begin(query: NearbyQuery): number | undefined {
-    if (!this.state.enabled) return undefined;
+    if (
+      !this.state.enabled ||
+      !["fuel", "charging", "air", "wash"].includes(query.service)
+    )
+      return undefined;
     const id = ++this.sequence;
     this.selected = undefined;
     this.state = {
@@ -191,10 +196,15 @@ export class BetaSession {
           handedOff: false,
           startedMs: this.elapsed(),
           selectionMs: null,
+          selected: false,
           decisionMs: null,
           failureReason: null,
           quality: null,
-          requestedSort: query.sort ?? "nearest",
+          requestedSort:
+            query.sort &&
+            ["nearest", "cheapest", "open_now", "best"].includes(query.sort)
+              ? query.sort
+              : "nearest",
           transitions: Object.freeze({}),
           explicitExit: false,
         }),
@@ -216,7 +226,21 @@ export class BetaSession {
             ...a,
             status: outcome,
             resultCount: response?.resultCount ?? null,
-            failureReason: outcome === "failure" ? (reason ?? "requestError") : null,
+            failureReason:
+              outcome === "failure"
+                ? reason &&
+                  [
+                    "network",
+                    "timeout",
+                    "rateLimited",
+                    "serverError",
+                    "notFound",
+                    "invalidResponse",
+                    "requestError",
+                  ].includes(reason)
+                  ? reason
+                  : "requestError"
+                : null,
           },
     );
     if (
@@ -244,7 +268,8 @@ export class BetaSession {
       this.selected = { id, pointId };
       this.update(id, (a) => ({
         ...a,
-        selectionMs: a.selectionMs ?? this.duration(a.startedMs),
+        selectionMs: a.selected ? a.selectionMs : this.duration(a.startedMs),
+        selected: true,
       }));
     }
   }
@@ -266,6 +291,9 @@ export class BetaSession {
     this.update(this.responses.get(response), (a) => ({ ...a, explicitExit: true }));
     this.selected = undefined;
   }
+  public clearSelection() {
+    this.selected = undefined;
+  }
   public click(pointId: string, response?: NearbyResponse): number | undefined {
     const id = response
       ? response.results.some((p) => p.id === pointId)
@@ -277,9 +305,7 @@ export class BetaSession {
     this.update(id, (a) => ({
       ...a,
       clicked: a.exposed || a.clicked,
-      decisionMs: a.exposed
-        ? (a.decisionMs ?? this.duration(a.startedMs))
-        : a.decisionMs,
+      decisionMs: a.exposed && !a.clicked ? this.duration(a.startedMs) : a.decisionMs,
     }));
     return id;
   }
