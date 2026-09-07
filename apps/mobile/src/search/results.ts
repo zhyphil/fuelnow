@@ -1,19 +1,22 @@
 import { ApiFailure, type NearbyQuery, type NearbyResponse } from "../api/client";
 
-export type SearchState =
+export type ResourceState<T> =
   | { status: "idle" | "loading" }
-  | { status: "ready"; response: NearbyResponse }
+  | { status: "ready"; response: T }
   | { status: "error"; retryable: boolean };
+export type SearchState = ResourceState<NearbyResponse>;
 export type SearchPort = (
   query: NearbyQuery,
   signal: AbortSignal,
 ) => Promise<NearbyResponse>;
 
-export class SearchController {
-  private state: SearchState = { status: "idle" };
+export class ResourceController<Query, Response> {
+  private state: ResourceState<Response> = { status: "idle" };
   private listeners = new Set<() => void>();
   private active: AbortController | null = null;
-  public constructor(private readonly search: SearchPort) {}
+  public constructor(
+    private readonly search: (query: Query, signal: AbortSignal) => Promise<Response>,
+  ) {}
   public getSnapshot = () => this.state;
   public subscribe = (listener: () => void) => {
     this.listeners.add(listener);
@@ -21,7 +24,7 @@ export class SearchController {
       this.listeners.delete(listener);
     };
   };
-  private set(state: SearchState) {
+  private set(state: ResourceState<Response>) {
     this.state = state;
     this.listeners.forEach((listener) => listener());
   }
@@ -30,7 +33,7 @@ export class SearchController {
     this.active = null;
     this.set({ status: "idle" });
   };
-  public run = async (query: NearbyQuery) => {
+  public run = async (query: Query) => {
     this.active?.abort();
     const request = new AbortController();
     this.active = request;
@@ -49,6 +52,7 @@ export class SearchController {
     }
   };
 }
+export class SearchController extends ResourceController<NearbyQuery, NearbyResponse> {}
 
 export function resultTitle(
   point: NearbyResponse["results"][number],

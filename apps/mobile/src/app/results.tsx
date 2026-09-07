@@ -18,7 +18,7 @@ import { withSearchSort, type Sort, type FuelType } from "../search/sorts";
 export default function ResultsScreen() {
   const router = useRouter();
   const {
-    copy: { results: copy, services },
+    copy: { results: copy, services, evidence },
   } = useLanguage();
   const { service } = useSearchSelection();
   const { state: location } = useLocation();
@@ -126,6 +126,13 @@ export default function ResultsScreen() {
               {item.brand?.trim() ? ` · ${item.brand}` : ""}
             </Text>
             <PointSummary point={item} />
+            <ActionButton
+              secondary
+              label={evidence.details}
+              onPress={() =>
+                router.push({ pathname: "/point/[id]", params: { id: item.id } })
+              }
+            />
             <RecommendationSummary recommendation={item.recommendation} />
             <EvidenceSummary evidence={item.evidence} country={item.country} />
           </View>

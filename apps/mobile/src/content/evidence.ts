@@ -1,5 +1,27 @@
 import type { Language } from "../i18n/preferences";
 const translations = {
+  details: ["View details", "Voir les détails", "Ver detalles"],
+  back: ["Back", "Retour", "Volver"],
+  invalidPoint: [
+    "This service point link is invalid.",
+    "Ce lien de service est invalide.",
+    "Este enlace de servicio no es válido.",
+  ],
+  lifecycle: ["Listing status", "État de la fiche", "Estado de la ficha"],
+  active: ["Active listing", "Fiche active", "Ficha activa"],
+  permanently_closed: [
+    "Permanently closed",
+    "Fermé définitivement",
+    "Cerrado permanentemente",
+  ],
+  temporarily_closed: [
+    "Temporarily closed",
+    "Fermé temporairement",
+    "Cerrado temporalmente",
+  ],
+  unverified: ["Unverified", "Non vérifié", "Sin verificar"],
+  hours: ["Published opening hours", "Horaires publiés", "Horario publicado"],
+  updated: ["Listing updated", "Fiche mise à jour", "Ficha actualizada"],
   washTypes: ["Wash services", "Types de lavage", "Tipos de lavado"],
   automatic_rollers: [
     "Automatic rollers",
