@@ -10,6 +10,7 @@ import { PostgresServicePointDetail } from "../detail/PostgresServicePointDetail
 import { PostgresFuelProjectionStore } from "../worker/source-import/PostgresFuelProjectionStore.js";
 import { projectFuelSource } from "../worker/source-import/projectFuelSource.js";
 import { withDisposableDatabase } from "./withDisposableDatabase.js";
+import { projectStaticEvStation } from "../worker/supplement-import/projectStaticEv.js";
 
 async function main() {
   const fr = JSON.parse(
@@ -45,6 +46,57 @@ async function main() {
     process.env.LOAD_TEST_DATABASE_URL ?? "",
     async (pool) => {
       const store = new PostgresFuelProjectionStore(pool);
+      const evRows = JSON.parse(
+        await readFile(
+          new URL(
+            "../../../../fixtures/france-ev/toulouse-static-sample.json",
+            import.meta.url,
+          ),
+          "utf8",
+        ),
+      ).records;
+      const evRow = evRows.find(
+        (row: Record<string, unknown>) =>
+          row.consolidated_is_lon_lat_correct === "true",
+      );
+      const ev = projectStaticEvStation("FR", [evRow], "2026-09-07T13:00:00Z");
+      const evSummary = ev.point.sourceSummary;
+      await pool.query(
+        "INSERT INTO data_sources (id,name,source_url,licence_name,licence_url,attribution_text,enabled) VALUES ($1,$2,$3,$4,$5,$6,true)",
+        [
+          evSummary.primarySourceId,
+          evSummary.sourceName,
+          evSummary.sourceUrl,
+          evSummary.licenceName,
+          evSummary.licenceUrl,
+          evSummary.attributionText,
+        ],
+      );
+      const evEntry = {
+        rawPayload: ev.raw,
+        projection: {
+          sourceRecordId: ev.sourceRecordId,
+          point: ev.point,
+          air: null,
+          wash: null,
+          issues: [],
+        },
+      };
+      assert.deepEqual(await store.persistProjections([evEntry]), {
+        written: 1,
+        skipped: 0,
+      });
+      assert.deepEqual(await store.persistProjections([evEntry]), {
+        written: 0,
+        skipped: 1,
+      });
+      const evseRow = (
+        await pool.query(
+          "SELECT source_evse_id FROM charging_evses WHERE service_point_id=$1",
+          [ev.point.id],
+        )
+      ).rows[0];
+      assert.equal(evseRow.source_evse_id, evRow.id_pdc_itinerance);
       await assert.rejects(store.persist([source]), /not explicitly enabled/);
       for (const item of [source, spanish]) {
         const summary = projectFuelSource(item).point.sourceSummary;
@@ -76,7 +128,7 @@ async function main() {
       });
       assert.equal(await count("fuel_prices"), prices);
       assert.equal(await count("field_provenance"), provenance);
-      assert.equal(await count("source_records"), 2);
+      assert.equal(await count("source_records"), 3);
       await assert.rejects(store.persist([source, source]), /Duplicate station/);
       const conflict = { ...source, record: { ...fr, ville: "conflicting snapshot" } };
       await assert.rejects(store.persist([conflict]), /Conflicting snapshot/);
@@ -138,7 +190,7 @@ async function main() {
         routingProvider: null,
       });
       try {
-        for (const service of ["fuel", "air", "wash"]) {
+        for (const service of ["fuel", "air", "wash", "charging"]) {
           const response = await app.inject({
             method: "GET",
             url: `/v1/nearby?service=${service}&latitude=43.588&longitude=1.41&radius=10000&sort=nearest${service === "fuel" ? "&fuelType=diesel" : ""}`,
@@ -146,11 +198,44 @@ async function main() {
           assert.equal(response.statusCode, 200);
           const body = response.json();
           assert.equal(body.resultCount, 1);
+          if (service === "charging") {
+            assert.equal(body.results[0].evidence.price, null);
+            assert.equal(body.results[0].evidence.details.charging.totalEvses, 1);
+          }
           if (service === "fuel") assert.equal(body.results[0].evidence.price, null);
         }
       } finally {
         await app.close();
       }
+      await pool.query(
+        "UPDATE charging_evses SET status='occupied',operational=true,source_observed_at=now() WHERE service_point_id=$1",
+        [ev.point.id],
+      );
+      const nextEv = projectStaticEvStation("FR", [evRow], "2026-09-08T13:00:00Z");
+      await assert.rejects(
+        store.persistProjections([
+          {
+            rawPayload: nextEv.raw,
+            projection: {
+              sourceRecordId: nextEv.sourceRecordId,
+              point: nextEv.point,
+              air: null,
+              wash: null,
+              issues: [],
+            },
+          },
+        ]),
+        /must not overwrite dynamic/,
+      );
+      assert.equal(
+        (
+          await pool.query(
+            "SELECT status FROM charging_evses WHERE service_point_id=$1",
+            [ev.point.id],
+          )
+        ).rows[0].status,
+        "occupied",
+      );
       await pool.query(
         "UPDATE service_points SET lifecycle_status='unverified',closure_reason='manual review' WHERE id=$1",
         [projection.point.id],
@@ -185,7 +270,9 @@ async function main() {
             "rollback",
             "concurrent retry",
             "missing price",
-            "three-service API",
+            "four-service API",
+            "EV hierarchy and original identity",
+            "static-versus-dynamic overwrite protection",
             "lifecycle protection",
             "link protection",
             "disabled source",

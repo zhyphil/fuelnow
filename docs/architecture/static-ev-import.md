@@ -11,3 +11,11 @@ Reject an entire selected station on duplicate keys, inconsistent identities/ope
 Only an explicit business-field allowlist is retained in source records; operator contacts, telephone and arbitrary columns are discarded. Unknown connector vocabulary remains unknown. Static free-text pricing does not become a comparable numeric tariff. The full-file hash belongs to the collection receipt, not to a claim that every original column is stored.
 
 Source licence and origin wording follow `docs/data/ev-source-licence-update-policy.md`. Release approval, complete-snapshot acquisition and actual database integration are separate gates. Verification: 12 projection tests plus API type checking and lint.
+
+## Canonical persistence — P5-QA-10d2
+
+The shared `PostgresCanonicalProjectionStore` now accepts validated source-owned Fuel or static EV projections. The legacy Fuel class name remains an alias. The same bounded transaction, source enablement, collision, source-link and lifecycle protections apply to both. EVSE and connector database UUIDs are source-namespaced while original EVSE/Spanish connector IDs remain in their source-ID columns. French connector flags have no publisher connector ID; that source column is null rather than fabricated.
+
+A new static snapshot replaces only its owned static hierarchy within the transaction. Existing dynamic EVSE/connector state or tariffs block the whole write, preserving that evidence for explicit reconciliation. Static input itself may not carry live status or tariffs. No automatic cross-source merge is performed.
+
+The disposable PostgreSQL integration now verifies Fuel, Air, Wash and Charging queries, EVSE count versus connectors, original source identity, repeated snapshots and rejection/rollback when dynamic evidence is present. This is engineering evidence from fixtures, not complete source acquisition or native acceptance.

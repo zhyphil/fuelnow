@@ -235,17 +235,13 @@ export function projectStaticEvStation(
   const evses: Evse[] = [...groups]
     .sort(([a], [b]) => a.localeCompare(b))
     .map(([evseId, members]) => ({
-      id: fuelSourcePointId(country, `${source.id}/evse`, evseId),
+      id: evseId,
       status: "unknown",
       operational: null,
       sourceObservedAt: null,
       connectors: members.flatMap((row) =>
         row.connectorTypes.map((type) => ({
-          id: fuelSourcePointId(
-            country,
-            `${source.id}/connector`,
-            JSON.stringify([evseId, row.connectorId, type]),
-          ),
+          id: country === "FR" ? type : row.connectorId,
           connectorType: type,
           powerKw: row.powerKw,
           operational: null,
