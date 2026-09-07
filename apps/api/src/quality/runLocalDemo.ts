@@ -13,6 +13,11 @@ import {
 } from "./localDemo.js";
 import { createApiClient } from "../../../mobile/src/api/client.js";
 import { resolveMobileConfig } from "../../../mobile/src/config/environment.js";
+import {
+  seedLocalRealFuel,
+  createLocalRealFuelApp,
+  checkLocalRealFuel,
+} from "./localRealFuel.js";
 
 const repository = fileURLToPath(new URL("../../../../", import.meta.url));
 const mobile = fileURLToPath(new URL("../../../mobile/", import.meta.url));
@@ -63,12 +68,20 @@ async function main() {
       console.log(
         `Disposable demo database (only this run): ${allocated.rows[0]!.name}`,
       );
-      await seedLocalDemo(pool);
-      const app = createLocalDemoApp(pool);
+      const realReport = options.realFuel ? await seedLocalRealFuel(pool) : null;
+      if (!realReport) await seedLocalDemo(pool);
+      if (realReport) console.log(JSON.stringify(realReport));
+      const app = realReport
+        ? createLocalRealFuelApp(pool, realReport)
+        : createLocalDemoApp(pool);
       let child: ChildProcess | undefined;
       try {
         if (requestedStop) return;
         const origin = await app.listen({ host: options.host, port: options.port });
+        if (realReport) {
+          await checkLocalRealFuel(app);
+          if (options.check) return;
+        }
         if (options.check) {
           const client = createApiClient(
             resolveMobileConfig({ environment: "test", apiBaseUrl: origin }),
@@ -131,9 +144,14 @@ async function main() {
           );
           return;
         }
-        console.log(
-          `\nLOCAL TEST ONLY — synthetic stations, no real journeys.\nPhone connection check: ${origin}/\nUse manual location: Toulouse (Fuel/Air/Wash), Barcelona (Charge).\nCtrl+C stops API/Metro and deletes this session's disposable database. Restart resets data.\n`,
-        );
+        if (realReport)
+          console.log(
+            `LOCAL REAL FUEL SNAPSHOT — Toulouse centre + 12 km; source dates preserved; not field-verified.\nPhone connection check: ${origin}/\nNo automatic refresh or paid routing. Ctrl+C removes only this disposable database.`,
+          );
+        else
+          console.log(
+            `\nLOCAL TEST ONLY — synthetic stations, no real journeys.\nPhone connection check: ${origin}/\nUse manual location: Toulouse (Fuel/Air/Wash), Barcelona (Charge).\nCtrl+C stops API/Metro and deletes this session's disposable database. Restart resets data.\n`,
+          );
         if (options.lan)
           console.log(
             "Trusted Wi-Fi only. API and Metro are reachable on the local network; do not forward ports or use a public tunnel.",
@@ -151,7 +169,7 @@ async function main() {
             ],
             {
               cwd: mobile,
-              env: demoMobileEnvironment(process.env, options.host),
+              env: demoMobileEnvironment(process.env, options.host, options.realFuel),
               stdio: "inherit",
             },
           );

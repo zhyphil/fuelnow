@@ -21,6 +21,7 @@ import { LocationPanel } from "../components/LocationPanel";
 import { emptyRecovery } from "../search/empty";
 import { distance } from "../search/presentation";
 import { withSearchSort, type Sort, type FuelType } from "../search/sorts";
+import { mobileConfig } from "../config/runtime";
 
 export default function ResultsScreen() {
   const router = useRouter();
@@ -108,6 +109,9 @@ export default function ResultsScreen() {
         contentContainerStyle={styles.content}
         ListHeaderComponent={
           <View style={styles.header}>
+            {mobileConfig.localDataMode === "toulouse-real-fuel" && (
+              <Text style={styles.notice}>{evidence.localRealFuelNotice}</Text>
+            )}
             <ActionButton
               label={copy.back}
               secondary

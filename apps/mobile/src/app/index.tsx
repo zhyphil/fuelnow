@@ -26,7 +26,9 @@ export default function WelcomeScreen() {
         <Text style={styles.brand}>{copy.appName}</Text>
         {mobileConfig.environment === "test" && (
           <Text accessibilityRole="alert" style={styles.coverage}>
-            {evidence.localDemoNotice}
+            {mobileConfig.localDataMode === "toulouse-real-fuel"
+              ? evidence.localRealFuelNotice
+              : evidence.localDemoNotice}
           </Text>
         )}
         <View style={styles.hero}>

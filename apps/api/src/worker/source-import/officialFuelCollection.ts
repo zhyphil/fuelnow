@@ -1,17 +1,34 @@
 import { createHash } from "node:crypto";
-import type { FuelSourceRecord } from "@fuel-now/data-core";
+import { haversineDistanceMeters, type FuelSourceRecord } from "@fuel-now/data-core";
 import { projectFuelSource } from "./projectFuelSource.js";
 import type { SyncRunReporter } from "./syncRun.js";
 import { safeSourceFailure } from "./safeFailure.js";
 
 export type FuelCollectionSelection =
-  { country: "FR"; stationIds: string[] } | { country: "ES"; municipalityId: string };
+  | { country: "FR"; stationIds: string[] }
+  | { country: "FR"; area: "toulouse-12km" }
+  | { country: "ES"; municipalityId: string };
+
+export const TOULOUSE_ORIGIN = { latitude: 43.6047, longitude: 1.4442 };
 
 export function officialFuelRequest(selection: FuelCollectionSelection): {
   url: URL;
   sourceId: string;
 } {
   if (selection.country === "FR") {
+    if ("area" in selection) {
+      if (selection.area !== "toulouse-12km") throw new Error("Unsupported area");
+      const url = new URL(
+        "https://data.economie.gouv.fr/api/explore/v2.1/catalog/datasets/prix-des-carburants-en-france-flux-instantane-v2/records",
+      );
+      url.searchParams.set(
+        "where",
+        "within_distance(geom, geom'POINT(1.4442 43.6047)', 12 km)",
+      );
+      url.searchParams.set("order_by", "id");
+      url.searchParams.set("limit", "100");
+      return { url, sourceId: "fr-fuel-realtime-v2" };
+    }
     if (
       selection.stationIds.length < 1 ||
       selection.stationIds.length > 20 ||
@@ -125,7 +142,9 @@ export async function collectOfficialFuelBatch(
     const raw = source.record as Record<string, unknown>;
     if (
       selection.country === "FR"
-        ? !selection.stationIds.includes(projected.sourceRecordId)
+        ? "area" in selection
+          ? haversineDistanceMeters(TOULOUSE_ORIGIN, projected.point) > 12005
+          : !selection.stationIds.includes(projected.sourceRecordId)
         : String(raw.IDMunicipio) !== selection.municipalityId
     )
       throw new Error("Official response escaped requested scope");

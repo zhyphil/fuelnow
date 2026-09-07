@@ -30,12 +30,18 @@ export function demoOptions(
     new Set(args).size !== args.length ||
     args.some(
       (arg) =>
-        !["--lan", "--check", "--api-only"].includes(arg) && !arg.startsWith("--host="),
+        !["--lan", "--check", "--api-only", "--real-fuel"].includes(arg) &&
+        !arg.startsWith("--host="),
     )
   )
     throw new Error("Use --lan, --host=PRIVATE_IP, --api-only or --check");
   const check = args.includes("--check"),
     lan = args.includes("--lan");
+  const realFuel = args.includes("--real-fuel");
+  if (realFuel && (lan || env.LIVE_SOURCE_CHECK !== "true"))
+    throw new Error(
+      "Real Fuel requires explicit LIVE_SOURCE_CHECK=true and loopback access",
+    );
   const hosts = args.filter((arg) => arg.startsWith("--host="));
   if (hosts.length > 1 || (hosts.length && !lan) || (check && lan))
     throw new Error("Host needs --lan; checks are loopback-only");
@@ -67,6 +73,7 @@ export function demoOptions(
     check,
     lan,
     apiOnly: args.includes("--api-only"),
+    realFuel,
     port: check ? 0 : 3001,
   };
 }
@@ -143,6 +150,7 @@ export function createLocalDemoApp(pool: pg.Pool) {
 export function demoMobileEnvironment(
   env: NodeJS.ProcessEnv,
   host: string,
+  realFuel = false,
 ): NodeJS.ProcessEnv {
   // Never inherit .env/public secrets/provider tokens into a test bundle.
   const result: NodeJS.ProcessEnv = {};
@@ -158,6 +166,7 @@ export function demoMobileEnvironment(
     EXPO_NO_TELEMETRY: "1",
     EXPO_OFFLINE: "1",
     EXPO_PUBLIC_APP_ENV: "test",
+    EXPO_PUBLIC_LOCAL_DATA_MODE: realFuel ? "toulouse-real-fuel" : "demo",
     EXPO_PUBLIC_API_BASE_URL: `http://${host}:3001`,
     REACT_NATIVE_PACKAGER_HOSTNAME: host,
   };

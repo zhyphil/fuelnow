@@ -4,12 +4,14 @@ export interface MobileConfig {
   environment: MobileEnvironment;
   apiBaseUrl: string;
   requestTimeoutMs: number;
+  localDataMode: "demo" | "toulouse-real-fuel";
 }
 
 export function resolveMobileConfig(
   input: {
     environment?: string;
     apiBaseUrl?: string;
+    localDataMode?: string;
   } = {},
 ): MobileConfig {
   const environment = input.environment ?? "development";
@@ -17,6 +19,12 @@ export function resolveMobileConfig(
     throw new Error("Invalid mobile environment");
   }
   const address = input.apiBaseUrl?.trim();
+  const localDataMode = input.localDataMode ?? "demo";
+  if (
+    !["demo", "toulouse-real-fuel"].includes(localDataMode) ||
+    (localDataMode === "toulouse-real-fuel" && environment !== "test")
+  )
+    throw new Error("Invalid local data mode");
   if (!address && environment === "production") {
     throw new Error("Production requires an explicit API URL");
   }
@@ -40,5 +48,6 @@ export function resolveMobileConfig(
     environment: environment as MobileEnvironment,
     apiBaseUrl: url.origin,
     requestTimeoutMs: 12_000,
+    localDataMode: localDataMode as MobileConfig["localDataMode"],
   };
 }

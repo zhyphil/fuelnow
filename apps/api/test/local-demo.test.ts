@@ -15,6 +15,36 @@ const interfaces = {
     } as NetworkInterfaceInfo,
   ],
 };
+it("requires explicit source opt-in for real Fuel and keeps it loopback-only", () => {
+  expect(() => demoOptions(["--real-fuel"], {}, {})).toThrow();
+  expect(() =>
+    demoOptions(["--real-fuel", "--lan"], interfaces, { LIVE_SOURCE_CHECK: "true" }),
+  ).toThrow();
+  expect(
+    demoOptions(["--real-fuel", "--check"], {}, { LIVE_SOURCE_CHECK: "true" }),
+  ).toMatchObject({ realFuel: true, check: true, host: "127.0.0.1" });
+  expect(demoOptions([], {}, {})).toMatchObject({ realFuel: false });
+});
+it("labels the explicitly chosen real-data mobile mode without inheriting secrets", () => {
+  expect(
+    demoMobileEnvironment({ GOOGLE_MAPS_ANDROID_API_KEY: "secret" }, "127.0.0.1", true),
+  ).toMatchObject({
+    EXPO_PUBLIC_LOCAL_DATA_MODE: "toulouse-real-fuel",
+    EXPO_PUBLIC_APP_ENV: "test",
+  });
+  expect(
+    JSON.stringify(
+      demoMobileEnvironment(
+        { GOOGLE_MAPS_ANDROID_API_KEY: "secret" },
+        "127.0.0.1",
+        true,
+      ),
+    ),
+  ).not.toContain("secret");
+  expect(demoMobileEnvironment({}, "127.0.0.1").EXPO_PUBLIC_LOCAL_DATA_MODE).toBe(
+    "demo",
+  );
+});
 it("defaults to loopback and only opts into a private address on this computer", () => {
   expect(demoOptions([], interfaces, {})).toMatchObject({
     host: "127.0.0.1",

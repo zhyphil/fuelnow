@@ -32,6 +32,56 @@ const response = (body: unknown, status = 200) =>
   });
 
 describe("bounded official Fuel collection", () => {
+  it("limits Toulouse collection to a fixed 12 km query without dynamic location input", () => {
+    const request = officialFuelRequest({ country: "FR", area: "toulouse-12km" });
+    expect(request.url.searchParams.get("where")).toBe(
+      "within_distance(geom, geom'POINT(1.4442 43.6047)', 12 km)",
+    );
+    expect(request.url.searchParams.get("limit")).toBe("100");
+    expect(() =>
+      officialFuelRequest({ country: "FR", area: "arbitrary" } as never),
+    ).toThrow();
+  });
+  it("accepts the bounded Toulouse sample but rejects out-of-area records and truncation", async () => {
+    const sample = JSON.parse(
+      readFileSync(
+        new URL(
+          "../../../fixtures/france-fuel/toulouse-12km-sample.json",
+          import.meta.url,
+        ),
+        "utf8",
+      ),
+    );
+    const area = { country: "FR", area: "toulouse-12km" } as const;
+    const batch = await collectOfficialFuelBatch(area, {
+      fetch: vi.fn<typeof fetch>().mockResolvedValue(response(sample)),
+      clock,
+    });
+    expect(batch.sources).toHaveLength(79);
+    expect(batch.sources[0]?.record).toEqual(sample.results[0]);
+    await expect(
+      collectOfficialFuelBatch(area, {
+        fetch: vi
+          .fn<typeof fetch>()
+          .mockResolvedValue(response({ ...sample, total_count: 101 })),
+        clock,
+      }),
+    ).rejects.toThrow("Incomplete");
+    const far = {
+      ...sample.results[0],
+      geom: { lat: 48.85, lon: 2.35 },
+      latitude: 4885000,
+      longitude: 235000,
+    };
+    await expect(
+      collectOfficialFuelBatch(area, {
+        fetch: vi
+          .fn<typeof fetch>()
+          .mockResolvedValue(response({ total_count: 1, results: [far] })),
+        clock,
+      }),
+    ).rejects.toThrow();
+  });
   it("uses fixed HTTPS origins and rejects arbitrary URL or expression inputs", () => {
     expect(officialFuelRequest(selection).url.hostname).toBe("data.economie.gouv.fr");
     expect(() =>

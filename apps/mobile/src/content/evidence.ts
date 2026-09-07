@@ -125,6 +125,11 @@ const translations = {
     "TEST LOCAL — Choisissez Toulouse manuellement pour carburant/air/lavage ou Barcelona pour recharge. Stations et prix DEMO fictifs : ne vous y rendez pas.",
     "PRUEBA LOCAL — Elige Toulouse manualmente para carburante/aire/lavado o Barcelona para carga. Estaciones y precios DEMO ficticios: no vayas a ellos.",
   ],
+  localRealFuelNotice: [
+    "LOCAL TEST — Real DGCCRF Fuel snapshot: Toulouse centre + 12 km only. No automatic refresh. Check source dates and prices before travelling; other services may be incomplete.",
+    "TEST LOCAL — Données carburant réelles DGCCRF : centre de Toulouse + 12 km uniquement. Pas d’actualisation automatique. Vérifiez les dates et prix avant de partir ; autres services incomplets.",
+    "PRUEBA LOCAL — Datos reales de carburante DGCCRF: centro de Toulouse + 12 km. Sin actualización automática. Comprueba fechas y precios antes de viajar; otros servicios incompletos.",
+  ],
   diagnosticsNotice: [
     "Optional local test metrics: searches, timing, data-quality counts, sorting, selection and navigation. No coordinates or uploads. Cleared after 15 minutes or when disabled.",
     "Mesures de test locales facultatives : recherches, durées, compteurs de qualité, tri, sélection, navigation. Aucune coordonnée ni transmission. Effacées après 15 minutes ou à la désactivation.",
