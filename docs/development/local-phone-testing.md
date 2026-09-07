@@ -1,6 +1,6 @@
 # 本机 + iPhone / Android 真机测试
 
-2026-09-07。iPhone 15 Pro Max / iOS 26.6.1；华为 Mate 20 HMA-L29 / EMUI 12.0.0，USB 读取确认 Android 10 / API 29、Expo Go 57.0.9。两台手机的 LAN 浏览器检查已通过；华为已完成 Fuel 基础列表报价、Cheapest、Open now、USB Best 理由显示，Barcelona / Charge 基础列表、静态详情、排序限制说明及禁用项实际点击检查，以及 Toulouse / Air 独立搜索与详情检查。Wash 基础独立搜索已确认 1 个最近排序结果、模拟价格与状态，详情此前已展示；用户实际点击 Wash 列表及同站详情页 DEMO 导航均未跳转。Fuel 详情油品上下文缺口仍待修复。当前使用华为 USB 回环对照环境，LAN 测试暂停；下一步检查 Paris / Fuel 的空结果提示与返回已覆盖城市后的恢复，USB 长期稳定性仍待确认。这不是正式 Beta 发布或现场验收。
+2026-09-07。iPhone 15 Pro Max / iOS 26.6.1；华为 Mate 20 HMA-L29 / EMUI 12.0.0，USB 读取确认 Android 10 / API 29、Expo Go 57.0.9。两台手机的 LAN 浏览器检查已通过；华为已完成 Fuel 基础列表报价、Cheapest、Open now、USB Best 理由显示，Barcelona / Charge 基础列表、静态详情、排序限制说明及禁用项实际点击检查，以及 Toulouse / Air 独立搜索与详情检查。Wash 基础独立搜索已确认 1 个最近排序结果、模拟价格与状态，详情此前已展示；用户实际点击 Wash 列表及同站详情页 DEMO 导航均未跳转。Paris / Fuel 步骤的照片已确认 0 个最近排序结果、50 km 搜索范围和空结果提示。Fuel 详情油品上下文缺口仍待修复。当前使用华为 USB 回环对照环境，LAN 测试暂停；下一步返回 Toulouse / Fuel 验证空结果后的恢复，USB 长期稳定性仍待确认。这不是正式 Beta 发布或现场验收。
 
 ## 启动与停止
 
@@ -141,7 +141,8 @@ pnpm local:start --lan
 - [x] Barcelona / Recharge 基础列表与静态详情：2026-09-07 用户照片显示 DEMO Barcelona Charging、ES 地址、约 1.5 km 直线距离，详情含 CCS Combo 2 / Type 2、最高额定功率 150 kW（不是实际速度）、2 个充电点；价格/营业/实时可用数量均为 Inconnu，并说明西班牙未启用实时可用性。来源 Synthetic Spain Charging、风险提示与模拟导航保护可见。照片未包含排序标题，不额外标记具体排序或实时充电能力通过。
 - [x] Charge 排序限制的界面说明：2026-09-07 用户照片显示 Le moins cher 下方解释 V1 无可比较价格，Ouvert maintenant 下方解释营业时间未知；请求 Le plus proche 且实际 Résultats 1 / Classement Le plus proche，驾车时间缺失时按距离排序的说明可见。确认文案/状态展示与规则一致，不把静态照片当实际点击拦截已测。
 - [x] Charge 禁用项点击回归：2026-09-07 用户按指引在 Barcelona / Recharge 结果加载后，打开 Tri et filtres 并分别点击 Le moins cher / Ouvert maintenant，确认两项都无法选中、仍保持 Le plus proche。结合此前照片中的限制原因，完成当前充电模拟场景的禁用交互验收；证据为用户操作反馈，不代替其他服务或所有 capability 组合测试。
-- [ ] Paris / Fuel 空结果与恢复：本套模拟数据未覆盖 Paris，最近排序应展示空结果说明，而不是网络错误或残留 Barcelona 充电站；随后改回 Toulouse / Fuel，验证可重新取得测试站点。此项不依赖缺失的真实数据或地图密钥，不代表 Paris 真实无服务。
+- [x] Paris / Fuel 空结果展示：2026-09-07 用户按 Paris / Carburant 步骤提交的照片显示 Carburant、Résultats: 0、Classement: Le plus proche、搜索范围已扩大提示，以及 Aucun service répertorié dans la zone / Changez de lieu ou de service 和 50 km 搜索半径。可见页面没有网络错误或残留的 Barcelona 充电站卡片。城市按本次操作步骤记录，照片本身未展示城市名；本套模拟数据不覆盖 Paris，不代表该城市真实无服务。
+- [ ] 空结果后的恢复：改回 Toulouse / Fuel，保持最近排序并选择 Gazole，确认能重新显示测试站点而非停留在空结果页；结果恢复尚未由上述空结果照片证明。
 - [x] Toulouse / Gonflage（Air）独立搜索与详情：2026-09-07 用户六张照片中，照片 1–2 确认独立 Gonflage 列表为 1 个最近排序结果、主 DEMO 站、0 EUR/use，以及 ETA 缺失时按距离排序的说明；照片 3–4 确认详情为 Gratuit、设备按来源工作、Public。列表和详情的 Air 营业时间保持未知，未被 Fuel 的 Open 覆盖；低置信度、模拟来源与导航禁用提示可见。仅验证模拟数据展示，不代表现场免费、设备状态或导航点击拦截已验收。照片 5 是同一多服务详情的 Fuel 未选油品状态，不将其视为既有 Fuel 上下文问题已修复。
 - [x] Toulouse / Lavage（Wash）基础列表卡片：2026-09-07 用户按独立入口步骤提交的新照片显示列表刷新/地图按钮和第 1 个 Toulouse 主 DEMO 站，价格 6,00 EUR/programme de lavage，会员条件/税费未知，营业时间未知，服务按来源可用；模拟导航禁用和低置信度提示可见。与此前多服务详情中的 6 EUR 洗车方案、自动滚筒/吸尘器、设备按来源工作一致。仅确认已显示的模拟卡片，不代表真实价格或设备状态。
 - [x] Wash 列表顶部结果数量/排序：2026-09-07 用户随后补图明确显示 Lavage、Résultats: 1、Classement: Le plus proche，以及 ETA 缺失时按距离排序、部分数据未知和扩大搜索范围的说明。结合价格卡片，完成当前模拟数据的 Wash 基础独立搜索展示验收；不代替多候选排序或真实行程时间验收。
