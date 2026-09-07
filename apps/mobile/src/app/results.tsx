@@ -10,6 +10,7 @@ import { useSearchSelection } from "../search/context";
 import { buildInitialSearch } from "../search/selection";
 import { resultTitle, SearchController } from "../search/results";
 import { SortPicker } from "../components/SortPicker";
+import { PointSummary } from "../components/PointSummary";
 import { withSearchSort, type Sort, type FuelType } from "../search/sorts";
 
 export default function ResultsScreen() {
@@ -122,6 +123,7 @@ export default function ResultsScreen() {
               {item.country}
               {item.brand?.trim() ? ` · ${item.brand}` : ""}
             </Text>
+            <PointSummary point={item} />
           </View>
         )}
       />

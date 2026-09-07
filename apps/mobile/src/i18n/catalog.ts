@@ -6,9 +6,11 @@ import type { Language } from "./preferences";
 import { serviceMessages } from "../content/services";
 import { resultMessages } from "../content/results";
 import { sortMessages } from "../content/sorts";
+import { pointMessages } from "../content/point";
 
 export function getMessages(language: Language) {
   return {
+    point: pointMessages[language],
     sorts: sortMessages[language],
     results: resultMessages[language],
     services: serviceMessages[language],

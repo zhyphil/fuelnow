@@ -139,6 +139,7 @@ const NearbyBestRecommendationSchema = Type.Object(
 
 export const NearbyServicePointSchema = Type.Object(
   {
+    address: Type.Union([Type.String(), Type.Null()]),
     id: Type.String({ minLength: 1 }),
     country: CountrySchema,
     name: Type.Union([Type.String({ minLength: 1 }), Type.Null()]),
@@ -377,6 +378,7 @@ export function registerNearbyRoute(
         ({ candidate, recommendation }) => {
           const route = candidate.route;
           return {
+            address: candidate.address ?? null,
             id: candidate.id,
             country: candidate.country,
             name: candidate.name,

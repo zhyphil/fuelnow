@@ -27,6 +27,7 @@ export interface CandidateSearchRequest {
 }
 
 export interface ServicePointCandidate {
+  address?: string | null;
   id: string;
   country: CountryCode;
   name: string | null;
@@ -43,6 +44,7 @@ export interface ServicePointCandidate {
 }
 
 interface CandidateRow extends QueryResultRow {
+  address?: string | null;
   id: string;
   country: CountryCode;
   name: string | null;
@@ -141,21 +143,15 @@ export class PostgresCandidateSearch {
     }
 
     const result = await this.pool.query<CandidateRow>(
-      `SELECT
-         id,
-         country,
-         name,
-         brand,
-         longitude,
-         latitude,
-         lifecycle_status,
-         opening_status,
-         opening_status_evaluated_at,
-         service_opening_status,
-         service_opening_status_evaluated_at,
-         temporary_closure,
-         straight_line_distance_m
-       FROM search_service_point_candidates($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
+      `SELECT candidate.*,
+         COALESCE(NULLIF(BTRIM(point.address_formatted), ''),
+           NULLIF(CONCAT_WS(', ',
+             NULLIF(CONCAT_WS(' ', point.address_house_number, point.address_street), ''),
+             NULLIF(CONCAT_WS(' ', point.address_postal_code, point.address_locality), ''),
+             point.address_administrative_area), '')) AS address
+       FROM search_service_point_candidates($1, $2, $3, $4, $5, $6, $7, $8, $9) AS candidate
+       JOIN service_points AS point ON point.id = candidate.id
+       ORDER BY candidate.straight_line_distance_m, candidate.id`,
       [
         longitude,
         latitude,
@@ -170,6 +166,7 @@ export class PostgresCandidateSearch {
     );
 
     return result.rows.map((row) => ({
+      address: row.address ?? null,
       id: row.id,
       country: row.country,
       name: row.name,

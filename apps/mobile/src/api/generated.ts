@@ -224,6 +224,7 @@ export interface operations {
             };
             resultCount: number;
             results: {
+              address: string | null;
               id: string;
               country: "FR" | "ES";
               name: string | null;
