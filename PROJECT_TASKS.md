@@ -553,6 +553,8 @@ V1 的核心验收结果是：
 
 # 完成记录
 
+2026-09-07 Expo HMR 排查补充：用户展开警告显示正确 LAN 地址 192.168.1.63:8081，Error undefined；Mac 回环/LAN 的 HMR WebSocket 握手成功，手机 Expo 进程有新的启动记录，但未取得对应失败的底层网络原因。加载稳定性不标解决，Best 手机验收仍未完成。提出 USB/LAN 对照方案，等待用户确认后再改测试连接；本轮未设置转发、重启、重装或清数据，只发布文字记录。
+
 2026-09-07 华为 Open now 基础验收：照片显示 Results 1 / Order Open now，保留 1.659 EUR/liter 的营业主站，先前的临时关闭站已排除；勾选当前模拟数据过滤检查，不代表全部营业边界或真实现场通过。Mac 侧另验证 Best 返回主站及距离/新鲜度/ETA 缺失理由，手机 Best 仍待验收；随后用户照片显示 Cannot connect to Expo CLI 警告，完整 URL/Error 尚待提供，不能据此判定 Best 查询失败。Fuel 详情缺口与加载稳定性仍待处理。用户已重新明确授权按原约定 commit 并 push 到 origin/main；只发布文字记录，不上传照片或原始日志。
 
 2026-09-07 华为 Cheapest 基础验收：照片显示 Results 2 / Order Cheapest；1.659 EUR/liter 主站第一，Unknown/Closed/Unavailable 站第二，未知价格没有获得零价优势。真机测试说明勾选排序基础交互；由于只有一个有效报价，多报价排序边界未验收。下一步 Open now 筛除关闭站，Fuel 详情修复及加载稳定性仍待处理；仅提交文字记录。

@@ -100,7 +100,7 @@ pnpm local:start --lan
 - [x] 验证柴油 Cheapest 基础交互与有效报价优先：2026-09-07 用户照片显示 `Results: 2 · Order: Cheapest`，1.659 EUR/liter 主站排第一，Unknown/临时关闭站排第二。仅一个有效报价，不代替多报价升序/同价决胜边界验收。
 - [x] 验证 Fuel `Open now` 基础过滤：2026-09-07 用户照片显示 `Results: 1 · Order: Open now`，只剩 Multi-service 主站，价格 1.659 EUR/liter、Scheduled opening Open，临时关闭站已筛除。仅验证当前模拟营业状态，不代表真实即时营业或全部营业边界通过。
 - [ ] 验证 Fuel `Best`：Diesel 保持选中，检查实际排序 Best、主站推荐理由和 ETA 不可用说明。Mac 使用实际移动请求代码查询同一模拟城市/柴油，返回 appliedSort best、capability enabled、1 个主站，理由为距离较近、数据较新、ETA 不可用；手机仍待验收。Fuel 详情缺口和间歇加载失败仍未关闭。
-- [ ] 核对后续照片中的 `Cannot connect to Expo CLI`：本地 Expo 源码确认此提示来自 HMR 开发连接错误；当时 USB 已授权、服务监听和 8081/status 正常，但完整 URL/Error 未取得。待展开 See More 获取具体原因，不把此警告当作已定位的 Fuel API/Best 故障，不关闭加载稳定性问题。
+- [ ] 定位 `Cannot connect to Expo CLI`：用户展开照片确认 URL 为 `192.168.1.63:8081`、Error 为 `undefined`；本地 Expo 源码显示此警告来自 HMR `/hot` 的 connection-error，读取 `e.message`，undefined 本身不提供底层原因。USB 已授权，Mac 回环和 LAN 地址的 `/hot` WebSocket 握手均成功；限定 Expo 进程的近期日志出现新的项目启动记录，但未取得对应网络异常，不能宣称手机长连接已修复，也不能把该警告认定为 Fuel API/Best 故障。建议用户确认后做 USB 与 LAN 对照，尚未设置 USB 端口转发、重启服务或修改配置。
 - [ ] 实际点击 DEMO 导航不应跳出；真实目的地导航另行验收。
 
 ### 2026-09-07 间歇加载失败与恢复
