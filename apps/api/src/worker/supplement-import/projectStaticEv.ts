@@ -104,6 +104,9 @@ export function normalizeStaticEvRow(
           "date_maj",
           "deduplication_status",
           "consolidated_source_id",
+          "datagouv_dataset_id",
+          "datagouv_resource_id",
+          "datagouv_last_modified",
           ...FR_CONNECTORS.map(([field]) => field),
         ]
       : [

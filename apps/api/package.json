@@ -4,6 +4,8 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "source:import-ev": "node --env-file-if-exists=../../.env --import tsx src/worker/supplement-import/runStaticEvImport.ts",
+    "test:ev-live": "node --import tsx src/quality/runStaticEvCheck.ts",
     "test:fuel-live": "node --import tsx src/quality/runLiveFuelCheck.ts",
     "source:import-fuel": "node --env-file-if-exists=../../.env --import tsx src/worker/source-import/runFuelImport.ts",
     "test:import-local": "node --import tsx src/quality/runFuelImportCheck.ts",
