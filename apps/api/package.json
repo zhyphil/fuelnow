@@ -4,6 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "test:mobile-local": "node --import tsx src/quality/runMobileClientCheck.ts",
     "test:alerts-local": "node --import tsx src/quality/runAlertDispatchCheck.ts",
     "deployment:check": "node --env-file-if-exists=../../.env --import tsx src/quality/runDeploymentPreflight.ts",
     "test:restore-local": "node --import tsx src/quality/runBackupRestoreCheck.ts",

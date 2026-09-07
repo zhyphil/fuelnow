@@ -2,9 +2,9 @@
 
 > 项目：France + Spain Driver Decision Engine  
 > 需求来源：[france_spain_driver_decision_engine_project.md](./france_spain_driver_decision_engine_project.md)  
-> 当前状态：Phase 5 已完成 10/21 主任务及 15 个工程子项（含 EV/OSM 四个细项）；继续逐项验证、commit、push；缺信息项留空，小时任务保持暂停，阶段尚未完成
+> 当前状态：Phase 5 已完成 10/21 主任务及 16 个工程子项（含 EV/OSM 四个细项）；继续逐项验证、commit、push；缺信息项留空，小时任务保持暂停，阶段尚未完成
 > 当前阶段：Phase 5 测试、合规与发布准备
-> 下一项任务：REL-04 客户端到真实 API 联调；生产部署、日历、许可、通知接收人和真机缺资料项先跳过，见 [发布前置条件](./docs/testing/phase5-release-prerequisites.md)
+> 下一项任务：REL-02 隐私安全运行日志错误率/延迟汇总；生产部署、日历、许可、通知接收人和真机缺资料项先跳过，见 [发布前置条件](./docs/testing/phase5-release-prerequisites.md)
 > 最后更新：2026-09-07
 
 ## 使用方法
@@ -372,6 +372,7 @@ V1 的核心验收结果是：
 - [ ] `P5-REL-03` 准备 Beta 发布说明和反馈渠道
   - [x] `P5-REL-03a` 准备三语 Beta 说明草稿和隐私安全反馈表（2026-09-07；不发布构建、不创建 issue；实际渠道/责任人与私密支持仍待确认；见 docs/testing/beta-release-notes.md）
 - [ ] `P5-REL-04` 完成核心用户流程回归测试
+  - [x] `P5-REL-04a` 移动端真实请求/状态控制/三语展示到 HTTP/PostGIS 跨层回归（2026-09-07；48 搜索 + 12 详情、跨境与 400/404/429，共 65 次 HTTP 请求通过；不是原生设备验收；见 docs/testing/phase5-mobile-http-integration.md）
 - [ ] `P5-REL-05` 完成上线检查和回滚方案 — 进行中：清单检查器、运行手册和本地临时库恢复完成；实际部署平台的备份/权限/恢复目标与版本回退演练未完成
   - [x] `P5-REL-05a` 建立拒绝不完整验收的发布检查器与回滚运行手册 — 2026-09-07：10 项新增测试、347 API tests 通过；实际清单返回 10/21、4 门槛未完成，exit 2；见 docs/testing/phase5-release-runbook.md
   - [x] `P5-REL-05b` 在独立临时库执行备份恢复并加入 CI（2026-09-07；7 项保护测试，40 个表/序列、结构摘要及四服务 8 次 API 请求通过；拒绝恢复覆盖非空库，不代表生产 RPO/RTO；见 docs/testing/phase5-local-recovery.md）
