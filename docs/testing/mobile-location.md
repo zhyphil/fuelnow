@@ -20,7 +20,16 @@ approximate/precise, denied permission and return from Settings, disabled system
 location, backgrounding while locating and a slow GPS fix. Bundle export and
 mocked adapter tests do not establish those OS dialog interactions on real devices.
 
-Manual-location UI is the next checklist item, P4-APP-03. No raw coordinates,
-permission errors or location history are written to storage or analytics.
+P4-APP-03 adds an offline, searchable list of the eight ADR 0005 city-centre
+anchors and validated coordinate entry (including decimal commas and negative
+longitude). This is explicitly city-centre search, not address geocoding or device
+location. Arbitrary coordinates remain available for locations outside the list.
+No geocoding service, provider key or manual-text transmission is needed.
+
+Manual selection works without a location permission request and uses the same
+in-memory origin consumed by later search screens. Selecting manually cancels
+pending GPS work; a late GPS response cannot overwrite the chosen origin. Closing
+the selector preserves an existing ready origin. Raw coordinates, manual input,
+permission errors and location history are not written to storage or analytics.
 
 API reference: [Expo Location SDK 57](https://docs.expo.dev/versions/v57.0.0/sdk/location/).

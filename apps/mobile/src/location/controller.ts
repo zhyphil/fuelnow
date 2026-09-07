@@ -2,7 +2,8 @@ export interface Origin {
   latitude: number;
   longitude: number;
   accuracyMetres: number | null;
-  source: "gps";
+  source: "gps" | "manual";
+  label?: string;
 }
 
 export type LocationFailure =
@@ -47,6 +48,22 @@ export class LocationController {
     this.active?.abort();
     this.active = null;
     this.update({ status: "idle" });
+  };
+  public selectManual = (origin: Pick<Origin, "latitude" | "longitude" | "label">) => {
+    if (
+      !Number.isFinite(origin.latitude) ||
+      Math.abs(origin.latitude) > 90 ||
+      !Number.isFinite(origin.longitude) ||
+      Math.abs(origin.longitude) > 180
+    ) {
+      throw new Error("Invalid manual coordinates");
+    }
+    this.active?.abort();
+    this.active = null;
+    this.update({
+      status: "ready",
+      origin: { ...origin, source: "manual", accuracyMetres: null },
+    });
   };
   public request = async () => {
     if (this.active) return;

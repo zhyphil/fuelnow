@@ -3,10 +3,13 @@ import { ActivityIndicator, Linking, StyleSheet, Text, View } from "react-native
 import { useLocation } from "../location/context";
 import { locationMessages } from "../content/location";
 import { ActionButton } from "./ActionButton";
+import { ManualLocation } from "./ManualLocation";
+import { manualMessages } from "../content/manual";
 
 export function LocationPanel() {
   const { state, request, clear } = useLocation();
   const [settingsFailed, setSettingsFailed] = useState(false);
+  const [manualOpen, setManualOpen] = useState(false);
   const copy = locationMessages.en;
   return (
     <View style={styles.panel}>
@@ -14,7 +17,13 @@ export function LocationPanel() {
       <Text accessibilityLiveRegion="polite" style={styles.status}>
         {settingsFailed ? copy.unavailable : copy[state.status]}
       </Text>
+      {state.status === "ready" && state.origin.source === "manual" && (
+        <Text style={styles.status}>
+          {manualMessages.en.selected}: {state.origin.label ?? manualMessages.en.custom}
+        </Text>
+      )}
       {state.status === "ready" &&
+        state.origin.source === "gps" &&
         (state.origin.accuracyMetres === null || state.origin.accuracyMetres > 100) && (
           <Text style={styles.status}>{copy.approximate}</Text>
         )}
@@ -41,6 +50,15 @@ export function LocationPanel() {
           }}
         />
       )}
+      <ActionButton
+        secondary
+        label={manualMessages.en.choose}
+        onPress={() => {
+          if (state.status === "requesting") clear();
+          setManualOpen(true);
+        }}
+      />
+      {manualOpen && <ManualLocation onClose={() => setManualOpen(false)} />}
     </View>
   );
 }
