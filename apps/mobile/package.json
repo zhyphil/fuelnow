@@ -4,6 +4,7 @@
   "private": true,
   "main": "expo-router/entry",
   "scripts": {
+    "privacy:check": "node --experimental-strip-types scripts/check-native-privacy.ts",
     "dev": "expo start",
     "ios": "expo start --ios",
     "android": "expo start --android",

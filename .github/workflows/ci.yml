@@ -44,3 +44,6 @@ jobs:
 
       - name: Export iOS and Android bundles
         run: pnpm mobile:export
+
+      - name: Check generated native privacy configuration
+        run: pnpm --filter @fuel-now/mobile privacy:check

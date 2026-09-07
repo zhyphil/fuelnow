@@ -36,7 +36,18 @@ const config: ExpoConfig = {
     ],
   ],
   ios: { supportsTablet: false },
-  android: {},
+  android: {
+    allowBackup: false,
+    blockedPermissions: [
+      "android.permission.READ_EXTERNAL_STORAGE",
+      "android.permission.WRITE_EXTERNAL_STORAGE",
+      "android.permission.SYSTEM_ALERT_WINDOW",
+      "android.permission.VIBRATE",
+      "android.permission.ACCESS_BACKGROUND_LOCATION",
+      "android.permission.FOREGROUND_SERVICE_LOCATION",
+      "android.permission.ACTIVITY_RECOGNITION",
+    ],
+  },
   extra: { androidMapsConfigured: Boolean(process.env.GOOGLE_MAPS_ANDROID_API_KEY) },
 };
 
