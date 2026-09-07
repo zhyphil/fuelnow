@@ -1,0 +1,58 @@
+name: Beta feedback / Retour / Comentarios
+description: Non-sensitive test feedback in English, French or Spanish.
+title: "[Beta] "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        This repository is public. Do not include exact location, private addresses, routes, request URLs, logs, credentials, personal contacts or unredacted screenshots. This form does not mean a Beta has been released. Sensitive reports must wait for an approved private channel.
+
+        Ce dépôt est public. Ne publiez pas de localisation précise, adresses privées, trajets, URL de requête, journaux, secrets, coordonnées personnelles ou captures non masquées. Attendez un canal privé approuvé pour les signalements sensibles.
+
+        Este repositorio es público. No publique ubicación exacta, direcciones privadas, rutas, URL de solicitudes, registros, secretos, datos personales ni capturas sin ocultar información sensible. Espere un canal privado aprobado para informes sensibles.
+  - type: input
+    id: build
+    attributes:
+      label: Build / Version / Versión
+      description: App build number and iOS or Android version; no device identifier.
+    validations:
+      required: true
+  - type: dropdown
+    id: category
+    attributes:
+      label: Category / Catégorie / Categoría
+      options:
+        - Data quality / Qualité des données / Calidad de datos
+        - Interface / Interfaz
+        - Failure / Erreur / Error
+        - Accessibility / Accessibilité / Accesibilidad
+    validations:
+      required: true
+  - type: input
+    id: context
+    attributes:
+      label: Language, service, sort / Langue, service, tri / Idioma, servicio, orden
+      description: EN/FR/ES; fuel/charging/air/wash; nearest/cheapest/open_now/best.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps / Étapes / Pasos
+      description: Minimal reproduction without private locations or raw requests.
+    validations:
+      required: true
+  - type: textarea
+    id: result
+    attributes:
+      label: Expected and actual / Attendu et obtenu / Esperado y real
+      description: Describe the difference; include a public station identifier only if necessary.
+    validations:
+      required: true
+  - type: checkboxes
+    id: privacy
+    attributes:
+      label: Privacy check / Vérification / Comprobación
+      options:
+        - label: No sensitive information / Aucune information sensible / Sin información sensible
+          required: true
