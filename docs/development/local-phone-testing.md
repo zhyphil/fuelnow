@@ -1,6 +1,6 @@
 # 本机 + iPhone / Android 真机测试
 
-2026-09-07。iPhone 15 Pro Max / iOS 26.6.1；华为 Mate 20 HMA-L29 / EMUI 12.0.0，USB 读取确认 Android 10 / API 29、Expo Go 57.0.9。两台手机的 LAN 浏览器检查已通过；华为已完成 Fuel 基础列表报价、Cheapest、Open now、USB Best 理由显示，Barcelona / Charge 基础列表、静态详情、排序限制说明及禁用项实际点击检查，以及 Toulouse / Air 独立搜索与详情检查。Wash 基础独立搜索已确认 1 个最近排序结果、模拟价格与状态，详情此前已展示；用户实际点击 Wash 列表及同站详情页 DEMO 导航均未跳转。Paris / Fuel 空结果照片已确认 0 个最近排序结果、50 km 范围和提示；用户切回 Toulouse 后确认重新出现 2 个 DEMO 结果。Fuel 详情油品上下文缺口仍待修复。当前使用华为 USB 回环对照环境，LAN 测试暂停；下一步检查当前结果的地图第二层视图及返回列表，USB 长期稳定性仍待确认。这不是正式 Beta 发布或现场验收。
+2026-09-07。iPhone 15 Pro Max / iOS 26.6.1；华为 Mate 20 HMA-L29 / EMUI 12.0.0，USB 读取确认 Android 10 / API 29、Expo Go 57.0.9。两台手机的 LAN 浏览器检查已通过；华为已完成 Fuel 基础列表报价、Cheapest、Open now、USB Best 理由显示，Barcelona / Charge 基础列表、静态详情、排序限制说明及禁用项实际点击检查，以及 Toulouse / Air 独立搜索与详情检查。Wash 基础独立搜索已确认 1 个最近排序结果、模拟价格与状态，详情此前已展示；用户实际点击 Wash 列表及同站详情页 DEMO 导航均未跳转。Paris / Fuel 空结果照片已确认 0 个最近排序结果、50 km 范围和提示；用户切回 Toulouse 后确认重新出现 2 个 DEMO 结果。地图页照片仅见返回按钮、说明及 Google 标识，底图和标记未显示，地图验收未通过、原因待查。Fuel 详情油品上下文缺口仍待修复。当前使用华为 USB 回环对照环境，LAN 测试暂停；下一步确认地图短暂等待后的状态和能否返回原列表，USB 长期稳定性仍待确认。这不是正式 Beta 发布或现场验收。
 
 ## 启动与停止
 
@@ -143,7 +143,8 @@ pnpm local:start --lan
 - [x] Charge 禁用项点击回归：2026-09-07 用户按指引在 Barcelona / Recharge 结果加载后，打开 Tri et filtres 并分别点击 Le moins cher / Ouvert maintenant，确认两项都无法选中、仍保持 Le plus proche。结合此前照片中的限制原因，完成当前充电模拟场景的禁用交互验收；证据为用户操作反馈，不代替其他服务或所有 capability 组合测试。
 - [x] Paris / Fuel 空结果展示：2026-09-07 用户按 Paris / Carburant 步骤提交的照片显示 Carburant、Résultats: 0、Classement: Le plus proche、搜索范围已扩大提示，以及 Aucun service répertorié dans la zone / Changez de lieu ou de service 和 50 km 搜索半径。可见页面没有网络错误或残留的 Barcelona 充电站卡片。城市按本次操作步骤记录，照片本身未展示城市名；本套模拟数据不覆盖 Paris，不代表该城市真实无服务。
 - [x] 空结果后的恢复：2026-09-07 用户按切回 Toulouse / Carburant / Gazole、保持最近排序的步骤操作，明确反馈“2个demo结果出来了”。确认从空结果切回有覆盖城市后列表恢复，不再停留在空结果页；证据为用户操作反馈，不额外确认这次报价、新鲜度、排序细节或网络故障根因。
-- [ ] 地图第二层视图及返回：在当前 Toulouse 的 2 个结果上打开 Voir la carte，检查底图、同批站点标记和返回列表。代码允许 Expo Go 使用 Android 地图提供方，但不能以代码配置代替华为真机底图加载验收；若空白或报错，记录实际状态，不预判原因。外部真实导航仍单独待验。
+- [ ] 地图第二层视图：2026-09-07 用户从当前 Toulouse 的 2 个结果打开 Voir la carte 后提供照片，仅见 Retour、地图提供方/位置隐私说明和左下 Google 标识，地图区域空白，未见底图或站点标记。记录为“未通过，原因待查”，不能把页面打开或 Google 标识可见等同地图加载成功；截图不证明空白持续多久。代码核对：ResultMap 在 enabled 且存在有效坐标范围时挂载 MapView，Android 使用 PROVIDER_GOOGLE；Expo Go 可走启用路径，不应仅因项目未配发布地图密钥便断言根因。现组件未跟踪地图就绪/加载超时，静态 mapUnavailable 分支不是运行时底图加载失败提示。仅凭当前证据不能区分加载延迟、连接、鉴权、设备服务或渲染原因；未修改代码、重装应用或调整手机设置。
+- [ ] 地图等待与返回列表：请用户在地图页短暂等待约 10 秒，确认底图/标记是否出现，再点击 Retour 验证能回到原来的 2 个 DEMO 结果。地图空白和返回能力分别记录；外部真实导航仍单独待验。
 - [x] Toulouse / Gonflage（Air）独立搜索与详情：2026-09-07 用户六张照片中，照片 1–2 确认独立 Gonflage 列表为 1 个最近排序结果、主 DEMO 站、0 EUR/use，以及 ETA 缺失时按距离排序的说明；照片 3–4 确认详情为 Gratuit、设备按来源工作、Public。列表和详情的 Air 营业时间保持未知，未被 Fuel 的 Open 覆盖；低置信度、模拟来源与导航禁用提示可见。仅验证模拟数据展示，不代表现场免费、设备状态或导航点击拦截已验收。照片 5 是同一多服务详情的 Fuel 未选油品状态，不将其视为既有 Fuel 上下文问题已修复。
 - [x] Toulouse / Lavage（Wash）基础列表卡片：2026-09-07 用户按独立入口步骤提交的新照片显示列表刷新/地图按钮和第 1 个 Toulouse 主 DEMO 站，价格 6,00 EUR/programme de lavage，会员条件/税费未知，营业时间未知，服务按来源可用；模拟导航禁用和低置信度提示可见。与此前多服务详情中的 6 EUR 洗车方案、自动滚筒/吸尘器、设备按来源工作一致。仅确认已显示的模拟卡片，不代表真实价格或设备状态。
 - [x] Wash 列表顶部结果数量/排序：2026-09-07 用户随后补图明确显示 Lavage、Résultats: 1、Classement: Le plus proche，以及 ETA 缺失时按距离排序、部分数据未知和扩大搜索范围的说明。结合价格卡片，完成当前模拟数据的 Wash 基础独立搜索展示验收；不代替多候选排序或真实行程时间验收。
