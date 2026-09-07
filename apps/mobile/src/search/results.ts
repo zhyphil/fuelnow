@@ -1,10 +1,11 @@
 import { ApiFailure, type NearbyQuery, type NearbyResponse } from "../api/client";
+import { errorReason, type ErrorReason } from "./errors";
 
 export type ResourceState<T> =
   | { status: "idle" }
   | { status: "loading"; refreshing?: boolean }
   | { status: "ready"; response: T }
-  | { status: "error"; retryable: boolean };
+  | { status: "error"; retryable: boolean; reason: ErrorReason };
 export type SearchState = ResourceState<NearbyResponse>;
 export type SearchPort = (
   query: NearbyQuery,
@@ -50,6 +51,7 @@ export class ResourceController<Query, Response> {
       if (!request.signal.aborted)
         this.set({
           status: "error",
+          reason: errorReason(error),
           retryable: error instanceof ApiFailure && error.retryable,
         });
     } finally {

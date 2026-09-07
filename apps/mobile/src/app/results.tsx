@@ -135,7 +135,7 @@ export default function ResultsScreen() {
                 {state.status === "error" && (
                   <View style={styles.header}>
                     <Text accessibilityRole="alert" style={styles.body}>
-                      {copy.error}
+                      {evidence[state.reason]}
                     </Text>
                     {state.retryable && (
                       <ActionButton label={copy.retry} onPress={run} />

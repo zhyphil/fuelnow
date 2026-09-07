@@ -1,5 +1,6 @@
 import type { operations } from "./generated";
 import type { MobileConfig } from "../config/environment";
+import { validNearby, validDetail } from "./generated-validation";
 
 export type NearbyQuery = NonNullable<
   operations["searchNearbyServicePoints"]["parameters"]["query"]
@@ -86,8 +87,13 @@ export function createApiClient(config: MobileConfig, fetcher: typeof fetch = fe
           isRecord(body) ? safeToken(body.code) : null,
         );
       }
-      if (!isRecord(body) || !valid(body))
-        throw new ApiFailure("invalid_response", response.status);
+      let accepted = false;
+      try {
+        accepted = isRecord(body) && valid(body);
+      } catch {
+        /* Malformed deep responses fail closed. */
+      }
+      if (!accepted) throw new ApiFailure("invalid_response", response.status);
       return body as T;
     } catch (error) {
       if (error instanceof ApiFailure) throw error;
@@ -109,6 +115,7 @@ export function createApiClient(config: MobileConfig, fetcher: typeof fetch = fe
       return get(
         `/v1/nearby?${params.toString()}`,
         (body) =>
+          validNearby(body) &&
           typeof body.requestId === "string" &&
           body.service === query.service &&
           Array.isArray(body.results) &&
@@ -148,6 +155,7 @@ export function createApiClient(config: MobileConfig, fetcher: typeof fetch = fe
       return get(
         `/v1/service-points/${encodeURIComponent(id)}`,
         (body) =>
+          validDetail(body) &&
           typeof body.requestId === "string" &&
           isRecord(body.servicePoint) &&
           body.servicePoint.id === id,

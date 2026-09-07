@@ -1,5 +1,40 @@
 import type { Language } from "../i18n/preferences";
 const translations = {
+  network: [
+    "Network unavailable. Check your connection and retry.",
+    "Réseau indisponible. Vérifiez la connexion et réessayez.",
+    "Red no disponible. Comprueba la conexión y reintenta.",
+  ],
+  timeout: [
+    "The request timed out. You can retry.",
+    "Le délai est dépassé. Vous pouvez réessayer.",
+    "La solicitud tardó demasiado. Puedes reintentar.",
+  ],
+  rateLimited: [
+    "Too many requests. Please wait before retrying.",
+    "Trop de requêtes. Patientez avant de réessayer.",
+    "Demasiadas solicitudes. Espera antes de reintentar.",
+  ],
+  serverError: [
+    "The service is temporarily unavailable. Retry later.",
+    "Le service est temporairement indisponible. Réessayez plus tard.",
+    "Servicio temporalmente no disponible. Reintenta más tarde.",
+  ],
+  notFound: [
+    "This service point no longer exists.",
+    "Ce point de service n’existe plus.",
+    "Este punto de servicio ya no existe.",
+  ],
+  invalidResponse: [
+    "The service returned invalid data. Please return and try later.",
+    "Le service a renvoyé des données invalides. Revenez et réessayez plus tard.",
+    "El servicio devolvió datos inválidos. Vuelve e inténtalo más tarde.",
+  ],
+  requestError: [
+    "This request could not be completed. Check your selection.",
+    "Cette requête a échoué. Vérifiez votre sélection.",
+    "No se pudo completar la solicitud. Comprueba tu selección.",
+  ],
   refreshing: [
     "Refreshing results…",
     "Actualisation des résultats…",

@@ -31,9 +31,10 @@ configuration. Never put database credentials or provider tokens in the mobile a
 - `src/api/generated.ts`: generated OpenAPI types, with no server runtime imports.
 
 The API client omits cookies, supports caller cancellation and a 12-second timeout,
-does not retry automatically, and exposes safe structured errors. It performs basic
-response-envelope checks; full field validation remains the server's schema
-responsibility. It neither caches nor logs precise search coordinates. Unknown
+does not retry automatically, and exposes safe structured errors. It performs
+complete response-schema checks using build-time generated TypeBox JavaScript
+validators (no compiler or dynamic evaluation in the native bundle). It neither
+caches nor logs precise search coordinates. Unknown
 service values and server capability/outcome metadata pass through unchanged.
 
 Run `pnpm api:types` after API schema changes. `pnpm check` detects generated-type

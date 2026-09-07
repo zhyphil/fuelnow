@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
+import { errorReason } from "../src/search/errors";
 import sample from "../../../docs/api/examples/nearby-fuel-cheapest.json";
 import { ApiFailure, createApiClient, type NearbyResponse } from "../src/api/client";
 import { resolveMobileConfig } from "../src/config/environment";
@@ -101,7 +102,11 @@ describe("list-first search lifecycle", () => {
     const controller = new SearchController(port);
     await controller.run(query);
     expect(port).toHaveBeenCalledOnce();
-    expect(controller.getSnapshot()).toEqual({ status: "error", retryable: true });
+    expect(controller.getSnapshot()).toEqual({
+      status: "error",
+      retryable: true,
+      reason: errorReason(error),
+    });
     await controller.run(query);
     expect(controller.getSnapshot().status).toBe("ready");
   });
@@ -112,7 +117,11 @@ describe("list-first search lifecycle", () => {
         throw error;
       });
       await controller.run(query);
-      expect(controller.getSnapshot()).toEqual({ status: "error", retryable: false });
+      expect(controller.getSnapshot()).toEqual({
+        status: "error",
+        retryable: false,
+        reason: errorReason(error),
+      });
     },
   );
   it("removes old results while refreshing", async () => {

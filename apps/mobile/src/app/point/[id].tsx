@@ -50,7 +50,7 @@ export default function PointScreen() {
         )}
         {state.status === "error" && (
           <>
-            <Text accessibilityRole="alert">{results.error}</Text>
+            <Text accessibilityRole="alert">{copy[state.reason]}</Text>
             {state.retryable && (
               <ActionButton
                 label={results.retry}
