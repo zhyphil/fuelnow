@@ -541,7 +541,12 @@ export class FranceFuelAdapter implements SourceAdapter<AdapterContext> {
       (service): service is "Lavage automatique" | "Lavage manuel" =>
         service === "Lavage automatique" || service === "Lavage manuel",
     );
-    const unattendedFuelPayment24Seven = input.horaires_automate_24_24 === "Oui";
+    const unattendedFuelPayment24Seven =
+      input.horaires_automate_24_24 === "Oui"
+        ? true
+        : input.horaires_automate_24_24 === "Non"
+          ? false
+          : null;
     const openingHoursResult = parseSourceOpeningHours({
       country: "FR",
       raw: input.horaires,
