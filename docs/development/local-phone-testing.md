@@ -1,6 +1,6 @@
 # 本机 + iPhone / Android 真机测试
 
-2026-09-07。iPhone 15 Pro Max / iOS 26.6.1；华为 Mate 20 HMA-L29 / EMUI 12.0.0，USB 读取确认 Android 10 / API 29、Expo Go 57.0.9。两台手机的 LAN 浏览器检查已通过；华为已完成 Fuel 基础列表报价、Cheapest、Open now、USB Best 理由显示，以及 Barcelona / Charge 基础列表、静态详情和排序限制说明显示检查。Fuel 详情油品上下文缺口仍待修复。当前使用华为 USB 回环对照环境，LAN 测试暂停；下一步检查 Toulouse / Air 独立搜索，USB 长期稳定性仍待确认。这不是正式 Beta 发布或现场验收。
+2026-09-07。iPhone 15 Pro Max / iOS 26.6.1；华为 Mate 20 HMA-L29 / EMUI 12.0.0，USB 读取确认 Android 10 / API 29、Expo Go 57.0.9。两台手机的 LAN 浏览器检查已通过；华为已完成 Fuel 基础列表报价、Cheapest、Open now、USB Best 理由显示，Barcelona / Charge 基础列表、静态详情和排序限制说明显示，以及 Toulouse / Air 独立搜索与详情检查。Fuel 详情油品上下文缺口仍待修复。当前使用华为 USB 回环对照环境，LAN 测试暂停；下一步检查 Toulouse / Wash 独立搜索（多服务详情已见），USB 长期稳定性仍待确认。这不是正式 Beta 发布或现场验收。
 
 ## 启动与停止
 
@@ -141,7 +141,8 @@ pnpm local:start --lan
 - [x] Barcelona / Recharge 基础列表与静态详情：2026-09-07 用户照片显示 DEMO Barcelona Charging、ES 地址、约 1.5 km 直线距离，详情含 CCS Combo 2 / Type 2、最高额定功率 150 kW（不是实际速度）、2 个充电点；价格/营业/实时可用数量均为 Inconnu，并说明西班牙未启用实时可用性。来源 Synthetic Spain Charging、风险提示与模拟导航保护可见。照片未包含排序标题，不额外标记具体排序或实时充电能力通过。
 - [x] Charge 排序限制的界面说明：2026-09-07 用户照片显示 Le moins cher 下方解释 V1 无可比较价格，Ouvert maintenant 下方解释营业时间未知；请求 Le plus proche 且实际 Résultats 1 / Classement Le plus proche，驾车时间缺失时按距离排序的说明可见。确认文案/状态展示与规则一致，不把静态照片当实际点击拦截已测。
 - [ ] Charge 禁用项点击回归：点击最低价/当前营业，不应切到不支持的模式；需要实际操作结果。
-- [ ] Toulouse / Gonflage（Air）独立搜索与详情：预期主 DEMO 站、模拟 0 EUR/use / Gratuit、设备按来源为可用/工作、Public；营业时间未知不应被站点 Fuel 营业状态替代。之前多服务详情里见过 Air 卡片，不代替独立入口搜索检查。
+- [x] Toulouse / Gonflage（Air）独立搜索与详情：2026-09-07 用户六张照片中，照片 1–2 确认独立 Gonflage 列表为 1 个最近排序结果、主 DEMO 站、0 EUR/use，以及 ETA 缺失时按距离排序的说明；照片 3–4 确认详情为 Gratuit、设备按来源工作、Public。列表和详情的 Air 营业时间保持未知，未被 Fuel 的 Open 覆盖；低置信度、模拟来源与导航禁用提示可见。仅验证模拟数据展示，不代表现场免费、设备状态或导航点击拦截已验收。照片 5 是同一多服务详情的 Fuel 未选油品状态，不将其视为既有 Fuel 上下文问题已修复。
+- [ ] Toulouse / Lavage（Wash）独立搜索：预期 1 个主 DEMO 站、6 EUR/programme de lavage、营业时间未知。上述照片 6 已确认多服务详情中的 6 EUR 洗车方案、自动滚筒/吸尘器、设备按来源工作；尚不代替独立 Wash 入口搜索。下一步只需补列表顶部与价格卡片照片，不重复索取已收到的详情。
 - [ ] 定位 `Cannot connect to Expo CLI`：用户展开照片确认 URL 为 `192.168.1.63:8081`、Error 为 `undefined`；本地 Expo 源码显示此警告来自 HMR `/hot` 的 connection-error，读取 `e.message`，undefined 本身不提供底层原因。USB 已授权，Mac 回环和 LAN 地址的 `/hot` WebSocket 握手均成功；限定 Expo 进程的近期日志出现新的项目启动记录，但未取得对应网络异常，不能宣称手机长连接已修复，也不能把该警告认定为 Fuel API/Best 故障。建议用户确认后做 USB 与 LAN 对照，尚未设置 USB 端口转发、重启服务或修改配置。
 - [ ] 实际点击 DEMO 导航不应跳出；真实目的地导航另行验收。
 
