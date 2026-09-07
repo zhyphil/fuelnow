@@ -2,9 +2,9 @@
 
 > 项目：France + Spain Driver Decision Engine  
 > 需求来源：[france_spain_driver_decision_engine_project.md](./france_spain_driver_decision_engine_project.md)  
-> 当前状态：Phase 5 已完成 10/21 主任务及 4 个工程子项；每小时自动迭代已恢复，运营/部署/分发留待单独决定
+> 当前状态：Phase 5 已完成 10/21 主任务及 5 个工程子项；按用户要求暂停每小时自动任务，当前任务直接连续迭代；运营/部署/分发留待单独决定
 > 当前阶段：Phase 5 测试、合规与发布准备
-> 下一项任务：`P5-QA-10a` Fuel 来源到统一业务字段投影；外部决定继续待办，见 [发布前置条件](./docs/testing/phase5-release-prerequisites.md)
+> 下一项任务：`P5-QA-10b` 统一库事务写入与重复导入/失败恢复；外部决定继续待办，见 [发布前置条件](./docs/testing/phase5-release-prerequisites.md)
 > 最后更新：2026-09-07
 
 ## 使用方法
@@ -338,7 +338,7 @@ V1 的核心验收结果是：
 - [x] `P5-QA-08` 测试弱网、无网、来源中断和路线 API 失败 — 2026-09-07：客户端对不响应取消的 headers/body 增加强制截止，来源断点恢复和四类路线故障保留结果；全量 765 tests、质量门槛和双平台 bundle 通过；见 docs/testing/phase5-failure-recovery.md
 - [x] `P5-QA-09` 进行接口负载与响应时间测试 — 2026-09-07：独立临时库应用 15 项迁移，四服务四排序、4/8 并发各 160 请求零错误，p95 6.12/7.90 ms；临时库已删除；全量 771 tests 与质量门槛通过；本地小样本非生产 SLA；见 docs/testing/phase5-local-load.md
 - [ ] `P5-QA-10` 人工抽查真实站点、价格和营业状态 — 进行中：2026-09-07 已远程核对两国 10 个当前官方站点记录；未完成真实数据 API/原生端及人工验收，见 [部分证据](./docs/testing/phase5-live-source-audit.md)
-  - [ ] `P5-QA-10a` 补齐 France/Spain Fuel 到 canonical 字段的可测试投影，保留来源/单位/未知与时效语义
+  - [x] `P5-QA-10a` 补齐 France/Spain Fuel 到 canonical 字段的可测试投影，保留来源/单位/未知与时效语义（2026-09-07；稳定 UUID、共享契约校验、8 项投影测试；[设计说明](./docs/architecture/canonical-source-import.md)）
   - [ ] `P5-QA-10b` 实现统一库事务写入、来源关联和重复导入/失败恢复验证，不覆盖未经核实的其他来源证据
   - [ ] `P5-QA-10c` 接通已批准公开 Fuel 来源的有界采集、显式执行开关和同步记录
   - [ ] `P5-QA-10d` 补齐获准开发的 EV/OSM 来源链路，严格保留许可证与动态能力限制
