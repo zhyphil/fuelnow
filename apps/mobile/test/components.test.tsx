@@ -10,7 +10,10 @@ import { EvidenceSummary } from "../src/components/EvidenceSummary";
 import type { Evidence } from "../src/search/evidence";
 import sample from "../../../docs/api/examples/nearby-fuel-cheapest.json";
 
-const state = vi.hoisted(() => ({ language: "en" as "en" | "fr" | "es" }));
+const state = vi.hoisted(() => ({
+  language: "en" as "en" | "fr" | "es",
+  fontScale: 1,
+}));
 Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
 vi.mock("../src/i18n/context", () => ({
   useLanguage: () => ({ language: state.language, copy: getMessages(state.language) }),
@@ -22,6 +25,7 @@ vi.mock("react-native", () => ({
   ScrollView: "ScrollView",
   Modal: "Modal",
   StyleSheet: { create: (styles: unknown) => styles },
+  useWindowDimensions: () => ({ fontScale: state.fontScale }),
   Pressable: ({
     children,
     style,
@@ -56,6 +60,50 @@ async function render(element: Parameters<ReturnType<typeof createRoot>["render"
 afterEach(async () => {
   for (const root of roots.splice(0)) await act(() => root.unmount());
   state.language = "en";
+  state.fontScale = 1;
+});
+
+it("reflows service cards for measured width and font changes without restricting text", async () => {
+  state.language = "es";
+  const element = (
+    <SearchProvider>
+      <ServicePicker />
+    </SearchProvider>
+  );
+  const root = await render(element);
+  const grid = () => root.container.queryAll((node) => !!node.props.onLayout)[0]!;
+  const cards = () => root.container.queryAll((node) => node.type === "Pressable");
+  const bases = () =>
+    cards().map(
+      (node) => Object.assign({}, ...node.props.style.filter(Boolean)).flexBasis,
+    );
+  expect(bases()).toEqual(Array(4).fill("100%"));
+  for (const [width, fontScale, expected] of [
+    [320, 1, "100%"],
+    [800, 1, "45%"],
+    [800, 2, "100%"],
+    [320, 1.3, "100%"],
+    [800, 1, "45%"],
+  ] as const) {
+    state.fontScale = fontScale;
+    await act(() => {
+      grid().props.onLayout({ nativeEvent: { layout: { width } } });
+      root.render(
+        <SearchProvider>
+          <ServicePicker />
+        </SearchProvider>,
+      );
+    });
+    expect(bases()).toEqual(Array(4).fill(expected));
+    await act(() => cards()[0]!.props.onPress());
+    expect(cards()[0]!.props.accessibilityState.selected).toBe(true);
+    expect(JSON.stringify(cards()[0]!.toJSON())).toContain("Combustible");
+  }
+  for (const node of root.container.queryAll((node) => node.type === "Text")) {
+    expect(node.props.allowFontScaling).not.toBe(false);
+    expect(node.props.numberOfLines).toBeUndefined();
+    expect(node.props.adjustsFontSizeToFit).not.toBe(true);
+  }
 });
 
 it("provides 48+ touch targets, explicit selection, expanded and disabled semantics", async () => {

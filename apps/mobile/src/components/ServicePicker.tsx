@@ -1,4 +1,5 @@
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { useState } from "react";
+import { Pressable, StyleSheet, Text, View, useWindowDimensions } from "react-native";
 import { useLanguage } from "../i18n/context";
 import { useSearchSelection } from "../search/context";
 import { SERVICES } from "../search/selection";
@@ -8,12 +9,19 @@ export function ServicePicker() {
     copy: { services },
   } = useLanguage();
   const { service, selectService } = useSearchSelection();
+  const { fontScale } = useWindowDimensions();
+  const [width, setWidth] = useState(0);
+  // Include padding and the selected checkmark without shrinking accessible text.
+  const twoColumns = width >= 2 * (220 * Math.max(1, fontScale) + 38) + 12;
   return (
     <View style={styles.section}>
       <Text accessibilityRole="header" style={styles.heading}>
         {services.choose}
       </Text>
-      <View style={styles.grid}>
+      <View
+        style={styles.grid}
+        onLayout={(event) => setWidth(event.nativeEvent.layout.width)}
+      >
         {SERVICES.map((value) => {
           const selected = service === value;
           return (
@@ -25,6 +33,7 @@ export function ServicePicker() {
               onPress={() => selectService(value)}
               style={({ pressed }) => [
                 styles.card,
+                !twoColumns && styles.fullWidth,
                 selected && styles.selected,
                 pressed && styles.pressed,
               ]}
@@ -63,6 +72,7 @@ const styles = StyleSheet.create({
     gap: 9,
   },
   selected: { backgroundColor: "#173E32", borderColor: "#173E32" },
+  fullWidth: { flexBasis: "100%" },
   pressed: { opacity: 0.8 },
   name: { color: "#173E32", fontSize: 20, fontWeight: "700" },
   description: { color: "#4F5D54", fontSize: 14, lineHeight: 21 },

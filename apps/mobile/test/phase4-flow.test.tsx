@@ -58,6 +58,7 @@ vi.mock("expo-router", () => ({
   useFocusEffect: (effect: () => (() => void) | void) => useEffect(effect, [effect]),
 }));
 vi.mock("react-native", () => ({
+  useWindowDimensions: () => ({ width: 360, height: 800, fontScale: 1 }),
   Text: "Text",
   View: "View",
   ScrollView: "ScrollView",
