@@ -4,6 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "test:load-local": "node --import tsx src/quality/runLocalLoad.ts",
     "quality:geography": "node --env-file-if-exists=../../.env --import tsx src/quality/runGeographyAudit.ts",
     "quality:prices": "node --env-file-if-exists=../../.env --import tsx src/quality/runPriceAudit.ts",
     "client:types": "node --import tsx src/api/generateClientContract.ts",
