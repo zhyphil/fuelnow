@@ -170,6 +170,18 @@ pnpm local:start --lan
 
 ### 2026-09-07 修复期间的 USB 开发服务绑定
 
+#### 新版地图复验：仍未通过
+
+用户两张照片依次显示转圈及 `Chargement de la carte…`，随后显示 `Le fond de carte n’a pas été chargé. Réessayez ou revenez aux résultats.` 和 Réessayer，地图区域仍空白，仅有 Google 标识。按当前代码，这证明 Android `onMapReady` 已触发，而 12 秒内未收到 `onMapLoaded`；不再把问题归为弹窗没有打开，也不把新增超时处理当底图修复成功。
+
+本次只读诊断和边界：
+
+- 限定当前 Expo 进程近期日志，Google SDK/renderer 初始化可见；`PhFlagUpdateRegistry` 的 `GoogleCertificatesRslt: not allowed` 属于 flag-update 警告，未取得明确的 Maps `Authorization failure`、API token 失败或 HTTPS/DNS 异常，不能据此直接断言 API 密钥错误。
+- 手机对地图日志中的 `clients4.google.com` 解析及单次 ICMP 连通成功；只证明这次基础网络可达，不证明 HTTPS、地图数据请求或应用级鉴权成功。未读取其他应用日志，原始日志、设备标识和用户照片不入库。
+- [Expo SDK 52 官方变更记录](https://expo.dev/changelog/2024-11-12-sdk-52#deprecations)明确宣布 SDK 53 起 Android Expo Go 不再支持 Google Maps，建议 development build；但[当前组件文档](https://docs.expo.dev/versions/latest/sdk/map-view/)仍标注 Expo Go 无须额外设置。两处资料有冲突，不能仅凭其中一句宣称本机根因已确定；[相同地图库版本的公开问题](https://github.com/react-native-maps/react-native-maps/issues/5888)是辅助线索，不将 issue 作者评论当 Expo 维护者结论。
+- 下一项建议：[独立开发测试包](https://docs.expo.dev/develop/development-builds/introduction/)配置自有受限 Android 地图密钥，绕开 Expo Go 容器进行对照。当前常用 Android SDK/Studio 路径不存在，当前 shell 和检查到的项目环境文件未发现地图密钥配置；不代表其他账户或位置一定没有密钥。需要用户确认工具链安装/测试包安装范围，Google 项目、密钥及可能的计费操作单独确认，不能在聊天中索取明文密钥。
+- 本轮未再修改应用代码、安装工具链/应用、启用 Google 计费或更改手机网络。底图/标记验收继续保持未完成。
+
 地图工程修复与待复验：
 
 - [x] Android 地图弹窗开启硬件加速，等 onShow 与非零布局后挂载 MapView，使用 absoluteFill 填满地图容器。此为渲染兼容处理，不将 Surface/EGL 警告直接定为根因。

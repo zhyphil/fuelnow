@@ -4,7 +4,7 @@
 > 需求来源：[france_spain_driver_decision_engine_project.md](./france_spain_driver_decision_engine_project.md)  
 > 当前状态：Fuel 详情、首页自适应与 USB IPv4 连接工程修复完成；地图新增弹窗渲染兼容处理和超时重试，尚未确认华为底图恢复。全量 1012 tests、双平台编译通过，手机复验待进行；Phase 5 为 10/21 主任务及 18 个子项；Phase 6 为 5/13 主任务及 8 个准备子项；未发布，小时任务保持暂停
 > 当前阶段：本机真机测试进行中（华为基础列表已通过；Phase 5/6 均未整体验收）
-> 下一项任务：USB 服务已重启为新版，华为复验地图底图/标记或具体超时提示、Fuel 列表与详情报价一致性及首页原字号/大字体完整长词。地图空白根因和长期 USB 稳定性尚未确认；本次 IPv4 绑定问题已定位修复，不代表之前所有 LAN 警告均已解释。iPhone LAN 测试暂不可用，App 安装仍待处理；发布条件未关闭，见 [真机测试说明](./docs/development/local-phone-testing.md)
+> 下一项任务：华为新版地图复验仍未通过：显示加载后进入“底图未加载”超时，说明 ready 已回调而 loaded 未完成。优先核对 Expo Go 地图支持/授权限制，建议用户确认后以独立 Android 测试包对照；本机缺 Android SDK/Studio，当前检查未发现地图密钥配置，不自动安装工具链、创建密钥或启用计费。Fuel 详情/首页字体复验与长期 USB 稳定性仍待完成；Phase 5/6 发布门槛未关闭，见 [真机测试说明](./docs/development/local-phone-testing.md)
 > 最后更新：2026-09-07
 
 ## 使用方法
@@ -554,6 +554,8 @@ V1 的核心验收结果是：
 2026-09-07 执行顺序补充：用户暂缓运营主体/邮箱/部署/分发决定，授权继续独立工程工作；QA-10、LEG-01/02 及实际部署/设备门槛保留未完成。先完成 LEG-03 工程子项，再检查 LEG-06 日志与分析；许可和发布门槛不得自动勾选。
 
 # 完成记录
+
+2026-09-07 华为地图修复后复验（未通过）：用户两张照片确认新 loading 和“Le fond de carte n’a pas été chargé”重试提示生效，但仍无底图/标记。当前 Expo 进程可见 flag-update 证书警告，无明确地图 Authorization failure；手机 Google 服务域名 DNS/单次 ICMP 成功，不等同 HTTPS/SDK 鉴权通过。官方 SDK 52 变更记录宣布 SDK 53 起 Android Expo Go 不支持 Google Maps，但现行组件文档仍写无须额外设置，资料冲突已记录，不冒充已证实具体底层根因。建议经用户确认用独立 Android 安装包对照；未安装工具链/新应用、改密钥或启用收费。仅更新证据记录，应用代码未再修改。
 
 2026-09-07 地图空白恢复能力工程修复：Android 地图 Modal 开启硬件加速，等待弹窗显示且有有效尺寸后再挂载；明确定位地图视图填满容器，区分 SDK 未启动与 Google 底图未加载，12 秒显示三语提示和隔离重试，允许迟到成功恢复，退出清理计时器。Apple Maps 以其支持的 ready 回调结束等待，不依赖 Google-only loaded 事件。新增 8 项回归，最终全量 1012 tests 与双平台 bundle 通过；不是华为底图恢复的证明，根因和真机验收仍待确认。
 
