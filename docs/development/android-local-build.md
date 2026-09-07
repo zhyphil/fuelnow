@@ -73,11 +73,19 @@ Google Maps SDK 的[使用和结算要求](https://developers.google.com/maps/do
 - [x] ARM64 APK 编译及最终权限核对：Gradle `assembleDebug` 成功，APK v2 签名有效，application ID / 显示名 / ARM64 / min SDK 24 / target SDK 36 已通过 APK 工具核对。
 - [x] USB 安装与启动：设备返回安装成功，前台 Activity 为独立测试应用，截图确认法语 TEST LOCAL 首页，不是 Expo Go 容器。
 - [x] 本机测试 API 搜索冒烟：独立包选择 Carburant → 手动 Toulouse → 搜索；截图显示最近排序 2 个结果和主 DEMO 卡片。未选择真实定位，未测试真实导航或地图底图。
-- [ ] 自有受限密钥配置后的华为地图底图/标记和点击验收。
+- [x] 自有受限密钥配置后的华为地图有限冒烟：手动 Toulouse 底图/2 个 DEMO 标记、选中主站点后打开详情及返回重开通过（2026-09-07）；不代表其他服务/设备/网络或真实导航全部验收。
 - [x] 专用本地测试签名与 APK 副本证书一致性验证；未替换手机应用，地图验收仍待完成。
 - [x] 注入用户本地受限地图密钥并重新构建、专用签署、核对实际 APK 密钥和权限；等待用户确认旧测试应用的数据重置后再安装。
 
 安装与地图验收按实际结果更新，不用 JS export 或单元测试替代原生构建和真机结果。
+
+### 专用签名地图包安装与真机结果（2026-09-07）
+
+用户明确同意旧 Fuel Now Test 的卸载及本地测试数据重置后，只对 `com.fuelnow.localtest` 执行卸载、安装和启动，均成功；未更改 Expo Go，包管理器确认它仍安装。Huawei Android 10 不支持工具先尝试的 incremental install，工具自动回退 streamed install 后成功。恢复 8081/3001 USB 转发；既有 Metro 和本地测试 API 继续运行。
+
+手动选择 Carburant / Toulouse，结果数 2；打开地图后实际截图可见 Toulouse 街道、两个红色 DEMO 标记和 Google 署名，没有空白/超时提示。点击主站点标记后显示名称和 Voir les détails，点击后进入对应 DEMO 详情；Retour 返回燃油列表，再次打开地图仍显示底图和两个标记。当前进程近期最多 1200 行日志仅做布尔匹配检查，未匹配 FATAL EXCEPTION 或地图鉴权失败，不输出原始日志/密钥，也不将有限样本当全量无错误证明。
+
+未申请定位，实际包权限 coarse/fine 均为 granted=false；没有启动外部 DEMO 导航或额外路线/Places 服务，没有更改云端配置。结束时手机停留在已显示的地图页。旧测试偏好随卸载清除，不能直接恢复，其他应用未动。本次通过仅适用于该独立包、该设备/网络及手动演示区域；不追溯认定 Expo Go 旧问题唯一根因，不关闭 Phase 5/6 整体门槛。此前未安装/等待授权段落为过程记录，安装状态以本节为准。
 
 ### 最终包权限边界
 
