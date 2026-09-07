@@ -41,3 +41,6 @@ jobs:
 
       - name: Run quality gate
         run: pnpm check
+
+      - name: Export iOS and Android bundles
+        run: pnpm mobile:export

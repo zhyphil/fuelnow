@@ -28,6 +28,7 @@ Do not silently rewrite an accepted decision when implementation changes directi
 | [0011](./0011-osm-air-wash-supplement.md) | P1-AW-01 | Full stack | OSM supplements Air/Wash presence; production does not depend on public Overpass |
 | [0012](./0012-v1-ev-realtime-scope.md) | P1-EV-03 | Full stack | No nationwide Charge real-time claim; conditional France per-EVSE availability and no V1 Charge price comparison |
 | [0013](./0013-v1-scope-after-data-feasibility.md) | P1-RPT-06 | Full stack | Retain four service entries with source-aware capabilities; Fuel full decision modes and limited honest Charge/Air/Wash modes |
+| [0014](./0014-mobile-foundation.md) | P4-APP-01 | Full stack | Expo SDK 57 native foundation, generated OpenAPI types and bounded mobile API transport |
 
 The V1 field decision for `P0-10` is maintained as the normative product contract in [V1 service field contract](../product/v1-service-fields.md).
 

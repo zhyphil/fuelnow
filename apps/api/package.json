@@ -4,6 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "client:types": "node --import tsx src/api/generateClientContract.ts",
     "dev": "node --env-file-if-exists=../../.env --import tsx --watch src/api/start.ts",
     "db:down": "docker compose --file ../../compose.yaml down",
     "db:migrate": "docker compose --file ../../compose.yaml exec -T db sh /migrations/apply-migrations.sh",
@@ -27,6 +28,7 @@
   },
   "devDependencies": {
     "@types/pg": "8.23.1",
+    "openapi-typescript": "7.13.0",
     "tsx": "4.23.13"
   }
 }

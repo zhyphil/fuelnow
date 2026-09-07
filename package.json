@@ -8,9 +8,13 @@
     "node": ">=24 <25"
   },
   "scripts": {
+    "mobile:dev": "pnpm --filter @fuel-now/mobile dev",
+    "mobile:export": "pnpm --filter @fuel-now/mobile export",
+    "api:types": "pnpm --filter @fuel-now/api client:types",
+    "api:types:check": "pnpm --filter @fuel-now/api client:types --check",
     "api:dev": "pnpm --filter @fuel-now/api dev",
     "api:start": "pnpm --filter @fuel-now/api start",
-    "check": "pnpm format:check && pnpm lint && pnpm typecheck && pnpm test",
+    "check": "pnpm format:check && pnpm lint && pnpm typecheck && pnpm api:types:check && pnpm test",
     "db:down": "pnpm --filter @fuel-now/api db:down",
     "db:migrate": "pnpm --filter @fuel-now/api db:migrate",
     "db:up": "pnpm --filter @fuel-now/api db:up",
