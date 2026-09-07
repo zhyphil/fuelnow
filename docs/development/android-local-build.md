@@ -52,13 +52,15 @@ Expo prebuild 会自动将 package.json 的 ios/android 脚本改成原生构建
 
 ## Google 地图待办
 
-用户已确认目前没有 Google Cloud 项目和地图密钥。当前构建不提供密钥，Android 独立包按既有逻辑禁用地图，不能将此包能安装/启动记作底图修复成功。
+用户随后自行创建了 Google Cloud 项目和地图密钥；截图确认 Maps SDK for Android 已启用，密钥编辑页已选择仅该 SDK 和 Android 应用限制，但包名/指纹条目尚为空，保存结果待确认。用户表示账户已有银行卡，项目结算关联尚未独立核实。当前构建仍不提供地图密钥，不能将此包能安装/启动记作底图修复成功。
 
 后续先获得用户对结算账户步骤的单独确认，再配置 Maps SDK for Android。测试密钥应只允许该 SDK，并限制为测试 application ID + 专用本地测试签名证书 SHA-1；不要使用 Expo/RN 模板内通用 debug 签名作为地图密钥限制的信任依据。配置密钥前需准备独立本地测试签名，并核对重新签名后实际 APK 的证书；不索取聊天明文密钥，不输出包含密钥的完整 Expo config。
 
 `GOOGLE_MAPS_ANDROID_API_KEY` 仅供原生地图插件注入；`extra` 只保存是否已配置的布尔值。Android 客户端密钥会随 APK 分发，不能依靠隐藏值代替应用/API 限制。密钥与签名变更需要重新生成/构建原生包，不能仅刷新 JS。
 
 改为专用测试签名后，已有同包名的默认签名包不能直接覆盖安装。需要先说明测试包数据重置影响并获得用户确认，或使用另一个明确的测试 application ID；不要自动卸载现有测试包。
+
+2026-09-07 已生成专用本地测试证书（RSA 3072、PKCS12），保存在被忽略的 `apps/mobile/.expo/local-signing/`；目录权限 700，私钥库和随机密码文件权限 600，不提交或展示秘密值。使用该证书签署 `fuel-now-test-signed.apk` 副本，保留原 APK；实际副本的 v2/v3 签名验证通过，包名仍为 `com.fuelnow.localtest`，证书 SHA-1 与密钥库一致。副本未注入地图密钥、未安装，后续含地图密钥的测试构建必须沿用此证书，不得重新生成。签署时仅传 `--ks-pass file:...`，PKCS12 私钥使用相同密码；不要让两个密码参数顺序读取同一单行密码文件。
 
 Google Maps SDK 的[使用和结算要求](https://developers.google.com/maps/documentation/android-sdk/usage-and-billing)与[价格表](https://developers.google.com/maps/billing-and-pricing/pricing)应在配置时再次核对；基础原生 Maps SDK 与路线、Places、Street View 等不同服务不可混为一项。本轮没有创建云项目、密钥或结算账户，也没有付费 API 调用。
 
@@ -70,6 +72,7 @@ Google Maps SDK 的[使用和结算要求](https://developers.google.com/maps/do
 - [x] USB 安装与启动：设备返回安装成功，前台 Activity 为独立测试应用，截图确认法语 TEST LOCAL 首页，不是 Expo Go 容器。
 - [x] 本机测试 API 搜索冒烟：独立包选择 Carburant → 手动 Toulouse → 搜索；截图显示最近排序 2 个结果和主 DEMO 卡片。未选择真实定位，未测试真实导航或地图底图。
 - [ ] 自有受限密钥配置后的华为地图底图/标记和点击验收。
+- [x] 专用本地测试签名与 APK 副本证书一致性验证；未替换手机应用，地图验收仍待完成。
 
 安装与地图验收按实际结果更新，不用 JS export 或单元测试替代原生构建和真机结果。
 

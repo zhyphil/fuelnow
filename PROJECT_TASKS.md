@@ -2,9 +2,9 @@
 
 > 项目：France + Spain Driver Decision Engine  
 > 需求来源：[france_spain_driver_decision_engine_project.md](./france_spain_driver_decision_engine_project.md)  
-> 当前状态：独立 Android 本地测试包已编译、权限核对、USB 安装并启动，Toulouse 燃油搜索返回 2 个 DEMO 结果；全量 1018 tests 通过。用户尚无 Google 项目/地图密钥，底图恢复未验收；Phase 5 为 10/21 主任务及 18 个子项；Phase 6 为 5/13 主任务及 8 个准备子项；未发布，小时任务保持暂停
+> 当前状态：独立 Android 测试包已启动并返回 2 个 DEMO 结果；此前全量 1018 tests 通过。用户已自行创建 Google 项目/密钥并启用 Android Maps SDK，限制条目保存待确认；专用测试签名及 APK 副本验证通过，尚未注入地图密钥或替换手机应用，底图恢复未验收；Phase 5 为 10/21 主任务及 18 个子项；Phase 6 为 5/13 主任务及 8 个准备子项；未发布，小时任务保持暂停
 > 当前阶段：本机真机测试进行中（华为基础列表已通过；Phase 5/6 均未整体验收）
-> 下一项任务：Android SDK 与独立测试包准备已完成。用户已确认没有 Google Cloud 项目和地图密钥；待单独确认结算账户步骤后，准备专用测试签名、限制为测试 application ID + SHA-1 / Maps SDK for Android 的密钥，再重建和验收底图/标记。当前不创建云项目/密钥、不启用计费，不将无密钥测试包能运行当地图已修复。Fuel 详情/首页字体完整复验与长期 USB 稳定性仍待完成；Phase 5/6 发布门槛未关闭，见 [Android 测试包说明](./docs/development/android-local-build.md)
+> 下一项任务：指导用户添加测试包名与已验证的专用证书 SHA-1，确认密钥仅限 Maps SDK for Android 并保存；核实项目结算关联，再通过本地秘密配置重建地图测试包。签名变化导致原测试包不能直接覆盖，须先获用户对测试应用数据重置的确认，不自动卸载。底图/标记、Fuel 详情/首页字体完整复验与长期 USB 稳定性仍待完成；Phase 5/6 发布门槛未关闭，见 [Android 测试包说明](./docs/development/android-local-build.md)
 > 最后更新：2026-09-07
 
 ## 使用方法
