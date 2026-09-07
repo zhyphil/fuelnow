@@ -6,6 +6,7 @@ import { api } from "../../api/runtime";
 import type { ServicePointResponse } from "../../api/client";
 import { ActionButton } from "../../components/ActionButton";
 import { EvidenceSummary } from "../../components/EvidenceSummary";
+import { NavigationButtons } from "../../components/NavigationButtons";
 import { useLanguage } from "../../i18n/context";
 import { ResourceController } from "../../search/results";
 import { detailAddress, validPointId } from "../../search/detail";
@@ -71,6 +72,13 @@ export default function PointScreen() {
             <Text>
               {detailAddress(point.address) ?? labels.addressUnknown} · {point.country}
             </Text>
+            <NavigationButtons
+              target={{
+                id: point.id,
+                location: point.location,
+                lifecycleStatus: point.lifecycle.status,
+              }}
+            />
             <Text>
               {copy.lifecycle}: {copy[point.lifecycle.status]}
             </Text>

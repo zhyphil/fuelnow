@@ -1,5 +1,16 @@
 import type { Language } from "../i18n/preferences";
 const translations = {
+  navigate: ["Navigate", "Itinéraire", "Cómo llegar"],
+  navigationFailed: [
+    "Could not open navigation. Please try again or choose another map app.",
+    "Impossible d’ouvrir la navigation. Réessayez ou choisissez une autre application.",
+    "No se pudo abrir la navegación. Reintenta o elige otra aplicación.",
+  ],
+  navigationDisabled: [
+    "Navigation unavailable: closed listing or invalid destination.",
+    "Navigation indisponible : lieu fermé ou destination invalide.",
+    "Navegación no disponible: lugar cerrado o destino no válido.",
+  ],
   map: ["View map", "Voir la carte", "Ver mapa"],
   mapNotice: [
     "Optional map: Apple Maps on iOS, Google Maps on Android. The map provider processes the viewed area. No location tracking is enabled.",

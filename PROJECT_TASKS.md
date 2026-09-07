@@ -4,7 +4,7 @@
 > 需求来源：[france_spain_driver_decision_engine_project.md](./france_spain_driver_decision_engine_project.md)  
 > 当前状态：开发已恢复；按任务完成、验收、commit、push 顺序继续
 > 当前阶段：Phase 4 客户端开发
-> 下一项任务：`P4-NAV-01` 一键打开 Apple Maps/Google Maps 等导航
+> 下一项任务：`P4-NAV-02` 记录搜索曝光、选择和导航点击事件
 > 最后更新：2026-09-07
 
 ## 使用方法
@@ -303,7 +303,7 @@ V1 的核心验收结果是：
 
 ## 4.3 导航与异常状态
 
-- [ ] `P4-NAV-01` 一键打开 Apple Maps/Google Maps 等导航
+- [x] `P4-NAV-01` 一键打开 Apple Maps/Google Maps 等导航 — 2026-09-07：列表/详情使用 Apple/Google HTTPS 导航链接，只含公共目的地；禁止关闭/无效目的地，提供失败反馈；643 tests 通过
 - [ ] `P4-NAV-02` 记录搜索曝光、选择和导航点击事件
 - [ ] `P4-ERR-01` 实现加载和刷新状态
 - [ ] `P4-ERR-02` 实现无位置权限状态
@@ -641,3 +641,4 @@ V1 的核心验收结果是：
 | 2026-09-07 | P4-RES-10 Best 推荐理由                        | 22 个后端理由码完整三语映射，保留限制和指标单位，无推荐对象时不编造理由；635 tests 与双平台 bundle 通过                                                                                                                                                                      |
 | 2026-09-07 | P4-RES-11 服务点详情页                         | UUID 详情路由、真实多服务资料、来源证据、营业原文与生命周期；通用可取消请求复用；637 tests 和双平台 bundle 通过                                                                                                                                                              |
 | 2026-09-07 | P4-RES-12 第二层原生地图                       | 与列表同批标记/详情选择，无位置层；Apple/Google 平台配置与缺 key 降级；639 tests 和双平台 bundle 通过；Android 发布密钥与真机地图留在 Phase 5                                                                                                                                |
+| 2026-09-07 | P4-NAV-01 外部导航                             | 列表/详情使用 Apple/Google HTTPS 导航链接，只含公共目的地；禁止关闭/无效目的地，提供失败反馈；643 tests 通过                                                                                                                                                                 |

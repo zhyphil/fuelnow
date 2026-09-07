@@ -14,6 +14,7 @@ import { PointSummary } from "../components/PointSummary";
 import { EvidenceSummary } from "../components/EvidenceSummary";
 import { RecommendationSummary } from "../components/RecommendationSummary";
 import { ResultMap } from "../components/ResultMap";
+import { NavigationButtons } from "../components/NavigationButtons";
 import { withSearchSort, type Sort, type FuelType } from "../search/sorts";
 
 export default function ResultsScreen() {
@@ -145,6 +146,7 @@ export default function ResultsScreen() {
               {item.brand?.trim() ? ` · ${item.brand}` : ""}
             </Text>
             <PointSummary point={item} />
+            <NavigationButtons target={item} />
             <ActionButton
               secondary
               label={evidence.details}
