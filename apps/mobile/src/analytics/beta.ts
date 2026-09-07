@@ -9,6 +9,9 @@ type Attempt = {
   exposed: boolean;
   clicked: boolean;
   handedOff: boolean;
+  startedMs: number;
+  selectionMs: number | null;
+  decisionMs: number | null;
 };
 export type BetaSnapshot = {
   enabled: boolean;
@@ -32,6 +35,26 @@ export function navigationMetrics(snapshot: BetaSnapshot) {
   };
 }
 
+export function decisionMetrics(snapshot: BetaSnapshot) {
+  const values = snapshot.attempts
+    .flatMap((a) => (a.decisionMs === null ? [] : [a.decisionMs]))
+    .sort((a, b) => a - b);
+  return {
+    samples: values.length,
+    medianMs: values.length
+      ? (values[Math.floor((values.length - 1) / 2)]! +
+          values[Math.floor(values.length / 2)]!) /
+        2
+      : null,
+    p95Ms: values.length ? values[Math.ceil(values.length * 0.95) - 1]! : null,
+    undecidedSearches: snapshot.attempts.filter(
+      (a) => a.exposed && (a.resultCount ?? 0) > 0 && a.decisionMs === null,
+    ).length,
+    appOpenToDecisionMs: null,
+    definition: "request_start_to_first_navigation_click" as const,
+  };
+}
+
 /** No disk, network, location, request IDs or persistent identity. */
 export class BetaSession {
   private state: BetaSnapshot = { enabled: false, discarded: 0, attempts: [] };
@@ -39,6 +62,17 @@ export class BetaSession {
   private responses = new WeakMap<NearbyResponse, number>();
   private selected: { id: number; pointId: string } | undefined;
   private listeners = new Set<() => void>();
+  private epoch = 0;
+  public constructor(private readonly clock: () => number = () => performance.now()) {}
+  private elapsed() {
+    return this.clock() - this.epoch;
+  }
+  private duration(start: number) {
+    const value = this.elapsed() - start;
+    return Number.isFinite(value) && value >= 0 && value <= 15 * 60_000
+      ? Math.round(value)
+      : null;
+  }
   public getSnapshot = () => this.state;
   public subscribe = (listener: () => void) => {
     this.listeners.add(listener);
@@ -50,6 +84,7 @@ export class BetaSession {
     this.listeners.forEach((listener) => listener());
   }
   public setEnabled(enabled: boolean) {
+    this.epoch = enabled ? this.clock() : 0;
     this.state = { enabled, discarded: 0, attempts: [] };
     this.responses = new WeakMap();
     this.selected = undefined;
@@ -82,6 +117,9 @@ export class BetaSession {
           exposed: false,
           clicked: false,
           handedOff: false,
+          startedMs: this.elapsed(),
+          selectionMs: null,
+          decisionMs: null,
         }),
       ],
     };
@@ -119,8 +157,13 @@ export class BetaSession {
       id !== undefined &&
       response.results.some((p) => p.id === pointId) &&
       this.state.attempts.some((a) => a.id === id && a.exposed)
-    )
+    ) {
       this.selected = { id, pointId };
+      this.update(id, (a) => ({
+        ...a,
+        selectionMs: a.selectionMs ?? this.duration(a.startedMs),
+      }));
+    }
   }
   public click(pointId: string, response?: NearbyResponse): number | undefined {
     const id = response
@@ -130,7 +173,13 @@ export class BetaSession {
       : this.selected?.pointId === pointId
         ? this.selected.id
         : undefined;
-    this.update(id, (a) => ({ ...a, clicked: a.exposed || a.clicked }));
+    this.update(id, (a) => ({
+      ...a,
+      clicked: a.exposed || a.clicked,
+      decisionMs: a.exposed
+        ? (a.decisionMs ?? this.duration(a.startedMs))
+        : a.decisionMs,
+    }));
     return id;
   }
   public handoff(id: number | undefined, accepted: boolean) {

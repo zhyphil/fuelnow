@@ -1,6 +1,7 @@
 export const betaCopy = {
   en: {
     title: "Local test metrics — not Beta results",
+    decision: "Request → navigation click, median (not app launch)",
     exposed: "Searches shown",
     clicks: "Search → navigation click",
     handoffs: "Map handoff accepted (not arrival)",
@@ -9,6 +10,7 @@ export const betaCopy = {
   },
   fr: {
     title: "Mesures de test locales — pas de résultats bêta",
+    decision: "Requête → clic de navigation, médiane (pas le lancement)",
     exposed: "Recherches affichées",
     clicks: "Recherche → clic de navigation",
     handoffs: "Ouverture de carte acceptée (pas une arrivée)",
@@ -17,6 +19,7 @@ export const betaCopy = {
   },
   es: {
     title: "Métricas de prueba locales — no son resultados beta",
+    decision: "Solicitud → clic de navegación, mediana (no desde el inicio)",
     exposed: "Búsquedas mostradas",
     clicks: "Búsqueda → clic de navegación",
     handoffs: "Apertura del mapa aceptada (no es una llegada)",

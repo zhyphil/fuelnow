@@ -1,9 +1,50 @@
 import { expect, it } from "vitest";
-import { BetaSession, navigationMetrics, observeSearch } from "../src/analytics/beta";
+import {
+  BetaSession,
+  decisionMetrics,
+  navigationMetrics,
+  observeSearch,
+} from "../src/analytics/beta";
 import type { NearbyQuery, NearbyResponse } from "../src/api/client";
 import sample from "../../../docs/api/examples/nearby-fuel-cheapest.json";
 const query: NearbyQuery = { latitude: 43, longitude: 1, service: "fuel" };
 const response = () => structuredClone(sample) as NearbyResponse;
+it("times only first navigation decisions and reports uncaptured app starts as unknown", async () => {
+  let now = 100;
+  const session = new BetaSession(() => now);
+  session.setEnabled(true);
+  const one = await shown(session);
+  now += 500;
+  session.select(one, one.results[0]!.id);
+  now += 500;
+  session.click(one.results[0]!.id, one);
+  now += 100;
+  session.click(one.results[0]!.id, one);
+  const two = await shown(session);
+  now += 3000;
+  session.click(two.results[0]!.id, two);
+  await shown(session);
+  expect(decisionMetrics(session.getSnapshot())).toMatchObject({
+    samples: 2,
+    medianMs: 2000,
+    p95Ms: 3000,
+    undecidedSearches: 1,
+    appOpenToDecisionMs: null,
+  });
+  expect(session.getSnapshot().attempts[0]!.selectionMs).toBe(500);
+});
+it.each([-1, Number.NaN, 900001])(
+  "does not turn invalid timing %s into zero",
+  async (duration) => {
+    let now = 0;
+    const session = new BetaSession(() => now);
+    session.setEnabled(true);
+    const one = await shown(session);
+    now = duration;
+    session.click(one.results[0]!.id, one);
+    expect(decisionMetrics(session.getSnapshot()).medianMs).toBeNull();
+  },
+);
 async function shown(session: BetaSession) {
   const reply = await observeSearch(async () => response(), session)(
     query,

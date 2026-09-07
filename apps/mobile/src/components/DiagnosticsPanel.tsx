@@ -1,7 +1,7 @@
 import { useSyncExternalStore } from "react";
 import { Text, View } from "react-native";
 import { analytics } from "../analytics/recorder";
-import { navigationMetrics } from "../analytics/beta";
+import { decisionMetrics, navigationMetrics } from "../analytics/beta";
 import { betaCopy } from "../content/beta";
 import { useLanguage } from "../i18n/context";
 import { ActionButton } from "./ActionButton";
@@ -12,6 +12,7 @@ export function DiagnosticsPanel() {
     analytics.beta.getSnapshot,
   );
   const metrics = navigationMetrics(beta);
+  const timing = decisionMetrics(beta);
   const {
     language,
     copy: { evidence: copy },
@@ -30,6 +31,11 @@ export function DiagnosticsPanel() {
       {state.enabled && (
         <View>
           <Text>{local.title}</Text>
+          <Text>
+            {local.decision}:{" "}
+            {timing.medianMs === null ? local.unknown : `${timing.medianMs} ms`} · n=
+            {timing.samples}
+          </Text>
           <Text>
             {local.exposed}: {metrics.exposedSearches}
           </Text>
