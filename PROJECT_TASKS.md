@@ -4,7 +4,7 @@
 > 需求来源：[france_spain_driver_decision_engine_project.md](./france_spain_driver_decision_engine_project.md)  
 > 当前状态：本机测试环境已实现，新增 17 tests、全量 990 tests 通过，双平台开发包编译和临时库清理验证通过；Phase 5 为 10/21 主任务及 18 个子项；Phase 6 为 5/13 主任务及 8 个准备子项；未发布，小时任务保持暂停
 > 当前阶段：本机真机测试进行中（华为基础列表已通过；Phase 5/6 均未整体验收）
-> 下一项任务：华为 Gazole 列表模拟报价 1.659 EUR/liter 已由照片确认，下一步验收 Cheapest 排序。列表有价而 Fuel 详情 Unknown 的油品上下文缺口仍待修复回归；间歇加载失败虽已恢复但根因未确认。iPhone App 安装仍待处理；发布与真实 Beta 条件仍未关闭，见 [真机测试说明](./docs/development/local-phone-testing.md)
+> 下一项任务：华为 Gazole 列表报价和 Cheapest 基础交互已由照片确认（有效报价在 Unknown 前，非多报价完整排序验收），下一步验收 Fuel Open now 筛除关闭站。Fuel 详情油品上下文缺口仍待修复回归；间歇加载失败虽已恢复但根因未确认。iPhone App 安装仍待处理；发布与真实 Beta 条件仍未关闭，见 [真机测试说明](./docs/development/local-phone-testing.md)
 > 最后更新：2026-09-07
 
 ## 使用方法
@@ -552,6 +552,8 @@ V1 的核心验收结果是：
 2026-09-07 执行顺序补充：用户暂缓运营主体/邮箱/部署/分发决定，授权继续独立工程工作；QA-10、LEG-01/02 及实际部署/设备门槛保留未完成。先完成 LEG-03 工程子项，再检查 LEG-06 日志与分析；许可和发布门槛不得自动勾选。
 
 # 完成记录
+
+2026-09-07 华为 Cheapest 基础验收：照片显示 Results 2 / Order Cheapest；1.659 EUR/liter 主站第一，Unknown/Closed/Unavailable 站第二，未知价格没有获得零价优势。真机测试说明勾选排序基础交互；由于只有一个有效报价，多报价排序边界未验收。下一步 Open now 筛除关闭站，Fuel 详情修复及加载稳定性仍待处理；仅提交文字记录。
 
 2026-09-07 华为列表报价验收：用户恢复后的照片确认 Toulouse 主 DEMO 站列表显示 1.659 EUR/liter、含税、Recent；勾选真机测试说明中的列表报价检查。英文 Air/Fuel/Wash 详情可见，Fuel 详情仍为 Unknown，复现已知油品上下文缺口，尚未修复。排序状态未出现在照片中，Cheapest、完整三语、四服务搜索与加载稳定性不标完成；下一步验收排序。仅更新文档，不上传照片。
 

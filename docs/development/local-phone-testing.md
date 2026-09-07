@@ -97,7 +97,8 @@ pnpm local:start --lan
 
 - [ ] 让 Fuel 详情接收并校验列表选定油品，API 按该油品返回真实对应报价；保留未选择/无报价时 Unknown，不任取其他油品或伪造价格。补契约、列表/地图跳转与详情回归，再在华为验收。
 - [x] 按 Toulouse / Fuel / Gazole 测试步骤确认列表模拟报价：用户新照片 1 显示 `Price: €1.659 / litre · Tax included · Recent`（2026-09-07）；详情缺口单独保留，不算一并修复。
-- [ ] 验证柴油 Cheapest 价格排序可选择、请求成功且界面报告实际采用的排序；当前照片没有排序控件/状态，不能据此标记通过。
+- [x] 验证柴油 Cheapest 基础交互与有效报价优先：2026-09-07 用户照片显示 `Results: 2 · Order: Cheapest`，1.659 EUR/liter 主站排第一，Unknown/临时关闭站排第二。仅一个有效报价，不代替多报价升序/同价决胜边界验收。
+- [ ] 验证 Fuel `Open now`：当前模拟数据下应返回主站，排除 Temporarily Closed 站；顶部显示实际 Open now 排序，营业依据仅为模拟营业时间，不承诺真实即时状态。
 - [ ] 实际点击 DEMO 导航不应跳出；真实目的地导航另行验收。
 
 ### 2026-09-07 间歇加载失败与恢复
@@ -116,5 +117,12 @@ pnpm local:start --lan
 - 新照片 2–4：英文详情分别显示 Air 0.00 EUR/use、Fuel 价格/所选油品 Unknown、Wash 6.00 EUR/wash programme。Air/Wash 的这些价格为模拟数据，不代表真实站点报价；服务卡显示不代替各服务搜索流程验收。
 - 列表有价而 Fuel 详情 Unknown 的已知缺口在真机复现，仍待修复；英文页面可见与此前法语页面可见分别记证据，不据此推断完整三语切换/持久化已通过。
 - 下一步测试列表 Cheapest 排序；加载稳定性和 Fuel 详情修复均保持未完成。只提交文字结果，不提交用户照片。
+
+### 2026-09-07 Cheapest 真机照片核对
+
+- 用户最新照片 1 明确显示请求控件 `Cheapest`、响应 `Results: 2 · Order: Cheapest`，以及第一名主 DEMO 站的 1.659 EUR/liter 报价。
+- 照片 2 显示第二名 Temporarily Closed 站为 Price Unknown / Scheduled opening Closed / Service status Unavailable，并有低置信度与未知风险提示；Unknown 没有被当作零价排到有效报价之前。
+- `Cheapest` 不等于仅显示营业站；关闭站作为无有效可比报价的候选保留在后方，与现有规则一致。只有一个有效价格，不能宣称已真机验证多个不同价格的升序比较。
+- 基础排序交互勾选完成。下一步选择 `Open now` 验证关闭站被筛除；预计只剩主站，具体以手机实际结果记录。Fuel 详情缺口、加载稳定性及其他阶段门槛保持未完成。原照片不上传仓库。
 
 工程验证：全量 990 tests（新增 17）通过；真实临时库四服务/详情/新鲜模拟油价通过；通过回环地址获取的 iOS/Android Expo manifest 与开发包编译通过；Ctrl+C 停止和重启清理已实测，前两次临时库已删除，原库站点数仍为 0。提交 `17da613` 已推送，GitHub CI 通过。Mac 工具访问 LAN 地址曾超时，但后续用户已确认手机浏览器后端可达；没有更改防火墙，工具侧超时原因未定位。
