@@ -37,7 +37,7 @@ async function main() {
   };
   const spanish: FuelSourceRecord = {
     country: "ES",
-    record: es.ListaEESSPrecio[0],
+    record: { ...es.ListaEESSPrecio[0], Horario: "" },
     context: { fetchedAt: "2026-09-03T23:00:00Z", sourceSnapshotAt: es.Fecha },
   };
   const projection = projectFuelSource(source);

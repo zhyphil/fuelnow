@@ -191,7 +191,7 @@ export class PostgresFuelProjectionStore {
         address?.administrativeArea,
         address?.formatted,
         point.timezone,
-        JSON.stringify(point.openingHours),
+        point.openingHours === null ? null : JSON.stringify(point.openingHours),
         point.temporaryClosure,
       ],
     );
@@ -208,7 +208,10 @@ export class PostgresFuelProjectionStore {
         {
           service_point_id: point.id,
           service_type: service,
-          opening_hours: service === "fuel" ? JSON.stringify(point.openingHours) : null,
+          opening_hours:
+            service === "fuel" && point.openingHours !== null
+              ? JSON.stringify(point.openingHours)
+              : null,
           opening_status: "unknown",
           opening_status_evaluated_at: null,
         },
