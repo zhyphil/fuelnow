@@ -9,12 +9,14 @@ import { useRouter } from "expo-router";
 import { useLocation } from "../location/context";
 import { ActionButton } from "../components/ActionButton";
 import { DiagnosticsPanel } from "../components/DiagnosticsPanel";
+import { sourcePageCopy } from "../content/sourceNotices";
 
 export default function WelcomeScreen() {
   const { service } = useSearchSelection();
   const router = useRouter();
   const { state: location } = useLocation();
   const {
+    language,
     copy: { app: copy, results },
   } = useLanguage();
   return (
@@ -37,6 +39,11 @@ export default function WelcomeScreen() {
         />
         <Text style={styles.coverage}>{copy.coverage}</Text>
         <LanguagePicker />
+        <ActionButton
+          secondary
+          label={sourcePageCopy[language].title}
+          onPress={() => router.push("/sources")}
+        />
         <DiagnosticsPanel />
       </ScrollView>
     </SafeAreaView>

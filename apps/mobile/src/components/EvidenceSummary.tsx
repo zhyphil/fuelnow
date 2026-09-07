@@ -1,9 +1,14 @@
-import { Text, View } from "react-native";
+import { Linking, Text, View } from "react-native";
 import { useState, type ReactNode } from "react";
 import { ActionButton } from "./ActionButton";
 import { useLanguage } from "../i18n/context";
 import { evidenceWarnings } from "../search/freshness";
 import { useFreshnessClock } from "./FreshnessClock";
+import {
+  openSourceNotice,
+  sourceNotices,
+  sourcePageCopy,
+} from "../content/sourceNotices";
 import {
   statusRows,
   provenanceRows,
@@ -27,6 +32,8 @@ export function EvidenceSummary({
   const { language, copy } = useLanguage();
   const now = useFreshnessClock();
   const [expanded, setExpanded] = useState(false);
+  const [linkFailed, setLinkFailed] = useState(false);
+  const notice = sourceNotices.find((source) => source.id === evidence.source?.id);
   const rows = [
     ...statusRows(evidence, language, country, now),
     ...fuelRows(evidence, language),
@@ -37,6 +44,31 @@ export function EvidenceSummary({
   ];
   return (
     <View style={{ gap: 6 }}>
+      {evidence.source && (
+        <Text
+          accessibilityRole={notice ? "link" : undefined}
+          onPress={
+            notice
+              ? () => {
+                  void openSourceNotice(notice.licenceUrl, Linking.openURL).then(
+                    (opened) => setLinkFailed(!opened),
+                  );
+                }
+              : undefined
+          }
+          style={{
+            color: "#263E32",
+            fontSize: 14,
+            lineHeight: 21,
+            textDecorationLine: notice ? "underline" : "none",
+          }}
+        >
+          {evidence.source.attributionText}
+        </Text>
+      )}
+      {linkFailed && (
+        <Text accessibilityRole="alert">{sourcePageCopy[language].linkFailure}</Text>
+      )}
       {(compact ? rows.slice(0, 3) : rows).map((row) => (
         <Text
           key={row.label}

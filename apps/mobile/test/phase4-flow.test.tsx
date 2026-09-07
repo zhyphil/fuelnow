@@ -4,6 +4,9 @@ import { createRoot } from "test-renderer";
 import { getMessages } from "../src/i18n/catalog";
 import { SearchProvider } from "../src/search/context";
 import WelcomeScreen from "../src/app/index";
+import SourcesScreen from "../src/app/sources";
+import { sourceNotices, sourcePageCopy } from "../src/content/sourceNotices";
+import { EvidenceSummary } from "../src/components/EvidenceSummary";
 import ResultsScreen from "../src/app/results";
 import PointScreen from "../src/app/point/[id]";
 import {
@@ -128,6 +131,67 @@ const cases = (["en", "fr", "es"] as const).flatMap((language) =>
     service,
   })),
 );
+it.each(["en", "fr", "es"] as const)(
+  "exposes sources and licences in %s",
+  async (language) => {
+    ports.language = language;
+    const copy = sourcePageCopy[language];
+    const root = createRoot({ textComponentTypes: ["Text"] });
+    roots.push(root);
+    const button = (label: string) =>
+      root.container.queryAll(
+        (node) => node.type === "Pressable" && node.props.accessibilityLabel === label,
+      )[0]!;
+    await act(async () =>
+      root.render(
+        <SearchProvider>
+          <WelcomeScreen />
+        </SearchProvider>,
+      ),
+    );
+    await act(async () => button(copy.title).props.onPress());
+    expect(ports.push).toHaveBeenLastCalledWith("/sources");
+    await act(async () => root.render(<SourcesScreen />));
+    for (const source of sourceNotices)
+      expect(button(`${copy.source}: ${source.name}`)).toBeDefined();
+    ports.openURL.mockRejectedValueOnce(new Error("cannot open"));
+    await act(async () =>
+      button(`${copy.source}: ${sourceNotices[0].name}`).props.onPress(),
+    );
+    expect(
+      root.container.queryAll(
+        (node) => node.type === "Text" && node.props.accessibilityRole === "alert",
+      ),
+    ).toHaveLength(1);
+    ports.openURL.mockResolvedValue(undefined);
+    await act(async () =>
+      button(`${copy.source}: ${sourceNotices[0].name}`).props.onPress(),
+    );
+    expect(
+      root.container.queryAll(
+        (node) => node.type === "Text" && node.props.accessibilityRole === "alert",
+      ),
+    ).toHaveLength(0);
+    await act(async () => button(copy.back).props.onPress());
+    expect(ports.back).toHaveBeenCalledOnce();
+  },
+);
+it("keeps source attribution visible before expanding compact evidence", async () => {
+  ports.language = "en";
+  const evidence = structuredClone(
+    sample.results[0]!.evidence,
+  ) as NearbyResponse["results"][number]["evidence"];
+  evidence.source!.attributionText = "© OpenStreetMap contributors";
+  const root = createRoot({ textComponentTypes: ["Text"] });
+  roots.push(root);
+  await act(async () => root.render(<EvidenceSummary evidence={evidence} compact />));
+  expect(
+    root.container.queryAll(
+      (node) =>
+        node.type === "Text" && node.props.children === "© OpenStreetMap contributors",
+    ),
+  ).toHaveLength(1);
+});
 it.each(cases)(
   "connects $service home → list → detail → navigation in $language",
   async ({ language, service }) => {
