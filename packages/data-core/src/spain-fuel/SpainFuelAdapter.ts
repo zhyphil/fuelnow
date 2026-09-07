@@ -187,7 +187,12 @@ export function parseSpainFuelLocalDateTime(value: string): string | null {
     zone: SOURCE_TIMEZONE,
     setZone: true,
   });
-  if (!parsed.isValid) {
+  // Never silently shift a nonexistent wall clock or choose one repeated hour.
+  if (
+    !parsed.isValid ||
+    parsed.toFormat(format) !== text ||
+    parsed.getPossibleOffsets().length !== 1
+  ) {
     return null;
   }
 

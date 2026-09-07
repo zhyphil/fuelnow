@@ -207,7 +207,12 @@ export function parseFranceFuelLocalDateTime(value: string): string | null {
     setZone: true,
   });
 
-  if (!parsed.isValid) {
+  // Source wall clocks have no trustworthy offset: reject DST gaps and folds.
+  if (
+    !parsed.isValid ||
+    parsed.toFormat("yyyy-MM-dd HH:mm:ss") !== wallClock ||
+    parsed.getPossibleOffsets().length !== 1
+  ) {
     return null;
   }
 
