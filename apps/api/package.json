@@ -4,6 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "deployment:check": "node --env-file-if-exists=../../.env --import tsx src/quality/runDeploymentPreflight.ts",
     "test:restore-local": "node --import tsx src/quality/runBackupRestoreCheck.ts",
     "test:services-live": "node --import tsx src/quality/runAllServicesLiveCheck.ts",
     "test:osm-live": "node --import tsx src/quality/runOsmCheck.ts",

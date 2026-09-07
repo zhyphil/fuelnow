@@ -104,7 +104,7 @@ function trustedProxies(value: string | undefined): string[] {
       family === 0 ||
       extra !== undefined ||
       (prefix !== undefined &&
-        (!/^\d+$/.test(prefix) || Number(prefix) < 0 || Number(prefix) > maximumPrefix))
+        (!/^\d+$/.test(prefix) || Number(prefix) < 1 || Number(prefix) > maximumPrefix))
     ) {
       throw new Error("API_TRUSTED_PROXIES must contain only IP or CIDR entries");
     }
@@ -119,9 +119,32 @@ export function resolveApiRuntimeConfig(
     ...(environment.APP_ENV === undefined ? {} : { appEnv: environment.APP_ENV }),
     ...(environment.NODE_ENV === undefined ? {} : { nodeEnv: environment.NODE_ENV }),
   });
-  const databaseSslMode = environment.DATABASE_SSL_MODE ?? "disable";
+  const databaseSslMode =
+    environment.DATABASE_SSL_MODE ?? (profile.isProduction ? "require" : "disable");
   if (databaseSslMode !== "disable" && databaseSslMode !== "require") {
     throw new Error("DATABASE_SSL_MODE must be disable or require");
+  }
+  if (profile.isProduction && databaseSslMode !== "require") {
+    throw new Error("Production database transport requires verified TLS");
+  }
+  const databaseUrl = required("DATABASE_URL", environment.DATABASE_URL);
+  if (profile.isProduction) {
+    let parsed: URL;
+    try {
+      parsed = new URL(databaseUrl);
+    } catch {
+      throw new Error("DATABASE_URL is invalid");
+    }
+    if (
+      !["postgres:", "postgresql:"].includes(parsed.protocol) ||
+      !parsed.hostname ||
+      parsed.hash ||
+      [...parsed.searchParams.keys()].some((key) => key.toLowerCase().startsWith("ssl"))
+    ) {
+      throw new Error("Production DATABASE_URL must not override verified TLS options");
+    }
+    if (environment.NODE_TLS_REJECT_UNAUTHORIZED === "0")
+      throw new Error("TLS certificate verification must remain enabled");
   }
   const routing = resolveRoutingConfig({
     ...(environment.MAPBOX_MONTHLY_ELEMENT_BUDGET === undefined
@@ -147,7 +170,7 @@ export function resolveApiRuntimeConfig(
     host: environment.API_HOST?.trim() || "127.0.0.1",
     port: integerInRange("API_PORT", environment.API_PORT, 3_000, 1, 65_535),
     logLevel: profile.logLevel,
-    databaseUrl: required("DATABASE_URL", environment.DATABASE_URL),
+    databaseUrl,
     databasePoolMax: integerInRange(
       "DATABASE_POOL_MAX",
       environment.DATABASE_POOL_MAX,
