@@ -1,5 +1,35 @@
 import type { Language } from "../i18n/preferences";
 const translations = {
+  openingChecked: [
+    "Opening evaluated at",
+    "Ouverture évaluée à",
+    "Apertura evaluada a las",
+  ],
+  availabilityObserved: [
+    "Availability observed at",
+    "Disponibilité observée à",
+    "Disponibilidad observada a las",
+  ],
+  staleData: [
+    "Some evidence is stale. Verify before travelling.",
+    "Certaines données sont anciennes. Vérifiez avant de partir.",
+    "Algunos datos están desactualizados. Comprueba antes de salir.",
+  ],
+  missingData: [
+    "Unknown data is not a guarantee of price, opening or availability.",
+    "Une donnée inconnue ne garantit ni prix, ni ouverture, ni disponibilité.",
+    "Los datos desconocidos no garantizan precio, apertura ni disponibilidad.",
+  ],
+  lowConfidence: [
+    "Low-confidence evidence; confirmation is recommended.",
+    "Données à faible confiance ; confirmation conseillée.",
+    "Datos de baja confianza; se recomienda confirmar.",
+  ],
+  expiredLive: [
+    "Live charging status has expired or has no valid timestamp; availability is shown as unknown.",
+    "L’état de recharge en direct a expiré ou sa date est invalide ; disponibilité inconnue.",
+    "El estado de recarga en directo caducó o su fecha no es válida; disponibilidad desconocida.",
+  ],
   radius: ["Area searched (radius)", "Zone recherchée (rayon)", "Zona buscada (radio)"],
   expand: ["Expand search area", "Élargir la zone", "Ampliar la zona"],
   no_service_points_in_radius: [

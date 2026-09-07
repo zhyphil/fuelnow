@@ -176,5 +176,13 @@ export function statusRows(
             : evidence.status.availability.state
         ],
     },
+    {
+      label: c.openingChecked,
+      value: timestamp(evidence.status.opening.evaluatedAt, language),
+    },
+    {
+      label: c.availabilityObserved,
+      value: timestamp(evidence.status.availability.observedAt, language),
+    },
   ];
 }
