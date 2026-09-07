@@ -27,6 +27,48 @@ const record = (sourceRecordId: string) => ({
   fetchedAt: "2026-09-04T00:20:00.000Z",
 });
 
+it("resumes after a source outage from the last committed page without replaying it", async () => {
+  const store = new MemoryStore();
+  let calls = 0;
+  await expect(
+    importSourceIncrementally({
+      sourceId: "fr-fuel",
+      store,
+      reader: {
+        async readPage() {
+          if (calls++ === 0)
+            return {
+              records: [record("one")],
+              nextCheckpoint: firstCheckpoint,
+              done: false,
+            };
+          throw new Error("source outage");
+        },
+      },
+    }),
+  ).rejects.toThrow("source outage");
+  expect(store.checkpoint).toEqual(firstCheckpoint);
+  expect(store.persisted).toHaveLength(1);
+  await importSourceIncrementally({
+    sourceId: "fr-fuel",
+    store,
+    reader: {
+      async readPage({ checkpoint }) {
+        expect(checkpoint).toEqual(firstCheckpoint);
+        return {
+          records: [record("two")],
+          nextCheckpoint: finalCheckpoint,
+          done: true,
+        };
+      },
+    },
+  });
+  expect(
+    store.persisted.flatMap((page) => page.records.map((row) => row.sourceRecordId)),
+  ).toEqual(["one", "two"]);
+  expect(store.checkpoint).toEqual(finalCheckpoint);
+});
+
 class MemoryStore implements SourceImportStore {
   public readonly persisted: PersistSourcePageRequest[] = [];
 

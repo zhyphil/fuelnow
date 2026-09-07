@@ -8,6 +8,42 @@ const config = resolveMobileConfig({
   environment: "test",
   apiBaseUrl: "https://api.example.invalid",
 });
+
+it.each(["headers", "body"] as const)(
+  "bounds an uncooperative weak-network %s stage and ignores a late response",
+  async (stage) => {
+    vi.useFakeTimers();
+    let release!: (value: Response) => void;
+    let releaseBody!: (value: unknown) => void;
+    const fetcher =
+      stage === "headers"
+        ? vi.fn<typeof fetch>().mockImplementation(
+            () =>
+              new Promise((resolve) => {
+                release = resolve;
+              }),
+          )
+        : vi.fn<typeof fetch>().mockResolvedValue({
+            ok: true,
+            status: 200,
+            json: () =>
+              new Promise((resolve) => {
+                releaseBody = resolve;
+              }),
+          } as Response);
+    const result = createApiClient(config, fetcher).nearby(query);
+    const failure = expect(result).rejects.toMatchObject({
+      kind: "timeout",
+      retryable: true,
+    });
+    await vi.advanceTimersByTimeAsync(config.requestTimeoutMs);
+    await failure;
+    expect(vi.getTimerCount()).toBe(0);
+    if (stage === "headers") release(new Response(JSON.stringify(sample)));
+    else releaseBody(sample);
+    await Promise.resolve();
+  },
+);
 const query = {
   latitude: 43.6,
   longitude: 1.44,

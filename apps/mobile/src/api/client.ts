@@ -55,16 +55,27 @@ export function createApiClient(config: MobileConfig, fetcher: typeof fetch = fe
       timedOut = true;
       controller.abort();
     }, config.requestTimeoutMs);
+    let interruptedListener = () => {};
+    const interrupted = new Promise<never>((_resolve, reject) => {
+      interruptedListener = () =>
+        reject(new ApiFailure(timedOut ? "timeout" : "cancelled"));
+      controller.signal.addEventListener("abort", interruptedListener, { once: true });
+    });
     try {
-      const response = await fetcher(`${config.apiBaseUrl}${path}`, {
-        method: "GET",
-        headers: { Accept: "application/json" },
-        credentials: "omit",
-        signal: controller.signal,
-      });
+      const response = await Promise.race([
+        Promise.resolve().then(() =>
+          fetcher(`${config.apiBaseUrl}${path}`, {
+            method: "GET",
+            headers: { Accept: "application/json" },
+            credentials: "omit",
+            signal: controller.signal,
+          }),
+        ),
+        interrupted,
+      ]);
       let body: unknown;
       try {
-        body = await response.json();
+        body = await Promise.race([response.json(), interrupted]);
       } catch {
         if (controller.signal.aborted)
           throw new ApiFailure(timedOut ? "timeout" : "cancelled");
@@ -102,6 +113,7 @@ export function createApiClient(config: MobileConfig, fetcher: typeof fetch = fe
       throw new ApiFailure("network");
     } finally {
       clearTimeout(timeout);
+      controller.signal.removeEventListener("abort", interruptedListener);
       signal?.removeEventListener("abort", cancel);
     }
   }

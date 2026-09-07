@@ -287,10 +287,15 @@ describe("nearby API integration", () => {
     },
   );
 
-  it("keeps useful Nearest results when the route provider times out", async () => {
+  it.each([
+    "timeout",
+    "rate_limited",
+    "provider_unavailable",
+    "invalid_response",
+  ] as const)("keeps useful Nearest results after route failure %s", async (reason) => {
     const timeoutProvider: RoutingProvider = {
       async calculateMatrix() {
-        throw new RoutingProviderError("timeout", true, null, 1);
+        throw new RoutingProviderError(reason, true, null, 1);
       },
     };
     const response = await appFor(
@@ -318,7 +323,7 @@ describe("nearby API integration", () => {
       provider: null,
       profile: null,
       trafficAware: null,
-      reason: "timeout",
+      reason,
     });
     expect(payload.outcome).toMatchObject({
       state: "results",

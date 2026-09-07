@@ -4,7 +4,7 @@
 > 需求来源：[france_spain_driver_decision_engine_project.md](./france_spain_driver_decision_engine_project.md)  
 > 当前状态：已获授权继续 Phase 5；逐项验证、commit、push 后进入下一项
 > 当前阶段：Phase 5 测试、合规与发布准备
-> 下一项任务：`P5-QA-08` 弱网/断网/来源中断与路线失败
+> 下一项任务：`P5-QA-09` 接口负载与响应时间
 > 最后更新：2026-09-07
 
 ## 使用方法
@@ -335,7 +335,7 @@ V1 的核心验收结果是：
 - [x] `P5-QA-05` 建立价格异常检测 — 2026-09-07：新增显式命令审计最新燃油价格/单位/未来时间/同单位日内突变；12 项检测测试，318 API tests、类型与 lint 通过；真实空库返回 coverage=empty/exit 2，不误报通过；见 docs/testing/price-anomaly-audit.md
 - [x] `P5-QA-06` 建立错误坐标和重复站点检测 — 2026-09-07：新增 9 项非法/交换/零坐标、地域边界和强身份重复测试；183 data-core tests、API 类型和 lint 通过；真实空库 exit 2；不自动合并/修复，最大 2,000 点显式范围；见 docs/testing/geography-duplicate-audit.md
 - [x] `P5-QA-07` 测试城市、郊区、高速和跨境区域 — 2026-09-07：六个城市/郊区/高速场景新增半径单调性/稳定排序/范围检查，既有 La Jonquera 21 FR + 67 ES 跨境精确矩阵通过；189 data-core tests；仅历史来源样本，非实时上线验收；见 docs/testing/phase5-geographic-regression.md
-- [ ] `P5-QA-08` 测试弱网、无网、来源中断和路线 API 失败
+- [x] `P5-QA-08` 测试弱网、无网、来源中断和路线 API 失败 — 2026-09-07：客户端对不响应取消的 headers/body 增加强制截止，来源断点恢复和四类路线故障保留结果；全量 765 tests、质量门槛和双平台 bundle 通过；见 docs/testing/phase5-failure-recovery.md
 - [ ] `P5-QA-09` 进行接口负载与响应时间测试
 - [ ] `P5-QA-10` 人工抽查真实站点、价格和营业状态
 
@@ -659,3 +659,4 @@ V1 的核心验收结果是：
 | 2026-09-07 | P5-QA-05 只读价格异常审计                      | 新增显式命令审计最新燃油价格/单位/未来时间/同单位日内突变；12 项检测测试，318 API tests、类型与 lint 通过；真实空库返回 coverage=empty/exit 2，不误报通过；见 docs/testing/price-anomaly-audit.md                                                                            |
 | 2026-09-07 | P5-QA-06 坐标与重复站点只读审计                | 新增 9 项非法/交换/零坐标、地域边界和强身份重复测试；183 data-core tests、API 类型和 lint 通过；真实空库 exit 2；不自动合并/修复，最大 2,000 点显式范围；见 docs/testing/geography-duplicate-audit.md                                                                        |
 | 2026-09-07 | P5-QA-07 两国代表地理场景回归                  | 六个城市/郊区/高速场景新增半径单调性/稳定排序/范围检查，既有 La Jonquera 21 FR + 67 ES 跨境精确矩阵通过；189 data-core tests；仅历史来源样本，非实时上线验收；见 docs/testing/phase5-geographic-regression.md                                                                |
+| 2026-09-07 | P5-QA-08 故障恢复与强制网络超时                | 客户端对不响应取消的 headers/body 增加强制截止，来源断点恢复和四类路线故障保留结果；全量 765 tests、质量门槛和双平台 bundle 通过；见 docs/testing/phase5-failure-recovery.md                                                                                                 |
