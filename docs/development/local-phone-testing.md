@@ -1,6 +1,6 @@
 # 本机 + iPhone / Android 真机测试
 
-2026-09-07。iPhone 15 Pro Max / iOS 26.6.1；华为 Mate 20 HMA-L29 / EMUI 12.0.0，USB 读取确认 Android 10 / API 29、Expo Go 57.0.9。两台手机 LAN 浏览器连通已通过；华为四服务基础展示、Fuel 基础排序、Charge 禁用项点击、DEMO 列表/详情导航保护、空结果与列表恢复已有分项证据，详见下方记录。西班牙语首页、燃油结果页、详情顶部及 Air 卡片可见内容已确认；用户确认关闭并重开同一项目后仍为西班牙语。Combustible 首页标题单词内换行待优化，全页面语言和其他偏好场景未验收。地图持续空白未通过，但可返回原来的 2 个结果；Fuel 详情油品上下文缺口仍待修复。当前为华为 USB 回环环境，LAN 测试暂停；下一步检查将已保存语言改为 English 后即时显示及重开保留，USB 长期稳定性仍待确认。这不是正式 Beta 发布或现场验收。
+2026-09-07。iPhone 15 Pro Max / iOS 26.6.1；华为 Mate 20 HMA-L29 / EMUI 12.0.0，USB 读取确认 Android 10 / API 29、Expo Go 57.0.9。两台手机 LAN 浏览器连通已通过；华为四服务基础展示、Fuel 基础排序、Charge 禁用项点击、DEMO 列表/详情导航保护、空结果与列表恢复已有分项证据，详见下方记录。西班牙语首页、燃油结果页、详情顶部及 Air 卡片可见内容已确认；用户确认西班牙语重开保留，随后改选 English 即时生效且重开仍为英语。Combustible 首页标题单词内换行待优化，全页面语言和其他偏好场景未验收。地图持续空白未通过，但可返回原来的 2 个结果；Fuel 详情油品上下文缺口仍待修复。当前为华为 USB 回环环境，LAN 测试暂停；下一步检查选择 Use device language 后的选中状态与显示语言，USB 长期稳定性仍待确认。这不是正式 Beta 发布或现场验收。
 
 ## 启动与停止
 
@@ -152,7 +152,8 @@ pnpm local:start --lan
 - [x] 西班牙语燃油结果页可见内容：2026-09-07 用户三张照片确认 Combustible: Gasóleo、Resultados: 2 / Orden: Más cercano，四个排序标签及缺少驾车时间时按距离排序的说明均为西班牙语；主站 Precio: 1,659 EUR/litro、Impuestos incluidos、Reciente、Abierto、Disponible según la fuente、Confianza: Alta 可见。第二站显示 1,4 km、Precio: Desconocido、Cerrado、No disponible、Confianza: Baja，并有西班牙语未知/低置信度风险提示。导航保护提示、来源展开及详情按钮也为西班牙语；DEMO 站名和 Synthetic test data 保留来源原文，不记为界面漏译。仅验收照片覆盖的显示，不代替其他排序实际点击、展开来源、详情或重启后的语言保存。
 - [x] 西班牙语站点详情可见区域：2026-09-07 用户两张照片显示 Toulouse 主 DEMO 站详情顶部的 Volver、Cómo llegar、模拟导航禁用说明、Ficha activa、Horario publicado: Desconocido 和更新时间；Air 卡片显示 0,00 EUR/uso、会员条件/税费未知、营业时间未知、按来源可用、Gratis、Operativo según la fuente、Público、Verificado、Confianza: Baja、观察/抓取时间和 Fuente / licencia。确认这些可见字段已本地化；站名、地址和来源名称保留原文。照片未覆盖 Fuel/Wash 卡片和全部许可内容，不额外验收；Fuel 选定油品/详情报价缺口仍单独待修复。
 - [x] 西班牙语偏好跨重开保留：2026-09-07 用户按关闭 Expo Go 并重新打开同一 USB 项目的步骤操作，明确反馈“重新打开还是西班牙语”。确认本次重开后西班牙语偏好保留；证据为用户反馈，未独立测量进程是否终止，不扩展为手机重启、清数据/重装、所有语言或长期稳定性验收。
-- [ ] 已保存语言改为 English：在首页 Idioma · Español 中选择 English 并 Close，确认四服务入口即时变为 Fuel / Charge / Air / Wash；再按同样方式关闭并重开当前项目，确认仍是英语而非旧的西班牙语。不清除应用数据或重新选择语言，以验证新偏好覆盖旧值及重开保留。
+- [x] 已保存语言改为 English：2026-09-07 用户对“选择 English 后立即显示 Fuel / Charge / Air / Wash，关闭并重开后仍为英语”明确回复“是的！”。确认新选择替代此前西班牙语且本次重开保留，证据为用户操作反馈；未独立测量进程终止，不扩展为全部语言、手机重启或长期稳定性验收。
+- [ ] 跟随系统语言选项：在 Language · English 中点击 Use device language，核对该选项选中而非手动 English，并记录实际显示语言。代码从设备语言列表选择首个受支持的 EN/FR/ES，无匹配时回退 English；仅仍显示英语不能证明手动偏好已清除，需看选中状态。当前不要求更改手机系统设置，此步也不代替自动跟随系统变更或跨重开清除偏好验收。
 - [x] Toulouse / Gonflage（Air）独立搜索与详情：2026-09-07 用户六张照片中，照片 1–2 确认独立 Gonflage 列表为 1 个最近排序结果、主 DEMO 站、0 EUR/use，以及 ETA 缺失时按距离排序的说明；照片 3–4 确认详情为 Gratuit、设备按来源工作、Public。列表和详情的 Air 营业时间保持未知，未被 Fuel 的 Open 覆盖；低置信度、模拟来源与导航禁用提示可见。仅验证模拟数据展示，不代表现场免费、设备状态或导航点击拦截已验收。照片 5 是同一多服务详情的 Fuel 未选油品状态，不将其视为既有 Fuel 上下文问题已修复。
 - [x] Toulouse / Lavage（Wash）基础列表卡片：2026-09-07 用户按独立入口步骤提交的新照片显示列表刷新/地图按钮和第 1 个 Toulouse 主 DEMO 站，价格 6,00 EUR/programme de lavage，会员条件/税费未知，营业时间未知，服务按来源可用；模拟导航禁用和低置信度提示可见。与此前多服务详情中的 6 EUR 洗车方案、自动滚筒/吸尘器、设备按来源工作一致。仅确认已显示的模拟卡片，不代表真实价格或设备状态。
 - [x] Wash 列表顶部结果数量/排序：2026-09-07 用户随后补图明确显示 Lavage、Résultats: 1、Classement: Le plus proche，以及 ETA 缺失时按距离排序、部分数据未知和扩大搜索范围的说明。结合价格卡片，完成当前模拟数据的 Wash 基础独立搜索展示验收；不代替多候选排序或真实行程时间验收。
