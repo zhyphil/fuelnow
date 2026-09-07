@@ -81,6 +81,8 @@ export default function ResultsScreen() {
       )}
       <FlatList
         data={response?.results ?? []}
+        refreshing={state.status === "loading" && state.refreshing === true}
+        onRefresh={query && state.status !== "loading" ? run : undefined}
         keyExtractor={(point) => point.id}
         contentContainerStyle={styles.content}
         ListHeaderComponent={
@@ -113,8 +115,18 @@ export default function ResultsScreen() {
                 {state.status === "loading" && (
                   <View accessibilityLiveRegion="polite">
                     <ActivityIndicator color="#173E32" />
-                    <Text style={styles.body}>{copy.loading}</Text>
+                    <Text style={styles.body}>
+                      {state.refreshing ? evidence.refreshing : copy.loading}
+                    </Text>
+                    <ActionButton
+                      secondary
+                      label={evidence.cancelRequest}
+                      onPress={controller.clear}
+                    />
                   </View>
+                )}
+                {state.status === "idle" && (
+                  <ActionButton label={copy.search} onPress={run} />
                 )}
                 {state.status === "error" && (
                   <View style={styles.header}>

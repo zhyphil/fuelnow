@@ -124,7 +124,7 @@ describe("list-first search lifecycle", () => {
     const controller = new SearchController(port);
     await controller.run(query);
     const next = controller.run(query);
-    expect(controller.getSnapshot()).toEqual({ status: "loading" });
+    expect(controller.getSnapshot()).toEqual({ status: "loading", refreshing: true });
     pending.resolve(response);
     await next;
   });

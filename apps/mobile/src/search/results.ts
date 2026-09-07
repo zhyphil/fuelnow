@@ -1,7 +1,8 @@
 import { ApiFailure, type NearbyQuery, type NearbyResponse } from "../api/client";
 
 export type ResourceState<T> =
-  | { status: "idle" | "loading" }
+  | { status: "idle" }
+  | { status: "loading"; refreshing?: boolean }
   | { status: "ready"; response: T }
   | { status: "error"; retryable: boolean };
 export type SearchState = ResourceState<NearbyResponse>;
@@ -37,7 +38,11 @@ export class ResourceController<Query, Response> {
     this.active?.abort();
     const request = new AbortController();
     this.active = request;
-    this.set({ status: "loading" });
+    this.set(
+      this.state.status === "ready"
+        ? { status: "loading", refreshing: true }
+        : { status: "loading" },
+    );
     try {
       const response = await this.search(query, request.signal);
       if (!request.signal.aborted) this.set({ status: "ready", response });
