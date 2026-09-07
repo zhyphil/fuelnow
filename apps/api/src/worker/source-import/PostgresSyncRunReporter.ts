@@ -1,4 +1,5 @@
 import type { Pool, QueryResultRow } from "pg";
+import { safeFailureCode } from "./safeFailure.js";
 
 import type {
   FinishSyncRunRequest,
@@ -39,10 +40,11 @@ export class PostgresSyncRunReporter implements SyncRunReporter {
     pagesProcessed,
     recordsProcessed,
     failedPages,
-    errorCode,
-    errorMessage,
+    errorCode: rawErrorCode,
     failureDecision,
   }: FinishSyncRunRequest): Promise<void> {
+    const errorCode = status === "failed" ? safeFailureCode(rawErrorCode) : null;
+    const errorMessage = status === "failed" ? "Source import failed" : null;
     if (status === "failed" && failureDecision !== undefined) {
       await this.pool.query(
         `SELECT failed_run_id

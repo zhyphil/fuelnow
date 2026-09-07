@@ -116,8 +116,7 @@ describe("measured source import", () => {
       failedPages: 1,
       errorCode: "TYPEERROR",
     });
-    expect(finishRequest?.errorMessage).toContain("api_key=[redacted]");
-    expect(finishRequest?.errorMessage).toContain("Bearer [redacted]");
+    expect(finishRequest?.errorMessage).toBe("Source import failed");
     expect(finishRequest?.errorMessage).not.toContain("secret-value");
     expect(finishRequest?.errorMessage).not.toContain("private-token");
   });

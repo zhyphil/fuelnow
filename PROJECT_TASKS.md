@@ -4,7 +4,7 @@
 > 需求来源：[france_spain_driver_decision_engine_project.md](./france_spain_driver_decision_engine_project.md)  
 > 当前状态：Phase 5 继续独立工程项；运营/部署/分发待单独决定，定时自动任务保持暂停
 > 当前阶段：Phase 5 测试、合规与发布准备
-> 下一项任务：`P5-LEG-06` 日志与分析精确位置审计；阻塞任务见 [发布前置条件](./docs/testing/phase5-release-prerequisites.md)
+> 下一项任务：`P5-REL-01` 可移植部署工程准备；实际开通待确认，见 [发布前置条件](./docs/testing/phase5-release-prerequisites.md)
 > 最后更新：2026-09-07
 
 ## 使用方法
@@ -347,7 +347,7 @@ V1 的核心验收结果是：
   - [x] `P5-LEG-03a` 移除多余 Android 权限、关闭备份并建立双平台生成配置 CI 检查 — 2026-09-07：11 个新增测试，170 mobile tests、类型、lint 与真实 introspect 通过；见 docs/testing/phase5-location-minimization.md
 - [ ] `P5-LEG-04` 检查所有数据源署名和许可证要求
 - [ ] `P5-LEG-05` 检查第三方地图与路线服务展示条款
-- [ ] `P5-LEG-06` 确认监控与分析不记录不必要的精确位置
+- [x] `P5-LEG-06` 确认监控与分析不记录不必要的精确位置 — 2026-09-07：当前应用范围通过；移除任意异常文本/名称，SQL reporter 二次白名单过滤，9 项隐私回归及 337 API tests 通过；部署网关/未来 SDK 须在 REL-02 重验，见 docs/testing/phase5-log-privacy.md
 
 ## 5.3 发布准备
 
@@ -668,3 +668,4 @@ V1 的核心验收结果是：
 | 2026-09-07 | P5-QA-09 真实 HTTP/PostGIS 并发负载测试        | 独立临时库应用 15 项迁移，四服务四排序、4/8 并发各 160 请求零错误，p95 6.12/7.90 ms；临时库已删除；全量 771 tests 与质量门槛通过；本地小样本非生产 SLA；见 docs/testing/phase5-local-load.md                                                                                 |
 | 2026-09-07 | Phase 5 部分进度与阻塞交接（非阶段完成）       | QA-01 至 QA-09 共 9/21 项完成并各自 push；QA-10 留存两国十站当前官方记录核对但未勾选；771 tests，CI dc06fcc 成功；运营/部署/设备条件待确认，见 docs/testing/phase5-release-prerequisites.md                                                                                  |
 | 2026-09-07 | P5-LEG-03a 原生权限最小化                      | 移除多余权限、关闭 Android 备份，新增双平台 introspect CI 门槛与 11 项回归；170 mobile tests、类型、lint 通过；LEG-03 整项仍待设备/法律依据审查                                                                                                                              |
+| 2026-09-07 | P5-LEG-06 应用日志与分析隐私                   | 清除任意异常名称/原文、服务端 request ID、SQL 写入边界过滤；9 个新增测试覆盖正常/错误/限流路径，337 API tests 通过；实际部署日志和未来 SDK 仍须重验                                                                                                                          |

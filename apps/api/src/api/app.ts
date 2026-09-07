@@ -39,6 +39,7 @@ export function createApiApp({
 }: CreateApiAppOptions): FastifyInstance {
   const app = Fastify({
     logger,
+    requestIdHeader: false,
     bodyLimit: security.bodyLimitBytes,
     requestTimeout: 15_000,
     routerOptions: { maxParamLength: 100 },

@@ -242,7 +242,7 @@ describe("source sync retry policy", () => {
       0,
       1,
       "ETIMEDOUT",
-      "Provider timed out",
+      "Source import failed",
       "transient",
       3,
       "2026-09-04T00:00:03Z",

@@ -1,5 +1,6 @@
 import type { IncrementalImportOptions } from "./importSourceIncrementally.js";
 import { importSourceIncrementally } from "./importSourceIncrementally.js";
+import { safeSourceFailure } from "./safeFailure.js";
 import type { IncrementalImportProgress, IncrementalImportResult } from "./types.js";
 
 export type SyncRunMode = "full_snapshot" | "incremental";
@@ -55,30 +56,6 @@ export interface MeasuredSourceImportOptions extends Omit<
   ) => SyncFailureDecision;
 }
 
-function safeError(error: unknown): { code: string; message: string } {
-  const code =
-    error instanceof Error && error.name.trim().length > 0
-      ? error.name
-          .replace(/[^A-Za-z0-9_]+/g, "_")
-          .toUpperCase()
-          .slice(0, 100)
-      : "UNKNOWN_ERROR";
-  const rawMessage =
-    error instanceof Error && error.message.trim().length > 0
-      ? error.message
-      : "Source import failed";
-  const message = rawMessage
-    .replace(/postgres(?:ql)?:\/\/[^\s]+/gi, "[redacted-database-url]")
-    .replace(/Bearer\s+[^\s]+/gi, "Bearer [redacted]")
-    .replace(
-      /([?&](?:access_token|api_key|key|password|secret|token)=)[^&\s]+/gi,
-      "$1[redacted]",
-    )
-    .slice(0, 1000);
-
-  return { code, message };
-}
-
 export async function runMeasuredSourceImport({
   sourceId,
   mode,
@@ -119,7 +96,7 @@ export async function runMeasuredSourceImport({
     });
   } catch (error) {
     const completedAt = clock().toISOString();
-    const safe = safeError(error);
+    const safe = safeSourceFailure(error);
     const failureDecision = decideFailure?.(error, {
       attemptNumber,
       completedAt,

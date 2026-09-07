@@ -95,7 +95,7 @@ export function registerApiErrorHandling(app: FastifyInstance): void {
     }
 
     request.log.error(
-      { errorName: error instanceof Error ? error.name : "UnknownError" },
+      { errorCode: "internal_server_error" },
       "Unhandled API request failure",
     );
     return reply
