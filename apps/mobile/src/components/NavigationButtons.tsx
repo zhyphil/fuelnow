@@ -60,7 +60,11 @@ export function NavigationButtons({
           }}
         />
       )}
-      {!navigationAllowed(target) && <Text>{copy.navigationDisabled}</Text>}
+      {!navigationAllowed(target) && (
+        <Text>
+          {target.synthetic ? copy.demoNavigationDisabled : copy.navigationDisabled}
+        </Text>
+      )}
       {failed && <Text accessibilityRole="alert">{copy.navigationFailed}</Text>}
     </View>
   );

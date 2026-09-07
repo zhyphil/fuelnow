@@ -1,5 +1,7 @@
 # Local development
 
+Updated 2026-09-07: API and mobile entry points are implemented. For an isolated, no-credentials phone test use [local phone testing](./local-phone-testing.md), `pnpm local:start --lan`, or double-click the root `local-test.command` on macOS. This mode ignores `.env`, starts Docker's existing local database service, allocates a disposable database with synthetic data and serves API/Expo together. Stop with Ctrl+C; restart resets only demo data. `pnpm local:check` verifies a disposable instance without leaving servers running.
+
 - Task: `P2-ENG-06`
 - Date: 2026-09-04
 - Supported runtime: Node.js 24 and pnpm 10.28.2
@@ -71,12 +73,12 @@ The current official PostgreSQL 18/PostGIS image publishes an amd64 build, so Ap
 | Workspace | Current local use |
 | --- | --- |
 | `apps/api` | API composition root plus local database migration and verification commands |
-| `apps/mobile` | Reserved Expo/React Native client; it becomes runnable during the mobile tasks |
+| `apps/mobile` | Runnable Expo/React Native iOS/Android client; `pnpm mobile:dev` |
 | `packages/contracts` | Shared API/domain contracts, starting with `P2-MOD-01` |
 | `packages/config` | Environment names, profiles and safe runtime rules |
 | `packages/data-core` | Existing France/Spain Fuel adapters, normalization and decision logic |
 
-There is deliberately no root `pnpm dev` command yet: neither application workspace has an executable entry point. Adding a fake server or empty mobile shell would give a misleading readiness signal. Each application will add its own documented start command when its implementation task lands; this guide must be updated at that point.
+Use `pnpm api:dev` for the configured API and `pnpm mobile:dev` for Expo. Physical phones must use the Mac's reachable LAN API address rather than 127.0.0.1. The safer combined synthetic test runner sets its own fixed development configuration and does not rely on, create or replace your `.env` files. Provider credentials and paid routing remain disabled in that runner.
 
 ## Safe source development
 

@@ -8,6 +8,8 @@
     "node": ">=24 <25"
   },
   "scripts": {
+    "local:start": "pnpm --filter @fuel-now/api local:start",
+    "local:check": "pnpm --filter @fuel-now/api local:start --check",
     "release:check": "pnpm --filter @fuel-now/api release:check",
     "mobile:dev": "pnpm --filter @fuel-now/mobile dev",
     "mobile:export": "pnpm --filter @fuel-now/mobile export",

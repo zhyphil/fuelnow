@@ -283,6 +283,57 @@ it.each(cases)(
   },
 );
 
+it("disables synthetic station navigation in both result and detail screens", async () => {
+  ports.language = "en";
+  const copy = getMessages("en");
+  const response = structuredClone(sample) as NearbyResponse;
+  response.results[0]!.evidence.source!.id = "__fixture__fr_fuel";
+  const point = structuredClone(detail) as ServicePointResponse;
+  ports.id = point.servicePoint.id = response.results[0]!.id;
+  for (const service of point.servicePoint.services)
+    if (service.evidence.source) service.evidence.source.id = "__fixture__fr_fuel";
+  ports.nearby.mockResolvedValue(response);
+  ports.servicePoint.mockResolvedValue(point);
+  const root = createRoot({ textComponentTypes: ["Text"] });
+  roots.push(root);
+  const button = (label: string) =>
+    root.container.queryAll(
+      (node) => node.type === "Pressable" && node.props.accessibilityLabel === label,
+    )[0]!;
+  await act(async () =>
+    root.render(
+      <SearchProvider>
+        <WelcomeScreen />
+      </SearchProvider>,
+    ),
+  );
+  await act(async () =>
+    button(
+      `${copy.services.names.fuel}. ${copy.services.descriptions.fuel}`,
+    ).props.onPress(),
+  );
+  await act(async () =>
+    root.render(
+      <SearchProvider>
+        <ResultsScreen />
+      </SearchProvider>,
+    ),
+  );
+  expect(button(`${copy.evidence.navigate} · Apple Maps`).props.disabled).toBe(true);
+  expect(JSON.stringify(root.container.toJSON())).toContain(
+    copy.evidence.demoNavigationDisabled,
+  );
+  await act(async () =>
+    root.render(
+      <SearchProvider>
+        <PointScreen />
+      </SearchProvider>,
+    ),
+  );
+  expect(button("Google Maps").props.disabled).toBe(true);
+  expect(ports.openURL).not.toHaveBeenCalled();
+});
+
 it("shows a safe network error and retries the same service without exposing URLs", async () => {
   ports.language = "en";
   const copy = getMessages("en");

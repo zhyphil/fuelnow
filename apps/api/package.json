@@ -4,6 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "local:start": "node --import tsx src/quality/runLocalDemo.ts",
     "operations:logs": "node --import tsx src/quality/runApiLogMetrics.ts",
     "test:mobile-local": "node --import tsx src/quality/runMobileClientCheck.ts",
     "test:alerts-local": "node --import tsx src/quality/runAlertDispatchCheck.ts",

@@ -237,7 +237,14 @@ export default function ResultsScreen() {
               evidence={item.evidence}
               country={item.country}
               actions={
-                <NavigationButtons target={item} response={response ?? undefined} />
+                <NavigationButtons
+                  target={{
+                    ...item,
+                    synthetic:
+                      item.evidence.source?.id.startsWith("__fixture__") === true,
+                  }}
+                  response={response ?? undefined}
+                />
               }
             />
             <ActionButton

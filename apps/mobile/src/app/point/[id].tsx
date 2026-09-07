@@ -81,6 +81,9 @@ export default function PointScreen() {
                 id: point.id,
                 location: point.location,
                 lifecycleStatus: point.lifecycle.status,
+                synthetic: point.services.some((service) =>
+                  service.evidence.source?.id.startsWith("__fixture__"),
+                ),
               }}
             />
             <Text>

@@ -5,6 +5,14 @@ const target = {
   location: { latitude: 40.4, longitude: -3.7 },
   lifecycleStatus: "active",
 };
+it("never opens real navigation for a synthetic test station", async () => {
+  const open = vi.fn();
+  expect(await openNavigation({ ...target, synthetic: true }, "apple", open)).toBe(
+    false,
+  );
+  expect(navigationUrl({ ...target, synthetic: true }, "google")).toBeNull();
+  expect(open).not.toHaveBeenCalled();
+});
 it.each(["apple", "google"] as const)(
   "creates safe destination-only %s links with driving mode",
   (provider) => {

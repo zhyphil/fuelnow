@@ -10,6 +10,7 @@ import { useLocation } from "../location/context";
 import { ActionButton } from "../components/ActionButton";
 import { DiagnosticsPanel } from "../components/DiagnosticsPanel";
 import { sourcePageCopy } from "../content/sourceNotices";
+import { mobileConfig } from "../config/runtime";
 
 export default function WelcomeScreen() {
   const { service } = useSearchSelection();
@@ -17,12 +18,17 @@ export default function WelcomeScreen() {
   const { state: location } = useLocation();
   const {
     language,
-    copy: { app: copy, results },
+    copy: { app: copy, results, evidence },
   } = useLanguage();
   return (
     <SafeAreaView style={styles.screen}>
       <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
         <Text style={styles.brand}>{copy.appName}</Text>
+        {mobileConfig.environment === "test" && (
+          <Text accessibilityRole="alert" style={styles.coverage}>
+            {evidence.localDemoNotice}
+          </Text>
+        )}
         <View style={styles.hero}>
           <Text style={styles.eyebrow}>{copy.eyebrow}</Text>
           <Text accessibilityRole="header" style={styles.title}>

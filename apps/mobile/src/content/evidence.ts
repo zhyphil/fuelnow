@@ -115,6 +115,16 @@ const translations = {
     "Actualizando resultados…",
   ],
   cancelRequest: ["Cancel request", "Annuler la requête", "Cancelar solicitud"],
+  demoNavigationDisabled: [
+    "Synthetic test station — real navigation is disabled.",
+    "Station de test fictive — navigation réelle désactivée.",
+    "Estación de prueba ficticia — navegación real desactivada.",
+  ],
+  localDemoNotice: [
+    "LOCAL TEST — Use manual Toulouse for Fuel/Air/Wash or Barcelona for Charge. DEMO stations and prices are synthetic; do not travel to them.",
+    "TEST LOCAL — Choisissez Toulouse manuellement pour carburant/air/lavage ou Barcelona pour recharge. Stations et prix DEMO fictifs : ne vous y rendez pas.",
+    "PRUEBA LOCAL — Elige Toulouse manualmente para carburante/aire/lavado o Barcelona para carga. Estaciones y precios DEMO ficticios: no vayas a ellos.",
+  ],
   diagnosticsNotice: [
     "Optional local test metrics: searches, timing, data-quality counts, sorting, selection and navigation. No coordinates or uploads. Cleared after 15 minutes or when disabled.",
     "Mesures de test locales facultatives : recherches, durées, compteurs de qualité, tri, sélection, navigation. Aucune coordonnée ni transmission. Effacées après 15 minutes ou à la désactivation.",

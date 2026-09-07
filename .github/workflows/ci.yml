@@ -71,6 +71,9 @@ jobs:
           LOAD_TEST_DATABASE_URL: postgresql://fuel_now:fuel_now@127.0.0.1:5432/fuel_now
         run: pnpm --filter @fuel-now/api test:mobile-local
 
+      - name: Check disposable local phone testing environment
+        run: pnpm local:check
+
       - name: Stop integration database service
         if: always()
         run: docker compose down
