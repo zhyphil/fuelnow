@@ -1,5 +1,37 @@
 import type { Language } from "../i18n/preferences";
 const translations = {
+  radius: ["Area searched (radius)", "Zone recherchée (rayon)", "Zona buscada (radio)"],
+  expand: ["Expand search area", "Élargir la zone", "Ampliar la zona"],
+  no_service_points_in_radius: [
+    "No listed service points in the searched area. Change location or service.",
+    "Aucun service répertorié dans la zone. Changez de lieu ou de service.",
+    "No hay servicios registrados en la zona. Cambia de lugar o servicio.",
+  ],
+  no_comparable_prices: [
+    "No comparable prices, not necessarily no nearby stations.",
+    "Aucun prix comparable, mais des stations peuvent exister à proximité.",
+    "No hay precios comparables; puede haber estaciones cercanas.",
+  ],
+  no_open_service_points: [
+    "No points confirmed open by the published schedules.",
+    "Aucun point confirmé ouvert selon les horaires publiés.",
+    "Ningún punto confirmado abierto según los horarios publicados.",
+  ],
+  opening_status_unknown: [
+    "Opening status is unknown; this does not mean every service is closed.",
+    "Ouverture inconnue : cela ne signifie pas que tous les services sont fermés.",
+    "Apertura desconocida; no significa que todos los servicios estén cerrados.",
+  ],
+  capability_unavailable: [
+    "This decision is unavailable with current evidence.",
+    "Cette décision est indisponible avec les données actuelles.",
+    "Esta decisión no está disponible con los datos actuales.",
+  ],
+  no_matching_service_points: [
+    "No service points match the selected filters.",
+    "Aucun service ne correspond aux filtres choisis.",
+    "Ningún servicio coincide con los filtros seleccionados.",
+  ],
   network: [
     "Network unavailable. Check your connection and retry.",
     "Réseau indisponible. Vérifiez la connexion et réessayez.",

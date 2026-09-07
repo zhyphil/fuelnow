@@ -17,11 +17,14 @@ import { RecommendationSummary } from "../components/RecommendationSummary";
 import { ResultMap } from "../components/ResultMap";
 import { NavigationButtons } from "../components/NavigationButtons";
 import { LocationPanel } from "../components/LocationPanel";
+import { emptyRecovery } from "../search/empty";
+import { distance } from "../search/presentation";
 import { withSearchSort, type Sort, type FuelType } from "../search/sorts";
 
 export default function ResultsScreen() {
   const router = useRouter();
   const {
+    language,
     copy: { results: copy, services, evidence },
   } = useLanguage();
   const { service } = useSearchSelection();
@@ -29,11 +32,14 @@ export default function ResultsScreen() {
   const origin = location.status === "ready" ? location.origin : null;
   const [sort, setSort] = useState<Sort>("nearest");
   const [fuelType, setFuelType] = useState<FuelType>();
+  const [radius, setRadius] = useState<number>();
   const [showMap, setShowMap] = useState(false);
   const query = useMemo(() => {
     const initial = buildInitialSearch(service, origin);
-    return initial ? withSearchSort(initial, sort, fuelType) : null;
-  }, [service, origin, sort, fuelType]);
+    return initial
+      ? { ...withSearchSort(initial, sort, fuelType), ...(radius ? { radius } : {}) }
+      : null;
+  }, [service, origin, sort, fuelType, radius]);
   const [controller] = useState(() => new SearchController(api.nearby));
   const state = useSyncExternalStore(controller.subscribe, controller.getSnapshot);
   useFocusEffect(
@@ -45,6 +51,7 @@ export default function ResultsScreen() {
     }, [controller, query]),
   );
   const response = query && state.status === "ready" ? state.response : null;
+  const recovery = response ? emptyRecovery(response) : null;
   useEffect(() => {
     if (response)
       analytics.record(
@@ -171,7 +178,28 @@ export default function ResultsScreen() {
           </View>
         }
         ListEmptyComponent={
-          response ? <Text style={styles.body}>{copy.empty}</Text> : null
+          response ? (
+            <View style={styles.header}>
+              <Text accessibilityRole="alert" style={styles.body}>
+                {response.outcome.emptyReason
+                  ? evidence[response.outcome.emptyReason]
+                  : copy.empty}
+              </Text>
+              <Text style={styles.body}>
+                {evidence.radius}:{" "}
+                {distance(response.search.usedRadiusMetres, language)}
+              </Text>
+              {recovery?.action === "nearest" && (
+                <ActionButton label={copy.nearest} onPress={() => setSort("nearest")} />
+              )}
+              {recovery?.action === "expand" && (
+                <ActionButton
+                  label={evidence.expand}
+                  onPress={() => setRadius(recovery.radius)}
+                />
+              )}
+            </View>
+          ) : null
         }
         renderItem={({ item, index }) => (
           <View style={styles.card}>
