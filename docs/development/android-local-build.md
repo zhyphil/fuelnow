@@ -52,7 +52,7 @@ Expo prebuild 会自动将 package.json 的 ios/android 脚本改成原生构建
 
 ## Google 地图待办
 
-用户随后自行创建了 Google Cloud 项目和地图密钥；截图确认 Maps SDK for Android 已启用，密钥编辑页已选择仅该 SDK 和 Android 应用限制，但包名/指纹条目尚为空，保存结果待确认。用户表示账户已有银行卡，项目结算关联尚未独立核实。当前构建仍不提供地图密钥，不能将此包能安装/启动记作底图修复成功。
+用户随后自行创建了 Google Cloud 项目和地图密钥；截图确认 Maps SDK for Android 已启用，密钥编辑页已选择仅该 SDK 和 Android 应用限制。用户随后确认已保存包名/专用 SHA-1 限制，并在本地 `.env.local` 填好密钥；没有在聊天中提供密钥。账户已有银行卡为用户陈述，项目结算关联和 SDK 实际鉴权仍未独立核实。
 
 后续先获得用户对结算账户步骤的单独确认，再配置 Maps SDK for Android。测试密钥应只允许该 SDK，并限制为测试 application ID + 专用本地测试签名证书 SHA-1；不要使用 Expo/RN 模板内通用 debug 签名作为地图密钥限制的信任依据。配置密钥前需准备独立本地测试签名，并核对重新签名后实际 APK 的证书；不索取聊天明文密钥，不输出包含密钥的完整 Expo config。
 
@@ -66,6 +66,8 @@ Google Maps SDK 的[使用和结算要求](https://developers.google.com/maps/do
 
 ## 验证状态
 
+2026-09-07 受限密钥构建：只在本地读取 `.env.local`，格式检查通过，prebuild 注入后 ARM64 `assembleDebug` 成功（31 秒）。沿用专用证书生成 `apps/mobile/.expo/local-signing/fuel-now-maps-test-signed.apk`，v2/v3 验证通过，包名和证书与交给用户的限制值一致。直接解析 APK manifest，确认 `com.google.android.geo.API_KEY` 与本地值相同，只输出布尔验证结果；最终权限未扩大。密钥文件权限 600、Git 忽略生效，APK/签名/密码均未提交。已恢复 prebuild 自动改动的启动脚本，未更改应用逻辑；本轮未重跑此前 1018 单元测试，采用实际原生构建和 APK 校验。尚未安装新包、未发起地图请求，不宣称底图恢复。
+
 - [x] 本地工具安装和版本核对。
 - [x] 测试身份与调试权限处理 6 项回归，全量 `pnpm check` 1018 tests、test 环境原生配置隐私检查通过。
 - [x] ARM64 APK 编译及最终权限核对：Gradle `assembleDebug` 成功，APK v2 签名有效，application ID / 显示名 / ARM64 / min SDK 24 / target SDK 36 已通过 APK 工具核对。
@@ -73,6 +75,7 @@ Google Maps SDK 的[使用和结算要求](https://developers.google.com/maps/do
 - [x] 本机测试 API 搜索冒烟：独立包选择 Carburant → 手动 Toulouse → 搜索；截图显示最近排序 2 个结果和主 DEMO 卡片。未选择真实定位，未测试真实导航或地图底图。
 - [ ] 自有受限密钥配置后的华为地图底图/标记和点击验收。
 - [x] 专用本地测试签名与 APK 副本证书一致性验证；未替换手机应用，地图验收仍待完成。
+- [x] 注入用户本地受限地图密钥并重新构建、专用签署、核对实际 APK 密钥和权限；等待用户确认旧测试应用的数据重置后再安装。
 
 安装与地图验收按实际结果更新，不用 JS export 或单元测试替代原生构建和真机结果。
 
