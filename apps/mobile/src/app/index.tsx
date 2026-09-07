@@ -8,6 +8,7 @@ import { useSearchSelection } from "../search/context";
 import { useRouter } from "expo-router";
 import { useLocation } from "../location/context";
 import { ActionButton } from "../components/ActionButton";
+import { DiagnosticsPanel } from "../components/DiagnosticsPanel";
 
 export default function WelcomeScreen() {
   const { service } = useSearchSelection();
@@ -36,6 +37,7 @@ export default function WelcomeScreen() {
         />
         <Text style={styles.coverage}>{copy.coverage}</Text>
         <LanguagePicker />
+        <DiagnosticsPanel />
       </ScrollView>
     </SafeAreaView>
   );

@@ -1,5 +1,25 @@
 import type { Language } from "../i18n/preferences";
 const translations = {
+  diagnosticsNotice: [
+    "Optional local test events: search, selection and navigation. No coordinates or uploads. Cleared after 15 minutes or when disabled.",
+    "Événements de test locaux facultatifs : recherche, sélection, navigation. Aucune coordonnée ni transmission. Effacés après 15 minutes ou à la désactivation.",
+    "Eventos de prueba locales opcionales: búsqueda, selección y navegación. Sin coordenadas ni envíos. Se borran a los 15 minutos o al desactivar.",
+  ],
+  diagnosticsOn: [
+    "Enable local test events",
+    "Activer les événements de test locaux",
+    "Activar eventos de prueba locales",
+  ],
+  diagnosticsOff: [
+    "Disable and clear test events",
+    "Désactiver et effacer les événements",
+    "Desactivar y borrar eventos",
+  ],
+  diagnosticsCount: [
+    "Recorded events",
+    "Événements enregistrés",
+    "Eventos registrados",
+  ],
   navigate: ["Navigate", "Itinéraire", "Cómo llegar"],
   navigationFailed: [
     "Could not open navigation. Please try again or choose another map app.",

@@ -8,6 +8,7 @@ import {
   type NavigationTarget,
 } from "../search/navigation";
 import { ActionButton } from "./ActionButton";
+import { analytics } from "../analytics/recorder";
 export function NavigationButtons({ target }: { target: NavigationTarget }) {
   const {
     copy: { evidence: copy },
@@ -20,7 +21,13 @@ export function NavigationButtons({ target }: { target: NavigationTarget }) {
     active.current = true;
     setBusy(true);
     setFailed(false);
+    analytics.record({ type: "navigation_click", pointId: target.id });
     const opened = await openNavigation(target, provider, Linking.openURL);
+    analytics.record({
+      type: "navigation_handoff",
+      pointId: target.id,
+      success: opened,
+    });
     setFailed(!opened);
     setBusy(false);
     active.current = false;

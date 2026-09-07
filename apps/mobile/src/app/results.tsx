@@ -1,4 +1,5 @@
-import { useCallback, useMemo, useState, useSyncExternalStore } from "react";
+import { useCallback, useEffect, useMemo, useState, useSyncExternalStore } from "react";
+import { analytics } from "../analytics/recorder";
 import { useFocusEffect, useRouter } from "expo-router";
 import { ActivityIndicator, FlatList, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -43,6 +44,26 @@ export default function ResultsScreen() {
     }, [controller, query]),
   );
   const response = query && state.status === "ready" ? state.response : null;
+  useEffect(() => {
+    if (response)
+      analytics.record(
+        {
+          type: "search_exposure",
+          service: response.service,
+          sort: response.ranking.appliedSort,
+          resultCount: response.resultCount,
+        },
+        response.requestId,
+      );
+  }, [response]);
+  const selectPoint = (id: string) => {
+    analytics.record({
+      type: "result_selection",
+      pointId: id,
+      ...(service ? { service } : {}),
+    });
+    router.push({ pathname: "/point/[id]", params: { id } });
+  };
   const run = () => {
     if (query) void controller.run(query);
   };
@@ -54,7 +75,7 @@ export default function ResultsScreen() {
           onClose={() => setShowMap(false)}
           onSelect={(id) => {
             setShowMap(false);
-            router.push({ pathname: "/point/[id]", params: { id } });
+            selectPoint(id);
           }}
         />
       )}
@@ -150,9 +171,7 @@ export default function ResultsScreen() {
             <ActionButton
               secondary
               label={evidence.details}
-              onPress={() =>
-                router.push({ pathname: "/point/[id]", params: { id: item.id } })
-              }
+              onPress={() => selectPoint(item.id)}
             />
             <RecommendationSummary recommendation={item.recommendation} />
             <EvidenceSummary evidence={item.evidence} country={item.country} />
