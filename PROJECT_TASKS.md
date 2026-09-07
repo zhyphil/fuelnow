@@ -2,9 +2,9 @@
 
 > 项目：France + Spain Driver Decision Engine  
 > 需求来源：[france_spain_driver_decision_engine_project.md](./france_spain_driver_decision_engine_project.md)  
-> 当前状态：Phase 5 已完成 10/21 主任务及 14 个工程子项（含 EV/OSM 四个细项）；继续逐项验证、commit、push；缺信息项留空，小时任务保持暂停，阶段尚未完成
+> 当前状态：Phase 5 已完成 10/21 主任务及 15 个工程子项（含 EV/OSM 四个细项）；继续逐项验证、commit、push；缺信息项留空，小时任务保持暂停，阶段尚未完成
 > 当前阶段：Phase 5 测试、合规与发布准备
-> 下一项任务：REL-02 告警队列投递/重试工程，随后客户端到真实 API 联调；生产部署、日历、许可和真机缺资料项先跳过，见 [发布前置条件](./docs/testing/phase5-release-prerequisites.md)
+> 下一项任务：REL-04 客户端到真实 API 联调；生产部署、日历、许可、通知接收人和真机缺资料项先跳过，见 [发布前置条件](./docs/testing/phase5-release-prerequisites.md)
 > 最后更新：2026-09-07
 
 ## 使用方法
@@ -368,6 +368,7 @@ V1 的核心验收结果是：
   - [x] `P5-REL-01b` 离线发布配置预检及生产 TLS/代理信任保护（2026-09-07；14 新测试，451 API tests 与类型检查通过；未知配置留空，不连接部署环境；见 docs/testing/phase5-deployment-preflight.md）
 - [ ] `P5-REL-02` 建立错误监控、性能监控和数据同步告警 — 进行中：只读运行检查完成，常驻采集/调度、通知投递及真实告警演练待完成
   - [x] `P5-REL-02a` 聚合运行检查与空库/同步/重试/告警积压检测 — 2026-09-07：14 项新增测试，361 API tests，真实空库 exit 2 与独立非空 fixture SQL/HTTP 验证通过；见 docs/testing/phase5-operational-checks.md
+  - [x] `P5-REL-02b` 隐私安全告警投递、强制超时、持久重试间隔与并发锁（2026-09-07；10 新测试，461 API tests；真实隔离 SQL + 本地接收函数验证；外部投递/调度仍待资料；见 docs/testing/phase5-alert-dispatch.md）
 - [ ] `P5-REL-03` 准备 Beta 发布说明和反馈渠道
   - [x] `P5-REL-03a` 准备三语 Beta 说明草稿和隐私安全反馈表（2026-09-07；不发布构建、不创建 issue；实际渠道/责任人与私密支持仍待确认；见 docs/testing/beta-release-notes.md）
 - [ ] `P5-REL-04` 完成核心用户流程回归测试
