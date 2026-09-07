@@ -1,5 +1,16 @@
 import type { Language } from "../i18n/preferences";
 const translations = {
+  map: ["View map", "Voir la carte", "Ver mapa"],
+  mapNotice: [
+    "Optional map: Apple Maps on iOS, Google Maps on Android. The map provider processes the viewed area. No location tracking is enabled.",
+    "Carte facultative : Apple Maps sur iOS, Google Maps sur Android. Le fournisseur traite la zone affichée. Aucun suivi de position n’est activé.",
+    "Mapa opcional: Apple Maps en iOS, Google Maps en Android. El proveedor procesa la zona visible. No se activa seguimiento de ubicación.",
+  ],
+  mapUnavailable: [
+    "Map not configured for this build. The result list and external navigation remain available.",
+    "Carte non configurée pour cette version. La liste et la navigation externe restent disponibles.",
+    "Mapa no configurado para esta versión. La lista y la navegación externa siguen disponibles.",
+  ],
   details: ["View details", "Voir les détails", "Ver detalles"],
   back: ["Back", "Retour", "Volver"],
   invalidPoint: [

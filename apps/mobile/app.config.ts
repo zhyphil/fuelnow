@@ -14,6 +14,10 @@ const config: ExpoConfig = {
     es: "./locales/es.json",
   },
   plugins: [
+    [
+      "react-native-maps",
+      { androidGoogleMapsApiKey: process.env.GOOGLE_MAPS_ANDROID_API_KEY },
+    ],
     "expo-router",
     ["expo-localization", { supportedLocales: ["en", "fr", "es"] }],
     [
@@ -33,6 +37,7 @@ const config: ExpoConfig = {
   ],
   ios: { supportsTablet: false },
   android: {},
+  extra: { androidMapsConfigured: Boolean(process.env.GOOGLE_MAPS_ANDROID_API_KEY) },
 };
 
 export default config;

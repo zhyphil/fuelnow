@@ -13,6 +13,7 @@ import { SortPicker } from "../components/SortPicker";
 import { PointSummary } from "../components/PointSummary";
 import { EvidenceSummary } from "../components/EvidenceSummary";
 import { RecommendationSummary } from "../components/RecommendationSummary";
+import { ResultMap } from "../components/ResultMap";
 import { withSearchSort, type Sort, type FuelType } from "../search/sorts";
 
 export default function ResultsScreen() {
@@ -25,6 +26,7 @@ export default function ResultsScreen() {
   const origin = location.status === "ready" ? location.origin : null;
   const [sort, setSort] = useState<Sort>("nearest");
   const [fuelType, setFuelType] = useState<FuelType>();
+  const [showMap, setShowMap] = useState(false);
   const query = useMemo(() => {
     const initial = buildInitialSearch(service, origin);
     return initial ? withSearchSort(initial, sort, fuelType) : null;
@@ -33,6 +35,7 @@ export default function ResultsScreen() {
   const state = useSyncExternalStore(controller.subscribe, controller.getSnapshot);
   useFocusEffect(
     useCallback(() => {
+      setShowMap(false);
       if (query) void controller.run(query);
       else controller.clear();
       return controller.clear;
@@ -44,6 +47,16 @@ export default function ResultsScreen() {
   };
   return (
     <SafeAreaView style={styles.screen}>
+      {showMap && response && (
+        <ResultMap
+          points={response.results}
+          onClose={() => setShowMap(false)}
+          onSelect={(id) => {
+            setShowMap(false);
+            router.push({ pathname: "/point/[id]", params: { id } });
+          }}
+        />
+      )}
       <FlatList
         data={response?.results ?? []}
         keyExtractor={(point) => point.id}
@@ -107,6 +120,12 @@ export default function ResultsScreen() {
                       <Text style={styles.body}>{copy.expanded}</Text>
                     )}
                     <ActionButton label={copy.refresh} secondary onPress={run} />
+                    <ActionButton
+                      label={evidence.map}
+                      secondary
+                      disabled={response.results.length === 0}
+                      onPress={() => setShowMap(true)}
+                    />
                   </>
                 )}
               </>
