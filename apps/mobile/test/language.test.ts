@@ -109,8 +109,13 @@ describe("local language preference", () => {
         expect(Object.keys(catalog[section]).sort()).toEqual(
           Object.keys(base[section]).sort(),
         );
-        for (const value of Object.values(catalog[section]))
-          expect(value.trim().length).toBeGreaterThan(0);
+        const verify = (value: unknown): void => {
+          if (typeof value === "string") expect(value.trim().length).toBeGreaterThan(0);
+          else
+            for (const child of Object.values(value as Record<string, unknown>))
+              verify(child);
+        };
+        verify(catalog[section]);
       }
     }
   });

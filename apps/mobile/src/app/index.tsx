@@ -3,8 +3,11 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useLanguage } from "../i18n/context";
 import { LanguagePicker } from "../components/LanguagePicker";
 import { LocationPanel } from "../components/LocationPanel";
+import { ServicePicker } from "../components/ServicePicker";
+import { useSearchSelection } from "../search/context";
 
 export default function WelcomeScreen() {
+  const { service } = useSearchSelection();
   const {
     copy: { app: copy },
   } = useLanguage();
@@ -19,7 +22,8 @@ export default function WelcomeScreen() {
           </Text>
           <Text style={styles.body}>{copy.introduction}</Text>
         </View>
-        <LocationPanel />
+        <ServicePicker />
+        {service && <LocationPanel />}
         <Text style={styles.coverage}>{copy.coverage}</Text>
         <LanguagePicker />
       </ScrollView>
