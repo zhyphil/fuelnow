@@ -240,6 +240,7 @@ it.each(cases)(
     );
     await press(copy.results.search);
     expect(ports.push).toHaveBeenLastCalledWith("/results");
+    analytics.setEnabled(true);
     await render(<ResultsScreen />);
     expect(ports.nearby.mock.calls[0]![0]).toMatchObject({
       latitude: ports.origin.latitude,
@@ -273,6 +274,9 @@ it.each(cases)(
     await render(<PointScreen />);
     expect(ports.servicePoint.mock.calls[0]![0]).toBe(first.id);
     await press("Google Maps");
+    expect(analytics.beta.getSnapshot().attempts).toMatchObject([
+      { status: "success", exposed: true, clicked: true, handedOff: true },
+    ]);
     expect(ports.openURL).toHaveBeenLastCalledWith(
       expect.stringContaining("https://www.google.com/maps/dir/"),
     );

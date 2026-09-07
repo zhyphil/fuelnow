@@ -9,7 +9,14 @@ import {
 } from "../search/navigation";
 import { ActionButton } from "./ActionButton";
 import { analytics } from "../analytics/recorder";
-export function NavigationButtons({ target }: { target: NavigationTarget }) {
+import type { NearbyResponse } from "../api/client";
+export function NavigationButtons({
+  target,
+  response,
+}: {
+  target: NavigationTarget;
+  response?: NearbyResponse | undefined;
+}) {
   const {
     copy: { evidence: copy },
   } = useLanguage();
@@ -22,7 +29,9 @@ export function NavigationButtons({ target }: { target: NavigationTarget }) {
     setBusy(true);
     setFailed(false);
     analytics.record({ type: "navigation_click", pointId: target.id });
+    const attempt = analytics.beta.click(target.id, response);
     const opened = await openNavigation(target, provider, Linking.openURL);
+    analytics.beta.handoff(attempt, opened);
     analytics.record({
       type: "navigation_handoff",
       pointId: target.id,

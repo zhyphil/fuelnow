@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import { analytics } from "../analytics/recorder";
+import { observeSearch } from "../analytics/beta";
 import { useFocusEffect, useRouter } from "expo-router";
 import { ActivityIndicator, FlatList, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -40,7 +41,9 @@ export default function ResultsScreen() {
       ? { ...withSearchSort(initial, sort, fuelType), ...(radius ? { radius } : {}) }
       : null;
   }, [service, origin, sort, fuelType, radius]);
-  const [controller] = useState(() => new SearchController(api.nearby));
+  const [controller] = useState(
+    () => new SearchController(observeSearch(api.nearby, analytics.beta)),
+  );
   const state = useSyncExternalStore(controller.subscribe, controller.getSnapshot);
   useFocusEffect(
     useCallback(() => {
@@ -53,6 +56,7 @@ export default function ResultsScreen() {
   const response = query && state.status === "ready" ? state.response : null;
   const recovery = response ? emptyRecovery(response) : null;
   useEffect(() => {
+    if (response) analytics.beta.expose(response);
     if (response)
       analytics.record(
         {
@@ -65,6 +69,7 @@ export default function ResultsScreen() {
       );
   }, [response]);
   const selectPoint = (id: string) => {
+    if (response) analytics.beta.select(response, id);
     analytics.record({
       type: "result_selection",
       pointId: id,
@@ -225,7 +230,9 @@ export default function ResultsScreen() {
               compact
               evidence={item.evidence}
               country={item.country}
-              actions={<NavigationButtons target={item} />}
+              actions={
+                <NavigationButtons target={item} response={response ?? undefined} />
+              }
             />
             <ActionButton
               secondary

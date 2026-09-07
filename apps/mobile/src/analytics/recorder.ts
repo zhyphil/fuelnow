@@ -1,4 +1,5 @@
 import { validPointId } from "../search/detail";
+import { BetaSession } from "./beta";
 export type ProductEvent = {
   type:
     "search_exposure" | "result_selection" | "navigation_click" | "navigation_handoff";
@@ -9,6 +10,7 @@ export type ProductEvent = {
   success?: boolean;
 };
 export class SessionRecorder {
+  public readonly beta = new BetaSession();
   private state: { enabled: boolean; events: readonly ProductEvent[] } = {
     enabled: false,
     events: [],
@@ -27,6 +29,7 @@ export class SessionRecorder {
     this.listeners.forEach((listener) => listener());
   }
   public setEnabled = (enabled: boolean) => {
+    this.beta.setEnabled(enabled);
     clearTimeout(this.timer);
     this.seen.clear();
     this.state = { enabled, events: [] };
