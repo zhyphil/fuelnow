@@ -1,5 +1,14 @@
 import type { Language } from "../i18n/preferences";
 const translations = {
+  observed: ["Source observation", "Observation source", "Observación de la fuente"],
+  published: ["Source publication", "Publication source", "Publicación de la fuente"],
+  fetched: ["Retrieved", "Récupéré", "Recuperado"],
+  source: ["Source / licence", "Source / licence", "Fuente / licencia"],
+  confidence: ["Confidence", "Confiance", "Confianza"],
+  freshness: ["Freshness", "Fraîcheur", "Actualidad"],
+  high: ["High", "Élevée", "Alta"],
+  medium: ["Medium", "Moyenne", "Media"],
+  low: ["Low", "Faible", "Baja"],
   unknown: ["Unknown", "Inconnu", "Desconocido"],
   price: ["Price", "Prix", "Precio"],
   opening: ["Scheduled opening", "Ouverture selon horaires", "Apertura según horario"],

@@ -3,6 +3,29 @@ import type { Language } from "../i18n/preferences";
 import { evidenceCopy } from "../content/evidence";
 export type Evidence = NearbyPoint["evidence"];
 export type EvidenceRow = { label: string; value: string };
+export function timestamp(value: string | null | undefined, language: Language) {
+  const date = value ? new Date(value) : null;
+  return date && Number.isFinite(date.getTime())
+    ? `${date.toLocaleString(language, { timeZone: "UTC" })} UTC`
+    : evidenceCopy(language).unknown;
+}
+export function provenanceRows(evidence: Evidence, language: Language): EvidenceRow[] {
+  const c = evidenceCopy(language),
+    source = evidence.source;
+  return [
+    { label: c.freshness, value: c[evidence.freshness] },
+    { label: c.confidence, value: c[evidence.confidence.level] },
+    { label: c.observed, value: timestamp(source?.observedAt, language) },
+    { label: c.published, value: timestamp(source?.publishedAt, language) },
+    { label: c.fetched, value: timestamp(source?.fetchedAt, language) },
+    {
+      label: c.source,
+      value: source
+        ? `${source.name} · ${source.attributionText}\n${source.url}\n${source.licenceName}\n${source.licenceUrl}`
+        : c.unknown,
+    },
+  ];
+}
 export function priceText(price: Evidence["price"], language: Language) {
   const c = evidenceCopy(language);
   if (!price || !Number.isFinite(price.amount) || price.amount < 0) return c.unknown;

@@ -1,9 +1,12 @@
 import { Text, View } from "react-native";
 import { useLanguage } from "../i18n/context";
-import { statusRows, type Evidence } from "../search/evidence";
+import { statusRows, provenanceRows, type Evidence } from "../search/evidence";
 export function EvidenceSummary({ evidence }: { evidence: Evidence }) {
   const { language } = useLanguage();
-  const rows = statusRows(evidence, language);
+  const rows = [
+    ...statusRows(evidence, language),
+    ...provenanceRows(evidence, language),
+  ];
   return (
     <View style={{ gap: 6 }}>
       {rows.map((row) => (

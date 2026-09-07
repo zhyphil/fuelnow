@@ -1,7 +1,23 @@
 import { expect, it } from "vitest";
 import sample from "../../../docs/api/examples/nearby-fuel-cheapest.json";
-import { priceText, statusRows, type Evidence } from "../src/search/evidence";
+import {
+  priceText,
+  statusRows,
+  provenanceRows,
+  timestamp,
+  type Evidence,
+} from "../src/search/evidence";
 const evidence = sample.results[0]!.evidence as Evidence;
+it("does not substitute retrieval time for an unknown source observation", () => {
+  const rows = provenanceRows(
+    { ...evidence, source: { ...evidence.source!, observedAt: null } },
+    "en",
+  );
+  expect(rows.find((row) => row.label === "Source observation")!.value).toBe("Unknown");
+  expect(rows.find((row) => row.label === "Retrieved")!.value).toContain("UTC");
+  expect(rows.at(-1)!.value).toContain(evidence.source!.licenceName);
+  expect(timestamp("not-a-date", "fr")).toBe("Inconnu");
+});
 it("shows price unit, conditions and freshness without treating missing price as free", () => {
   expect(priceText(null, "en")).toBe("Unknown");
   expect(priceText({ ...evidence.price!, amount: 0 }, "en")).toContain("€0.00");
